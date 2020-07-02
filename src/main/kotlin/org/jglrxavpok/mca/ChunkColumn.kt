@@ -3,6 +3,7 @@ package org.jglrxavpok.mca
 import org.jglrxavpok.nbt.NBTCompound
 import java.lang.IllegalArgumentException
 
+// TODO: doc
 class ChunkColumn(val x: Int, val z: Int) {
 
     var dataVersion = 0

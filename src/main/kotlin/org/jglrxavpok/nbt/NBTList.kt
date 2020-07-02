@@ -21,6 +21,7 @@ class NBTList<Tag: NBT>(val subtagType: Int): Iterable<Tag>, NBT {
         clear()
         val length = source.readInt()
         for (i in 0 until length) {
+            @Suppress("UNCHECKED_CAST") // Due to the specs and the way Hephaistos is made, this cast should not fail.
             val tag = source.readTag(subtagType) as Tag
             tags.add(tag)
         }
@@ -77,6 +78,7 @@ class NBTList<Tag: NBT>(val subtagType: Int): Iterable<Tag>, NBT {
     /**
      * Casts this list to another list type. Can throw a ClassCastException, so be careful
      */
+    @Suppress("UNCHECKED_CAST") // if that throws, it is the user's fault
     fun <T: NBT> asListOf() = this as NBTList<T>
 
     override fun equals(other: Any?): Boolean {
@@ -113,6 +115,6 @@ class NBTList<Tag: NBT>(val subtagType: Int): Iterable<Tag>, NBT {
     }
 
     override fun iterator(): Iterator<Tag> {
-        return tags.iterator();
+        return tags.iterator()
     }
 }

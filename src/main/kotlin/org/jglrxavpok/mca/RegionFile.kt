@@ -47,6 +47,7 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
             file.write(0)
         }
 
+        // prepare sectors
         val availableSectors = file.length() / SectorSize
         freeSectors = ArrayList(availableSectors.toInt())
         for (i in 0 until availableSectors) {
@@ -64,8 +65,8 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
             // mark already allocated sectors as taken.
             // location 0 means the chunk is *not* stored in the file
             if(location != 0 && sectorOffset(location) + sizeInSectors(location) <= freeSectors.size) {
-                for (i in 0 until sizeInSectors(location)) {
-                    freeSectors[i + sectorOffset(location)] = false
+                for (sectorIndex in 0 until sizeInSectors(location)) {
+                    freeSectors[sectorIndex + sectorOffset(location)] = false
                 }
             }
         }
@@ -94,7 +95,9 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
 
     /**
      * Gets the chunk inside this RegionFile. Coordinates are absolute.
-     * The returned ChunkColumn is a cached column extracted from this region file. If no column exists, a new one is created
+     * The returned ChunkColumn is a cached column extracted from this region file.
+     * (If no such column exists, a new one is created, cached, and returned)
+     *
      * Ie two calls with the same argument will return the same ChunkColumn object
      *
      * @see RegionFile.getChunk
@@ -107,11 +110,11 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
         if(hasChunk(x, z)) return getChunk(x, z)!!
         // not in file, but already in memory
         val index = index(x.chunkInsideRegion(), z.chunkInsideRegion())
-        if(index in columnCache) {
+        if(columnCache.containsKey(index)) {
             return columnCache[index]!!
         }
 
-        // neither in file nor memory, create a new colum,
+        // neither in file nor memory, create a new column
         val column = ChunkColumn(x, z)
         columnCache[index(x, z)] = column
         return column
@@ -124,31 +127,56 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
         val compressionType = file.readByte()
         val rawData = ByteArray(length-1)
         file.read(rawData)
+
         val reader = NBTReader(when(compressionType) {
             GZipCompression -> BufferedInputStream(GZIPInputStream(ByteArrayInputStream(rawData)))
             ZlibCompression -> BufferedInputStream(InflaterInputStream(ByteArrayInputStream(rawData)))
             else -> throw AnvilException("Invalid compression type: $compressionType (only 1 and 2 known)")
-        }, false)
-        val chunkData = reader.read();
+        }, false /* decompression performed by GZIPInputStream or InflaterInputStream */)
+
+        val chunkData = reader.read()
+        reader.close()
         if(chunkData !is NBTCompound) {
             throw AnvilException("Chunk root tag must be TAG_Compound")
         }
-        reader.close()
 
         return ChunkColumn(chunkData)
     }
 
+    /**
+     * Does this file contain the given chunk column? If 'false' is returned, it is still possible that the column is in
+     * memory but not on disk.
+     * Coordinates are absolute.
+     *
+     * @see hasLoadedChunk
+     */
     fun hasChunk(x: Int, z: Int): Boolean {
         if(out(x, z)) throw AnvilException("Out of RegionFile: $x,$z (chunk)")
 
         return locations[index(x.chunkInsideRegion(), z.chunkInsideRegion())] != 0
     }
 
-    private inline fun out(x: Int, z: Int) = x.chunkToRegion() != regionX || z.chunkToRegion() != regionZ
-    private inline fun sizeInSectors(location: Int) = (location and 0xFF)
-    private inline fun sectorOffset(location: Int) = location shr 8
-    private inline fun index(chunkX: Int, chunkZ: Int) = (chunkX and 31) + (chunkZ and 31) * 32
-    private inline fun fileOffset(chunkX: Int, chunkZ: Int) = sectorOffset(locations[index(chunkX, chunkZ)]) * SectorSize
+    /**
+     * Does this region contain the given chunk column? Contrary to `hasChunk`, this method also checks cached chunks in
+     * memory (created by `getOrCreateChunk`)
+     *
+     * @see hasChunk
+     * @see getOrCreateChunk
+     */
+    fun hasLoadedChunk(x: Int, z: Int): Boolean {
+        if(hasChunk(x, z)) return true
+
+        return columnCache.containsKey(index(x.chunkInsideRegion(), z.chunkInsideRegion()))
+    }
+
+    // even if inlining will not be that beneficial thanks to JIT, these functions would be called very frequently if
+    // this lib is used to load chunks in real time.
+    // better save off a few cycles when possible
+    @Suppress("NOTHING_TO_INLINE") private inline fun out(x: Int, z: Int) = x.chunkToRegion() != regionX || z.chunkToRegion() != regionZ
+    @Suppress("NOTHING_TO_INLINE") private inline fun sizeInSectors(location: Int) = (location and 0xFF)
+    @Suppress("NOTHING_TO_INLINE") private inline fun sectorOffset(location: Int) = location shr 8
+    @Suppress("NOTHING_TO_INLINE") private inline fun index(chunkX: Int, chunkZ: Int) = (chunkX and 31) + (chunkZ and 31) * 32
+    @Suppress("NOTHING_TO_INLINE") private inline fun fileOffset(chunkX: Int, chunkZ: Int) = sectorOffset(locations[index(chunkX, chunkZ)]) * SectorSize
 
     @Throws(IOException::class)
     override fun close() {
