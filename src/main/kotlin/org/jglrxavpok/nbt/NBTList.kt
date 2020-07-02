@@ -78,6 +78,7 @@ class NBTList<Tag: NBT>(val subtagType: Int): Iterable<Tag>, NBT {
      * Casts this list to another list type. Can throw a ClassCastException, so be careful
      */
     fun <T: NBT> asListOf() = this as NBTList<T>
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

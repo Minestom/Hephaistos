@@ -40,6 +40,16 @@ class NBTReader @JvmOverloads constructor(source: InputStream, compressed: Boole
         return readNamed().second
     }
 
+    /**
+     * Reads a single tag from the source.
+     * @throws IOException if an error occurred during reading
+     * @throws NBTException if the file does not follow NBT format
+     */
+    @Throws(IOException::class, NBTException::class)
+    fun readRaw(id: Int): NBT {
+        return reader.readTag(id)
+    }
+
     override fun close() {
         reader.close()
     }

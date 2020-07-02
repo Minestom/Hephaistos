@@ -1,4 +1,4 @@
-# NBT-MCA Lib (Working Title)
+# Hephaistos
 
 This library is both a NBT library and a Minecraft Anvil format library.
 
