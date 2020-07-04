@@ -56,8 +56,9 @@ class NBTCompound(): NBT {
     /**
      * Sets (and overwrites previous) tag associated to the given key
      */
-    operator fun set(key: String, tag: NBT) {
+    operator fun set(key: String, tag: NBT): NBTCompound {
         tags[key] = tag
+        return this
     }
 
     override fun toSNBT(): String {
@@ -76,72 +77,52 @@ class NBTCompound(): NBT {
     /**
      * Sets (and overwrites previous) tag associated to the given key (shorthand method that in turn calls `set`)
      */
-    fun setByte(key: String, value: Byte) {
-        set(key, NBTByte(value))
-    }
+    fun setByte(key: String, value: Byte) = set(key, NBTByte(value))
 
     /**
      * Sets (and overwrites previous) tag associated to the given key (shorthand method that in turn calls `set`)
      */
-    fun setByteArray(key: String, value: ByteArray) {
-        set(key, NBTByteArray(value))
-    }
+    fun setByteArray(key: String, value: ByteArray) = set(key, NBTByteArray(value))
 
     /**
      * Sets (and overwrites previous) tag associated to the given key (shorthand method that in turn calls `set`)
      */
-    fun setDouble(key: String, value: Double) {
-        set(key, NBTDouble(value))
-    }
+    fun setDouble(key: String, value: Double) = set(key, NBTDouble(value))
 
     /**
      * Sets (and overwrites previous) tag associated to the given key (shorthand method that in turn calls `set`)
      */
-    fun setFloat(key: String, value: Float) {
-        set(key, NBTFloat(value))
-    }
+    fun setFloat(key: String, value: Float) = set(key, NBTFloat(value))
 
     /**
      * Sets (and overwrites previous) tag associated to the given key (shorthand method that in turn calls `set`)
      */
-    fun setInt(key: String, value: Int) {
-        set(key, NBTInt(value))
-    }
+    fun setInt(key: String, value: Int) = set(key, NBTInt(value))
 
     /**
      * Sets (and overwrites previous) tag associated to the given key (shorthand method that in turn calls `set`)
      */
-    fun setIntArray(key: String, value: IntArray) {
-        set(key, NBTIntArray(value))
-    }
+    fun setIntArray(key: String, value: IntArray) = set(key, NBTIntArray(value))
 
     /**
      * Sets (and overwrites previous) tag associated to the given key (shorthand method that in turn calls `set`)
      */
-    fun setLong(key: String, value: Long) {
-        set(key, NBTLong(value))
-    }
+    fun setLong(key: String, value: Long) = set(key, NBTLong(value))
 
     /**
      * Sets (and overwrites previous) tag associated to the given key (shorthand method that in turn calls `set`)
      */
-    fun setLongArray(key: String, value: LongArray) {
-        set(key, NBTLongArray(value))
-    }
+    fun setLongArray(key: String, value: LongArray) = set(key, NBTLongArray(value))
 
     /**
      * Sets (and overwrites previous) tag associated to the given key (shorthand method that in turn calls `set`)
      */
-    fun setShort(key: String, value: Short) {
-        set(key, NBTShort(value))
-    }
+    fun setShort(key: String, value: Short) = set(key, NBTShort(value))
 
     /**
      * Sets (and overwrites previous) tag associated to the given key (shorthand method that in turn calls `set`)
      */
-    fun setString(key: String, value: String) {
-        set(key, NBTString(value))
-    }
+    fun setString(key: String, value: String) = set(key, NBTString(value))
 
     /**
      * Returns the value associated to the given key, if any. Returns 'null' otherwise.
@@ -214,6 +195,7 @@ class NBTCompound(): NBT {
      * Also returns 'null' if the tag is not of the correct type (eg getByte on a NBTCompound will yield 'null')
      */
     fun <T: NBT> getList(key: String): NBTList<T>? = get(key) as? NBTList<T>
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -227,6 +209,21 @@ class NBTCompound(): NBT {
 
     override fun hashCode(): Int {
         return tags.hashCode()
+    }
+
+    operator fun iterator(): Iterator<Pair<String, NBT>> {
+        return object: Iterator<Pair<String, NBT>> {
+            private val backing = this@NBTCompound.tags.entries.iterator()
+
+            override fun hasNext(): Boolean {
+                return backing.hasNext()
+            }
+
+            override fun next(): Pair<String, NBT> {
+                val (name, value) = backing.next()
+                return name to value
+            }
+        }
     }
 
 }

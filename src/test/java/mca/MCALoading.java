@@ -15,6 +15,7 @@ import java.nio.file.Paths;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class MCALoading {
 
@@ -30,9 +31,16 @@ public class MCALoading {
     public void read() throws AnvilException {
         RegionFile region = new RegionFile(file, 0, 0);
         ChunkColumn column0_0 = region.getChunk(0, 0);
+        assertNotNull(column0_0);
         assertEquals(0, column0_0.getX());
         assertEquals(0, column0_0.getZ());
         assertEquals(ChunkColumn.GenerationStatus.Full, column0_0.getGenerationStatus());
+
+        for (int z = 0; z < 16; z++) {
+            for (int x = 0; x < 16; x++) {
+                assertEquals("minecraft:bedrock", column0_0.getBlockState(x, 0, z).getName());
+            }
+        }
     }
 
     @After

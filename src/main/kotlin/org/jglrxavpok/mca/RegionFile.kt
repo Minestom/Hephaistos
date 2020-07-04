@@ -2,10 +2,13 @@ package org.jglrxavpok.mca
 
 import org.jglrxavpok.nbt.NBTCompound
 import org.jglrxavpok.nbt.NBTReader
+import org.jglrxavpok.nbt.NBTWriter
 import java.io.*
 import java.util.concurrent.ConcurrentHashMap
+import java.util.zip.DeflaterOutputStream
 import java.util.zip.GZIPInputStream
 import java.util.zip.InflaterInputStream
+import kotlin.math.ceil
 
 /**
  * Constructs a Region linked to the given file. Will initialize file contents if the file is not big enough.
@@ -21,6 +24,7 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
         private val ZlibCompression: Byte = 2
         private val MaxEntryCount = 1024
         private val SectorSize = 4096
+        private val Sector1MB = 1024*1024 / SectorSize
         private val HeaderLength = MaxEntryCount*2 * 4 // 2 4-byte field per entry
 
         fun createFileName(regionX: Int, regionZ: Int): String {
@@ -41,11 +45,7 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
             }
         }
 
-        val missingPadding = file.length() % SectorSize
-        // file is not a multiple of 4kib, add padding
-        for(i in 0 until missingPadding) {
-            file.write(0)
-        }
+        addPadding()
 
         // prepare sectors
         val availableSectors = file.length() / SectorSize
@@ -144,6 +144,112 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
     }
 
     /**
+     * Writes a column to the file. The X,Z coordinates are based on the ones inside the given column.
+     * The column does not have to be loaded from this file, but not doing so may generate inconsistencies in the world
+     * (ie chunks that look out of place). That means that "handcrafting" a ChunkColumn from one
+     * one instanced on their own, and passing it to writeColumn *is* valid.
+     */
+    @Throws(IOException::class)
+    fun writeColumn(column: ChunkColumn) {
+        val x = column.x
+        val z = column.z
+        if(out(x, z)) throw AnvilException("Out of RegionFile: $x,$z (chunk)")
+
+        val nbt = column.toNBT()
+        val dataOut = ByteArrayOutputStream()
+        NBTWriter(DeflaterOutputStream(dataOut), compressed = false /* compressed by the DeflaterOutputStream */).use {
+            it.writeNamed("", nbt)
+        }
+        val data = dataOut.size()
+        val sectorCount = ceil(data.toDouble() / SectorSize).toInt()
+        if(sectorCount >= Sector1MB) {
+            throw AnvilException("Sorry, but your ChunkColumn totals over 1MB of data, impossible to save it inside a RegionFile.")
+        }
+
+        val previousSectorCount = sizeInSectors(locations[index(x.chunkInsideRegion(), z.chunkInsideRegion())])
+        val previousSectorStart = sectorOffset(locations[index(x.chunkInsideRegion(), z.chunkInsideRegion())])
+        // start by saving to free sectors, before cleaning up the old data
+        synchronized(freeSectors) {
+            var sectorStart = findAvailableSectors(sectorCount)
+            var appendToEnd = false
+            if(sectorStart == -1) { // we need to allocate sectors
+                val eof = file.length()
+                file.seek(eof)
+                sectorStart = (eof / SectorSize).toInt()
+                appendToEnd = true
+            } else {
+                file.seek((sectorStart * SectorSize).toLong())
+            }
+            for (i in sectorStart until sectorStart+sectorCount) {
+                if(i < freeSectors.size) {
+                    freeSectors[i] = false
+                } else {
+                    freeSectors += false // increase size of freeSectors
+                }
+            }
+
+            val location = index(column.x, column.z)
+            file.write(dataOut.toByteArray())
+            if(appendToEnd) { // we are at the EOF, we may have to add some padding
+                addPadding()
+            }
+            locations[location] = buildLocation(sectorStart, sectorCount)
+            writeLocation(column.x, column.z)
+            timestamps[location] = System.currentTimeMillis().toInt()
+            writeTimestamp(column.x, column.z)
+
+            // the data has been written, now free previous storage
+            for (i in previousSectorStart until previousSectorStart+previousSectorCount) {
+                freeSectors[i] = true
+            }
+        }
+    }
+
+    private fun addPadding() {
+        val missingPadding = file.length() % SectorSize
+        // file is not a multiple of 4kib, add padding
+        if(missingPadding > 0) {
+            for(i in 0 until SectorSize-missingPadding) {
+                file.write(0)
+            }
+        }
+    }
+
+    /**
+     * Writes the chunk data location for a given chunk inside the file
+     */
+    private fun writeLocation(x: Int, z: Int) {
+        file.seek(index(x, z) * 4L)
+        file.writeInt(locations[index(x, z)])
+    }
+
+    /**
+     * Writes the chunk timestamp for a given chunk inside the file
+     */
+    private fun writeTimestamp(x: Int, z: Int) {
+        file.seek(index(x, z) * 4L + 4096)
+        file.writeInt(timestamps[index(x, z)])
+    }
+
+    /**
+     * Finds the first location in freeSectors which has sectorCount consecutive free sectors. If none can be found in the file, returns -1. That means allocations will have to take place
+     */
+    private fun findAvailableSectors(sectorCount: Int): Int {
+        for (start in 0 until freeSectors.size-sectorCount) {
+            var found = true
+            for(i in 0 until sectorCount) {
+                if(!freeSectors[i+start]) {
+                    found = false
+                    break
+                }
+            }
+            if(found)
+                return start
+        }
+        return -1
+    }
+
+    /**
      * Does this file contain the given chunk column? If 'false' is returned, it is still possible that the column is in
      * memory but not on disk.
      * Coordinates are absolute.
@@ -175,8 +281,9 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
     @Suppress("NOTHING_TO_INLINE") private inline fun out(x: Int, z: Int) = x.chunkToRegion() != regionX || z.chunkToRegion() != regionZ
     @Suppress("NOTHING_TO_INLINE") private inline fun sizeInSectors(location: Int) = (location and 0xFF)
     @Suppress("NOTHING_TO_INLINE") private inline fun sectorOffset(location: Int) = location shr 8
-    @Suppress("NOTHING_TO_INLINE") private inline fun index(chunkX: Int, chunkZ: Int) = (chunkX and 31) + (chunkZ and 31) * 32
+    @Suppress("NOTHING_TO_INLINE") private inline fun index(chunkX: Int, chunkZ: Int) = (chunkX.chunkInsideRegion() and 31) + (chunkZ.chunkInsideRegion() and 31) * 32
     @Suppress("NOTHING_TO_INLINE") private inline fun fileOffset(chunkX: Int, chunkZ: Int) = sectorOffset(locations[index(chunkX, chunkZ)]) * SectorSize
+    @Suppress("NOTHING_TO_INLINE") private inline fun buildLocation(start: Int, length: Int) = ((start shl 8) or (length and 0xFF)) and 0xFFFFFFFF.toInt()
 
     @Throws(IOException::class)
     override fun close() {
