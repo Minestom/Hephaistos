@@ -1,6 +1,7 @@
 package mca;
 
 import org.jglrxavpok.mca.AnvilException;
+import org.jglrxavpok.mca.BlockState;
 import org.jglrxavpok.mca.ChunkColumn;
 import org.jglrxavpok.mca.RegionFile;
 import org.junit.After;
@@ -140,6 +141,79 @@ public class MCASaving {
         int length = location & 0xFF;
         assertEquals(2, start); // first free sector
         assertEquals(1, length); // chunk very light, should only use a single 4kib sector
+    }
+
+    @Test
+    public void creationFromScratchViaRegionFile() throws AnvilException, IOException {
+        {
+            RegionFile region = new RegionFile(file, 0, 0);
+            BlockState stone = new BlockState("minecraft:stone");
+            for (int x = 0; x < 16; x++) {
+                for (int z = 0; z < 16; z++) {
+                    for (int y = 0; y < 256; y++) {
+                        region.setBlockState(x, y, z, BlockState.Air);
+                        region.setBlockState(x + 16, y, z, stone);
+                    }
+                }
+            }
+            region.flushCachedChunks();
+        }
+
+        {
+            RegionFile region = new RegionFile(file, 0, 0);
+            BlockState stone = new BlockState("minecraft:stone");
+            for (int x = 0; x < 16; x++) {
+                for (int z = 0; z < 16; z++) {
+                    for (int y = 0; y < 256; y++) {
+                        assertEquals(BlockState.Air, region.getBlockState(x, y, z));
+                        assertEquals(stone, region.getBlockState(x+16, y, z));
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    public void creationFromScratchViaChunks() throws AnvilException, IOException {
+        {
+            RegionFile region = new RegionFile(file, 0, 0);
+            ChunkColumn chunk0 = region.getOrCreateChunk(0, 0);
+            ChunkColumn chunk1 = region.getOrCreateChunk(1, 0);
+            fillChunk(chunk0, BlockState.Air);
+            fillChunk(chunk1, new BlockState("minecraft:stone"));
+            region.writeColumn(chunk0);
+            region.writeColumn(chunk1);
+        }
+
+        {
+            RegionFile reloaded = new RegionFile(file, 0, 0);
+            ChunkColumn reloadedChunk0 = reloaded.getChunk(0, 0);
+            ChunkColumn reloadedChunk1 = reloaded.getChunk(1, 0);
+            assertNotNull(reloadedChunk0);
+            assertNotNull(reloadedChunk1);
+            verifyChunk(reloadedChunk0, BlockState.Air);
+            verifyChunk(reloadedChunk1, new BlockState("minecraft:stone"));
+        }
+    }
+
+    private void verifyChunk(ChunkColumn chunkColumn, BlockState state) {
+        for (int x = 0; x < 16; x++) {
+            for (int z = 0; z < 16; z++) {
+                for (int y = 0; y < 256; y++) {
+                    assertEquals(state, chunkColumn.getBlockState(x, y, z));
+                }
+            }
+        }
+    }
+
+    private void fillChunk(ChunkColumn chunkColumn, BlockState state) {
+        for (int x = 0; x < 16; x++) {
+            for (int z = 0; z < 16; z++) {
+                for (int y = 0; y < 256; y++) {
+                    chunkColumn.setBlockState(x, y, z, state);
+                }
+            }
+        }
     }
 
     @After

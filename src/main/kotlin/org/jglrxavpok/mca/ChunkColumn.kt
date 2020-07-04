@@ -5,7 +5,12 @@ import org.jglrxavpok.nbt.NBTCompound
 import org.jglrxavpok.nbt.NBTList
 import org.jglrxavpok.nbt.NBTTypes
 
-// TODO: doc
+/**
+ * 16x256x16 (XYZ) area of the world. Consists of 16 ChunkSections vertically stacked.
+ *
+ * @param x: chunk coordinate on X axis (world absolute)
+ * @param z: chunk coordinate on Z axis (world absolute)
+ */
 class ChunkColumn(val x: Int, val z: Int) {
 
     var dataVersion = 0
@@ -76,15 +81,25 @@ class ChunkColumn(val x: Int, val z: Int) {
         }
     }
 
+    /**
+     * Sets the block state at the given position in the chunk.
+     * X,Y,Z must be in chunk coordinates (ie x&z in 0..15, y in 0..255)
+     *
+     * If y lands in an empty section, the section is created and considered to be filled with air
+     */
     fun setBlockState(x: Int, y: Int, z: Int, state: BlockState) {
-        // TODO: check bounds
+        checkBounds(x, y, z)
         val sectionY = y / 16
         val section = sections[sectionY]
         section[x, y % 16, z] = state
     }
 
+    /**
+     * Returns the block state at the given position in the chunk.
+     * X,Y,Z must be in chunk coordinates (ie x&z in 0..15, y in 0..255)
+     */
     fun getBlockState(x: Int, y: Int, z: Int): BlockState {
-        // TODO: check bounds
+        checkBounds(x, y, z)
         val sectionY = y / 16
         val section = sections[sectionY]
         if(section.empty) {
@@ -93,9 +108,18 @@ class ChunkColumn(val x: Int, val z: Int) {
         return section[x, y % 16, z]
     }
 
+    private fun checkBounds(x: Int, y: Int, z: Int) {
+        if(x !in 0..15)
+            throw IllegalArgumentException("x ($x) is not in 0..15")
+        if(z !in 0..15)
+            throw IllegalArgumentException("z ($z) is not in 0..15")
+        if(y !in 0..255)
+            throw IllegalArgumentException("y ($y) is not in 0..255")
+    }
+
     fun toNBT(): NBTCompound {
         return NBTCompound()
-                .setInt("dataVersion", dataVersion)
+                .setInt("DataVersion", dataVersion)
                 .set("Level",
                         NBTCompound().apply {
                             setInt("xPos", x)
@@ -122,10 +146,13 @@ class ChunkColumn(val x: Int, val z: Int) {
                             }
                             set("Sections", sections)
                             // TODO: Carving masks
-                            // TODO: Entities, TileEntities, TileTicks, LiquidTicks, Lights, LiquidsToBeTicked, ToBeTicked, PostProcessing
+                            set("Entities", entities)
+                            set("TileEntities", tileEntities)
+                            set("TileTicks", tileTicks)
+                            set("LiquidTicks", liquidTicks)
+                            // TODO: Lights, LiquidsToBeTicked, ToBeTicked, PostProcessing
                             // TODO: Structures
                         }
-
                 )
     }
 

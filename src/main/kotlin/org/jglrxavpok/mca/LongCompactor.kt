@@ -2,6 +2,8 @@ package org.jglrxavpok.mca
 
 import kotlin.math.ceil
 
+// TODO: doc
+
 fun compress(data: IntArray, lengthInBits: Int): LongArray {
     val compacted = LongArray(ceil(data.size*lengthInBits/64.0).toInt())
     var bitIndex = 0

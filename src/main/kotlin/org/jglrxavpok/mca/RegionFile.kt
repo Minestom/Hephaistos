@@ -4,6 +4,7 @@ import org.jglrxavpok.nbt.NBTCompound
 import org.jglrxavpok.nbt.NBTReader
 import org.jglrxavpok.nbt.NBTWriter
 import java.io.*
+import java.lang.IllegalArgumentException
 import java.util.concurrent.ConcurrentHashMap
 import java.util.zip.DeflaterOutputStream
 import java.util.zip.GZIPInputStream
@@ -13,6 +14,8 @@ import kotlin.math.ceil
 /**
  * Constructs a Region linked to the given file. Will initialize file contents if the file is not big enough.
  * That means it is valid to pass a newly created and empty file to this constructor, and RegionFile will start filling it.
+ *
+ * The RandomAccessFile is ALWAYS sought to the beginning of the file during construction.
  *
  * [Code based on Mojang source code](https://www.mojang.com/2012/02/new-minecraft-map-format-anvil/)
  * [also based on the Minecraft Wiki "Region File format page"](https://minecraft.gamepedia.com/Region_file_format)
@@ -38,6 +41,7 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
     private val columnCache = ConcurrentHashMap<Int, ChunkColumn>()
 
     init {
+        file.seek(0L)
         if(file.length() < HeaderLength) { // new file, fill in data
             // fill with 8kib of data
             repeat(HeaderLength) {
@@ -160,8 +164,8 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
         NBTWriter(DeflaterOutputStream(dataOut), compressed = false /* compressed by the DeflaterOutputStream */).use {
             it.writeNamed("", nbt)
         }
-        val data = dataOut.size()
-        val sectorCount = ceil(data.toDouble() / SectorSize).toInt()
+        val dataSize = dataOut.size()
+        val sectorCount = ceil(dataSize.toDouble() / SectorSize).toInt()
         if(sectorCount >= Sector1MB) {
             throw AnvilException("Sorry, but your ChunkColumn totals over 1MB of data, impossible to save it inside a RegionFile.")
         }
@@ -189,6 +193,8 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
             }
 
             val location = index(column.x, column.z)
+            file.writeInt(dataSize)
+            file.writeByte(ZlibCompression.toInt())
             file.write(dataOut.toByteArray())
             if(appendToEnd) { // we are at the EOF, we may have to add some padding
                 addPadding()
@@ -273,6 +279,55 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
         if(hasChunk(x, z)) return true
 
         return columnCache.containsKey(index(x.chunkInsideRegion(), z.chunkInsideRegion()))
+    }
+
+    /**
+     * Sets the block state at the given position.
+     * Creates any necessary chunk or section.
+     * Will NOT save the results to disk, use flushCachedChunks or writeColumn
+     *
+     * X,Y,Z are in absolute coordinates
+     *
+     * @throws IllegalArgumentException if x,y,z is not a valid position inside this region
+     */
+    fun setBlockState(x: Int, y: Int, z: Int, blockState: BlockState) {
+        if(out(x.blockToChunk(), z.blockToChunk())) throw IllegalArgumentException("Out of region $x;$z (block)")
+        if(y !in 0..255) throw IllegalArgumentException("y ($y) must be in 0..255")
+
+        val chunk = getOrCreateChunk(x.blockToChunk().chunkInsideRegion(), z.blockToChunk().chunkInsideRegion())
+        chunk.setBlockState(x.blockInsideChunk(), y, z.blockInsideChunk(), blockState)
+    }
+
+    /**
+     * Returns the block state present at the given position.
+     *
+     * Does not create any necessary chunk or section. Will throw AnvilException if the chunk does not exist (an empty section is considered full of air)
+     *
+     * X,Y,Z are in absolute coordinates
+     *
+     * @throws IllegalArgumentException if x,y,z is not a valid position inside this region
+     * @throws AnvilException if the chunk corresponding to x,z does not exist in this region (ie not loaded by the game, nor created and waiting for saving with this lib)
+     */
+    fun getBlockState(x: Int, y: Int, z: Int): BlockState {
+        if(out(x.blockToChunk(), z.blockToChunk())) throw IllegalArgumentException("Out of region $x;$z (block)")
+        if(y !in 0..255) throw IllegalArgumentException("y ($y) must be in 0..255")
+
+        val chunk = getChunk(x.blockToChunk().chunkInsideRegion(), z.blockToChunk().chunkInsideRegion()) ?: throw AnvilException("No chunk at $x,$y,$z")
+        return chunk.getBlockState(x.blockInsideChunk(), y, z.blockInsideChunk())
+    }
+
+    /**
+     * Writes all cached chunks to the disk, empties the cache.
+     *
+     * Useful when writing data directly from RegionFile via setBlockState for instance
+     */
+    @Throws(IOException::class)
+    fun flushCachedChunks() {
+        synchronized(columnCache) {
+            // TODO: parallelize if possible
+            columnCache.values.forEach(::writeColumn)
+            columnCache.clear()
+        }
     }
 
     // even if inlining will not be that beneficial thanks to JIT, these functions would be called very frequently if

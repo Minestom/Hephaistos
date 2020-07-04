@@ -6,6 +6,9 @@ import org.jglrxavpok.nbt.NBTCompound
 // TODO: doc
 class ChunkSection(val y: Byte) {
 
+    /**
+     * Palette used by this section, best not to touch if you don't know what you are doing
+     */
     private var palette: Palette? = null
     val empty get()= palette == null
     private val blockStates: Array<BlockState> = Array(16*16*16) { BlockState.Air }
@@ -44,12 +47,16 @@ class ChunkSection(val y: Byte) {
     operator fun set(x: Int, y: Int, z: Int, block: BlockState) {
         if(palette == null) {
             palette = Palette() // initialize new palette
-            palette!!.loadReferences(blockStates.asIterable())
+            palette!!.blocks += BlockState.Air
+            palette!!.loadReferences(blockStates.asIterable()) // load as all air
+            palette!!.increaseReference(block)
+            blockStates[index(x, y, z)] = block
+        } else {
+            val previous = this[x, y, z]
+            palette!!.increaseReference(block)
+            palette!!.decreaseReference(previous)
+            blockStates[index(x, y, z)] = block
         }
-        val previous = this[x, y, z]
-        palette!!.increaseReference(block)
-        palette!!.decreaseReference(previous)
-        blockStates[index(x, y, z)] = block
     }
 
     // TODO: block light

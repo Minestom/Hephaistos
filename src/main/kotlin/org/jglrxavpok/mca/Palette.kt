@@ -11,7 +11,6 @@ import kotlin.math.log2
 class Palette() {
 
     val blocks = ArrayList<BlockState>()
-    val empty get() = blocks.isEmpty()
     private val referenceCounts = HashMap<BlockState, Int>()
 
     internal constructor(blocks: NBTList<NBTCompound>): this() {
@@ -75,8 +74,15 @@ class Palette() {
     fun compactIDs(states: Array<BlockState>): LongArray {
         // convert state list into uncompressed data
         val indices = states.map(blocks::indexOf).toIntArray()
-        val bitLength = ceil(log2(blocks.size.toFloat())).toInt()
+        val bitLength = ceil(log2(blocks.size.toFloat())).toInt().coerceAtLeast(1) // at least one bit
         return compress(indices, bitLength)
+    }
+
+    /**
+     * Returns true iif the only referenced block inside this palette is "minecraft:air"
+     */
+    fun isEmpty(): Boolean {
+        return blocks.size == 1 && blocks[0] == BlockState.Air
     }
 
 }
