@@ -196,19 +196,19 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
                     freeSectors += false // increase size of freeSectors
                 }
             }
-
-            val location = index(column.x, column.z)
-            writeInt(position, dataSize)
-            writeByte(position+4, ZlibCompression)
-            writeBytes(position+5, dataOut.toByteArray())
-            if(appendToEnd) { // we are at the EOF, we may have to add some padding
-                addPadding()
-            }
-            locations[location] = buildLocation(sectorStart, sectorCount)
-            writeLocation(column.x, column.z)
-            timestamps[location] = System.currentTimeMillis().toInt()
-            writeTimestamp(column.x, column.z)
         }
+
+        val location = index(column.x, column.z)
+        writeInt(position, dataSize)
+        writeByte(position+4, ZlibCompression)
+        writeBytes(position+5, dataOut.toByteArray())
+        if(appendToEnd) { // we are at the EOF, we may have to add some padding
+            addPadding()
+        }
+        locations[location] = buildLocation(sectorStart, sectorCount)
+        writeLocation(column.x, column.z)
+        timestamps[location] = System.currentTimeMillis().toInt()
+        writeTimestamp(column.x, column.z)
 
         synchronized(freeSectors) {
             // the data has been written, now free previous storage
@@ -398,8 +398,9 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
     @Throws(IOException::class)
     fun flushCachedChunks() {
         synchronized(columnCache) {
-            // TODO: parallelize if possible
-            columnCache.values.forEach(::writeColumn)
+            columnCache.values.parallelStream().forEach {
+                writeColumn(it)
+            }
             columnCache.clear()
         }
     }
@@ -414,8 +415,17 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
     @Suppress("NOTHING_TO_INLINE") private inline fun fileOffset(chunkX: Int, chunkZ: Int) = sectorOffset(locations[index(chunkX, chunkZ)]) * SectorSize
     @Suppress("NOTHING_TO_INLINE") private inline fun buildLocation(start: Int, length: Int) = ((start shl 8) or (length and 0xFF)) and 0xFFFFFFFF.toInt()
 
+    /**
+     * Closes the given RandomAccessFile, and clears the column cache at the same time.
+     * This will NOT flush columns that are in the cache but not yet savec to disk. Use flushCachedChunks
+     *
+     * @see flushCachedChunks
+     */
     @Throws(IOException::class)
     override fun close() {
+        synchronized(columnCache) {
+            columnCache.clear()
+        }
         file.close()
     }
 

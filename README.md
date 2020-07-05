@@ -53,6 +53,81 @@ try(NBTWriter writer = new NBTWriter(new File("level.dat"), true /*compressed*/)
 ```
 
 ## Anvil format
-Built upon the NBT library part
+Built upon the NBT library part, the `mca` package allows loading and saving MCA (Minecraft Anvil) files.
 
-TODO - Under construction
+Contrary to `NBTReader` and `NBTWriter`, `RegionFile` requires a `RandomAccessFile` instead of a InputStream/OutputStream.
+The reasoning is that `RandomAccessFile` allows both reads and writes to happen at the same time on the same file.
+
+One must be careful of OutOfMemory errors when reading lots of chunks from a RegionFile. Use `RegionFile#forget` to unload a chunk column from the internal chunk cache to relieve memory.
+
+Finally, Hephaistos allows you to load and save Entities/TileEntities/Lighting but provide very little in the way of support for these features, you will have to make sure your entities are correct by yourself.
+In the event that you find that a convenience method would help you in your work, do not hesitate to submit a Pull Request or post an issue on this Github repository.
+
+Here comes the part you are all waiting for, examples!
+
+### Examples
+
+#### Creating a RegionFile/MCAFile from scratch
+
+It is possible to set blocks directly from `RegionFile`:
+```java
+            // create the region from a given RandomAccessFile. 0,0 is the region coordinates (a region is 32x32 chunks)
+            RegionFile region = new RegionFile(file, 0, 0);
+            BlockState stone = new BlockState("minecraft:stone");
+            for (int x = 0; x < 16; x++) {
+                for (int z = 0; z < 16; z++) {
+                    for (int y = 0; y < 256; y++) {
+                        // Sets the block inside the 0,0 and 1,0 chunks
+                        region.setBlockState(x, y, z, BlockState.Air);
+                        region.setBlockState(x + 16, y, z, stone);
+                    }
+                }
+            }
+            // save chunks that are in memory (automatically generated via setBlockState) to disk
+            // without this line, your chunks will NOT be saved to disk
+            region.flushCachedChunks();
+```
+
+It is also possible to create chunks on-demand:
+```java
+            RegionFile region = new RegionFile(file, 0, 0);
+            ChunkColumn chunk0 = region.getOrCreateChunk(0, 0);
+            ChunkColumn chunk1 = region.getOrCreateChunk(1, 0);
+            // just 3 for-loops over the entire chunk to set the blocks via ChunkColumn#setBlockState
+            fillChunk(chunk0, BlockState.Air);
+            fillChunk(chunk1, new BlockState("minecraft:stone"));
+            // write the chunks to disk. It is also possible to use flushCachedChunks() like in 
+            // the previous example, but you can select which chunks to save
+            region.writeColumn(chunk0);
+            region.writeColumn(chunk1);
+```
+
+#### Reading from a pre-existing RegionFile/MCAFile
+```java
+        // Load your region
+        RegionFile region = new RegionFile(file, 0, 0);
+        // Get your chunk. May return null if the chunk is not present in the file 
+        // (ie not generated yet)
+        ChunkColumn column0_0 = region.getChunk(0, 0);
+        if(column0_0 == null) {
+            // throw or whatever
+        }
+    
+        // print all blocks at x,0,z in the ChunkColumn 
+        // in an usual Minecraft world, all "minecraft:bedrock" in the Nether or overworld
+        // XYZ are chunk local (ie in a 16x256x16 cube)
+        // The method WILL throw IllegalArgumentException if XYZ are not valid
+        for (int z = 0; z < 16; z++) {
+            for (int x = 0; x < 16; x++) {
+                System.out.println(column0_0.getBlockState(x, 0, z).getName());
+                // a Map<String, String> is available in BlockState#getProperties 
+                // to analyse the properties of the block state (like 'lit' or 'facing' for a furnace) 
+            }
+        }
+    
+        // both following methods return a NBTList<NBTCompound> with the data from entities/tileEntities
+        // it is allowed to modify these lists directly to alter the data for later-saving
+        // other methods in the like exist for other features (ticks, heightmaps, etc.) 
+        column0_0.getTileEntities()
+        column0_0.getEntities()
+```
