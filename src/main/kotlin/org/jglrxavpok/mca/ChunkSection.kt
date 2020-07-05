@@ -72,6 +72,7 @@ class ChunkSection(val y: Byte) {
             palette!!.blocks += BlockState.Air
             palette!!.loadReferences(blockStates.asIterable()) // load as all air
             palette!!.increaseReference(block)
+            palette!!.decreaseReference(BlockState.Air)
             blockStates[index(x, y, z)] = block
         } else {
             val previous = this[x, y, z]

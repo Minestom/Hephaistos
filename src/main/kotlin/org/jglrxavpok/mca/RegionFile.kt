@@ -181,6 +181,10 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
                 val eof = file.length()
                 position = eof
                 sectorStart = (eof / SectorSize).toInt()
+                // fill up sectors
+                for (i in 0 until sectorCount) {
+                    writeBytes(eof+i*SectorSize, ByteArray(SectorSize) {0})
+                }
                 appendToEnd = true
             } else {
                 position = (sectorStart * SectorSize).toLong()
@@ -192,19 +196,19 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
                     freeSectors += false // increase size of freeSectors
                 }
             }
-        }
 
-        val location = index(column.x, column.z)
-        writeInt(position, dataSize)
-        writeByte(position+4, ZlibCompression)
-        writeBytes(position+5, dataOut.toByteArray())
-        if(appendToEnd) { // we are at the EOF, we may have to add some padding
-            addPadding()
+            val location = index(column.x, column.z)
+            writeInt(position, dataSize)
+            writeByte(position+4, ZlibCompression)
+            writeBytes(position+5, dataOut.toByteArray())
+            if(appendToEnd) { // we are at the EOF, we may have to add some padding
+                addPadding()
+            }
+            locations[location] = buildLocation(sectorStart, sectorCount)
+            writeLocation(column.x, column.z)
+            timestamps[location] = System.currentTimeMillis().toInt()
+            writeTimestamp(column.x, column.z)
         }
-        locations[location] = buildLocation(sectorStart, sectorCount)
-        writeLocation(column.x, column.z)
-        timestamps[location] = System.currentTimeMillis().toInt()
-        writeTimestamp(column.x, column.z)
 
         synchronized(freeSectors) {
             // the data has been written, now free previous storage
@@ -413,5 +417,20 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
     @Throws(IOException::class)
     override fun close() {
         file.close()
+    }
+
+    /**
+     * Unloads from memory the given column. Allows to relieve the JVM memory.
+     * This DOES NOT save the chunk column.
+     *
+     * One should no longer use the column object
+     */
+    fun forget(column: ChunkColumn) {
+        val index = index(column.x.chunkInsideRegion(), column.z.chunkInsideRegion())
+        if(columnCache[index] == column) {
+            columnCache.remove(index)
+        } else {
+            throw IllegalArgumentException("Tried to remove column that is not inside the region")
+        }
     }
 }

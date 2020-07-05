@@ -4,6 +4,7 @@ import org.jglrxavpok.mca.AnvilException;
 import org.jglrxavpok.mca.BlockState;
 import org.jglrxavpok.mca.ChunkColumn;
 import org.jglrxavpok.mca.RegionFile;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
@@ -28,6 +29,13 @@ import static org.junit.Assert.assertEquals;
  * These tests are very basic, and by no means guarantee 100% thread-safety
  */
 public class ParallelizationTests {
+
+    @Before
+    public void init() throws IOException {
+        if(Files.deleteIfExists(Paths.get("tmp_parallel_empty_r.0.0.mca")))
+            System.out.println("deleted");
+        Files.deleteIfExists(Paths.get("tmp_parallel_r.0.0.mca"));
+    }
 
     @Test
     public void parallelLoad() throws InterruptedException, IOException, AnvilException {
@@ -64,14 +72,16 @@ public class ParallelizationTests {
                 }
             }
         }
+        column.setGenerationStatus(ChunkColumn.GenerationStatus.Full);
     }
 
     private void verify(ChunkColumn column, int id) {
+        assertEquals("Mismatch in generation status: "+column.getX()+"; "+column.getZ(), ChunkColumn.GenerationStatus.Full, column.getGenerationStatus());
         BlockState state = new BlockState(String.valueOf(id));
         for (int z = 0; z < 16; z++) {
             for (int x = 0; x < 16; x++) {
                 for (int y = 0; y < 256; y++) {
-                    assertEquals(state, column.getBlockState(x, y, z));
+                    assertEquals("Failed at Chunk("+column.getX()+"; "+column.getZ()+") at X="+x+"; Y="+y+"; Z="+z, state, column.getBlockState(x, y, z));
                 }
             }
         }
@@ -79,22 +89,31 @@ public class ParallelizationTests {
 
     @Test
     public void parallelSave() throws InterruptedException, IOException, AnvilException {
-        RegionFile region = new RegionFile(new RandomAccessFile(new File("tmp_parallel_empty_r.0.0.mca"), "rw"), 0, 0);
+        RandomAccessFile raf = new RandomAccessFile(new File("tmp_parallel_empty_r.0.0.mca"), "rw");
+        raf.setLength(0);
+        RegionFile region = new RegionFile(raf, 0, 0);
 
         ExecutorService pool = Executors.newFixedThreadPool(4);
         Future<ChunkColumn>[] chunks = new Future[1024];
+        System.out.println("SAVE");
         for (int i = 0; i < 1024; i++) {
             final int chunkID = i;
             RegionFile finalRegion = region;
             chunks[i] = pool.submit(() -> {
-                ChunkColumn column = finalRegion.getOrCreateChunk(chunkID % 32, chunkID / 32);
-                fill(column, chunkID);
-                finalRegion.writeColumn(column);
-                return column;
+                try {
+                    ChunkColumn column = finalRegion.getOrCreateChunk(chunkID % 32, chunkID / 32);
+                    fill(column, chunkID);
+                    finalRegion.writeColumn(column);
+                    return column;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw e;
+                }
             });
         }
-        pool.shutdown();
-        for (int i = 0; i < chunks.length; i++) {
+
+        System.out.println("CHECK SAVING WITH NO EXCEPTION");
+        for (int i = 0; i < 1024; i++) {
             try {
                 chunks[i].get();
             } catch (ExecutionException e) {
@@ -105,11 +124,12 @@ public class ParallelizationTests {
         // now, we check their contents
         region.close();
 
+        System.out.println("LOAD TO CHECK CONTENTS");
         region = new RegionFile(new RandomAccessFile(new File("tmp_parallel_empty_r.0.0.mca"), "rw"), 0, 0);
-        for (int i = 0; i < 1024; i++) {
-            final int chunkID = i;
+        for (int chunkID = 0; chunkID < 1024; chunkID++) {
             ChunkColumn column = region.getOrCreateChunk(chunkID % 32, chunkID / 32);
             verify(column, chunkID);
+            region.forget(column);
         }
 
         region.close();
