@@ -1,4 +1,7 @@
-# Hephaistos ![](https://github.com/jglrxavpok/Hephaistos/workflows/Gradle%20build%20%2B%20tests/badge.svg)
+# Hephaistos
+![](https://github.com/jglrxavpok/Hephaistos/workflows/Gradle%20Build/badge.svg)
+
+![](https://github.com/jglrxavpok/Hephaistos/workflows/Gradle%20Tests/badge.svg)
 
 This library is both a NBT library and a Minecraft Anvil format library.
 
