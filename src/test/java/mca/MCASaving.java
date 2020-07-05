@@ -216,6 +216,35 @@ public class MCASaving {
         }
     }
 
+    @Test
+    public void setBiomes() throws AnvilException {
+        RegionFile region = new RegionFile(file, 0, 0);
+        region.getOrCreateChunk(0, 0); // force create chunk
+        assertEquals(ChunkColumn.UnknownBiome, region.getBiome(0,0,0));
+        region.setBiome(0,0,0, 1);
+        assertEquals(1, region.getBiome(0,0,0));
+    }
+
+    @Test
+    public void setBlockLight() throws AnvilException {
+        RegionFile region = new RegionFile(file, 0, 0);
+        ChunkColumn c = region.getOrCreateChunk(0, 0);
+        c.getSections()[0].setBlockLight(0,0,0, (byte) 15);
+        c.getSections()[0].setBlockLight(0,5,0, (byte) 12);
+        assertEquals((byte) 15, c.getSections()[0].getBlockLight(0,0,0));
+        assertEquals((byte) 12, c.getSections()[0].getBlockLight(0,5,0));
+    }
+
+    @Test
+    public void setSkyLight() throws AnvilException {
+        RegionFile region = new RegionFile(file, 0, 0);
+        ChunkColumn c = region.getOrCreateChunk(0, 0);
+        c.getSections()[0].setSkyLight(0,0,0, (byte) 15);
+        c.getSections()[0].setSkyLight(0,5,0, (byte) 12);
+        assertEquals((byte) 15, c.getSections()[0].getSkyLight(0,0,0));
+        assertEquals((byte) 12, c.getSections()[0].getSkyLight(0,5,0));
+    }
+
     @After
     public void clean() throws IOException {
         try {

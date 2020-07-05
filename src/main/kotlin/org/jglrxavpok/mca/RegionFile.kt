@@ -92,7 +92,7 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
     fun getChunk(x: Int, z: Int): ChunkColumn? {
         if(out(x, z)) throw AnvilException("Out of RegionFile: $x,$z (chunk)")
 
-        if(!hasChunk(x, z)) return null
+        if(!hasLoadedChunk(x, z)) return null
 
         return columnCache.computeIfAbsent(index(x.chunkInsideRegion(), z.chunkInsideRegion())) { readColumn(x.chunkInsideRegion(), z.chunkInsideRegion()) }
     }
@@ -314,6 +314,42 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
 
         val chunk = getChunk(x.blockToChunk().chunkInsideRegion(), z.blockToChunk().chunkInsideRegion()) ?: throw AnvilException("No chunk at $x,$y,$z")
         return chunk.getBlockState(x.blockInsideChunk(), y, z.blockInsideChunk())
+    }
+
+    /**
+     * Sets the biome at the given position.
+     * Creates any necessary chunk or section.
+     * Will NOT save the results to disk, use flushCachedChunks or writeColumn
+     *
+     * X,Y,Z are in absolute coordinates
+     *
+     * @throws IllegalArgumentException if x,y,z is not a valid position inside this region
+     */
+    fun setBiome(x: Int, y: Int, z: Int, biomeID: Int) {
+        if(out(x.blockToChunk(), z.blockToChunk())) throw IllegalArgumentException("Out of region $x;$z (block)")
+        if(y !in 0..255) throw IllegalArgumentException("y ($y) must be in 0..255")
+
+        val chunk = getOrCreateChunk(x.blockToChunk().chunkInsideRegion(), z.blockToChunk().chunkInsideRegion())
+        chunk.setBiome(x.blockInsideChunk(), y, z.blockInsideChunk(), biomeID)
+    }
+
+    /**
+     * Returns the biome present at the given position.
+     *
+     * Does not create any necessary chunk or section. Will throw AnvilException if the chunk does not exist (an empty section is considered full of air)
+     * As biome data might not be present inside the file, this method may return -1 for unknown biomes (ie biomes not in the file).
+     *
+     * X,Y,Z are in absolute coordinates
+     *
+     * @throws IllegalArgumentException if x,y,z is not a valid position inside this region
+     * @throws AnvilException if the chunk corresponding to x,z does not exist in this region (ie not loaded by the game, nor created and waiting for saving with this lib)
+     */
+    fun getBiome(x: Int, y: Int, z: Int): Int {
+        if(out(x.blockToChunk(), z.blockToChunk())) throw IllegalArgumentException("Out of region $x;$z (block)")
+        if(y !in 0..255) throw IllegalArgumentException("y ($y) must be in 0..255")
+
+        val chunk = getChunk(x.blockToChunk().chunkInsideRegion(), z.blockToChunk().chunkInsideRegion()) ?: throw AnvilException("No chunk at $x,$y,$z")
+        return chunk.getBiome(x.blockInsideChunk(), y, z.blockInsideChunk())
     }
 
     /**

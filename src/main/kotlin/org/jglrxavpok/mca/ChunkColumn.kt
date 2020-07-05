@@ -3,6 +3,7 @@ package org.jglrxavpok.mca
 import org.jglrxavpok.mca.AnvilException.Companion.missing
 import org.jglrxavpok.nbt.NBTCompound
 import org.jglrxavpok.nbt.NBTList
+import org.jglrxavpok.nbt.NBTShort
 import org.jglrxavpok.nbt.NBTTypes
 
 /**
@@ -12,6 +13,11 @@ import org.jglrxavpok.nbt.NBTTypes
  * @param z: chunk coordinate on Z axis (world absolute)
  */
 class ChunkColumn(val x: Int, val z: Int) {
+
+    companion object {
+        @JvmField
+        val UnknownBiome = -1
+    }
 
     var dataVersion = 0
     var generationStatus: GenerationStatus = GenerationStatus.Empty
@@ -34,12 +40,19 @@ class ChunkColumn(val x: Int, val z: Int) {
     var tileEntities: NBTList<NBTCompound> = NBTList(NBTTypes.TAG_Compound)
     var tileTicks: NBTList<NBTCompound> = NBTList(NBTTypes.TAG_Compound)
     var liquidTicks: NBTList<NBTCompound> = NBTList(NBTTypes.TAG_Compound)
+    var structures: NBTCompound? = null
+    var lights: NBTList<NBTList<NBTShort>>? = null
+    var liquidsToBeTicked: NBTList<NBTList<NBTShort>>? = null
+    var toBeTicked: NBTList<NBTList<NBTShort>>? = null
+    var postProcessing: NBTList<NBTList<NBTShort>>? = null
 
     /**
      * Chunk sections of this chunk. Empty sections are non-null but have their 'empty' field set to true.
      * @see ChunkSection
      */
     val sections = Array<ChunkSection>(16) { y -> ChunkSection(y.toByte()) }
+    var airCarvingMask: ByteArray? = null
+    var liquidCarvingMask: ByteArray? = null
 
     @Throws(AnvilException::class)
     constructor(chunkData: NBTCompound): this(
@@ -65,8 +78,17 @@ class ChunkColumn(val x: Int, val z: Int) {
         tileEntities = level.getList("TileEntities") ?: NBTList<NBTCompound>(NBTTypes.TAG_Compound)
         tileTicks = level.getList("TileTicks") ?: NBTList<NBTCompound>(NBTTypes.TAG_Compound)
         liquidTicks = level.getList("LiquidTicks") ?: NBTList<NBTCompound>(NBTTypes.TAG_Compound)
+        structures = level.getCompound("Structures")
 
-        // TODO: Lights, ToBeTicked, PostProcessing, Structures
+        val carvingMasks = level.getCompound("CarvingMasks")
+        if(carvingMasks != null) {
+            airCarvingMask = carvingMasks.getByteArray("AIR")
+            liquidCarvingMask = carvingMasks.getByteArray("LIQUID")
+        }
+        lights = level.getList("Lights")
+        liquidsToBeTicked = level.getList("LiquidsToBeTicked")
+        toBeTicked = level.getList("ToBeTicked")
+        postProcessing = level.getList("PostProcessing")
 
         val sectionsNBT = level.getList<NBTCompound>("Sections") ?: missing("Sections")
         for(nbt in sectionsNBT) {
@@ -117,6 +139,32 @@ class ChunkColumn(val x: Int, val z: Int) {
             throw IllegalArgumentException("y ($y) is not in 0..255")
     }
 
+    /**
+     * Sets the biome stored inside this column at the given position
+     * If biome data did not exist before calling this method, the biome array is created then filled with UnknownBiome
+     */
+    fun setBiome(x: Int, y: Int, z: Int, biomeID: Int) {
+        checkBounds(x, y, z)
+        if(biomes == null) {
+            biomes = IntArray(1024) { UnknownBiome }
+        }
+        val index = x/4+(z/4)*16+(y/4)*16
+        biomes!![index] = biomeID
+    }
+
+    /**
+     * Returns the biome stored inside this column at the given position
+     * Be aware that biome data may not be present inside this column, in that case, this method returns UnknownBiome
+     */
+    fun getBiome(x: Int, y:Int, z: Int): Int {
+        checkBounds(x, y, z)
+        if(biomes == null) {
+            return UnknownBiome
+        }
+        val index = x/4+(z/4)*16+(y/4)*16
+        return biomes!![index/2]
+    }
+
     fun toNBT(): NBTCompound {
         return NBTCompound()
                 .setInt("DataVersion", dataVersion)
@@ -145,13 +193,35 @@ class ChunkColumn(val x: Int, val z: Int) {
                                 }
                             }
                             set("Sections", sections)
-                            // TODO: Carving masks
                             set("Entities", entities)
                             set("TileEntities", tileEntities)
                             set("TileTicks", tileTicks)
                             set("LiquidTicks", liquidTicks)
-                            // TODO: Lights, LiquidsToBeTicked, ToBeTicked, PostProcessing
-                            // TODO: Structures
+                            if(structures != null) {
+                                set("Structures", structures!!)
+                            }
+                            if(airCarvingMask != null || liquidCarvingMask != null) {
+                                set("CarvingMasks", NBTCompound()
+                                        .apply {
+                                            if(airCarvingMask != null)
+                                                setByteArray("AIR", airCarvingMask!!)
+                                            if(liquidCarvingMask != null)
+                                                setByteArray("LIQUID", liquidCarvingMask!!)
+                                        }
+                                )
+                            }
+                            if(lights != null) {
+                                set("Lights", lights!!)
+                            }
+                            if(liquidsToBeTicked != null) {
+                                set("LiquidsToBeTicked", liquidsToBeTicked!!)
+                            }
+                            if(toBeTicked != null) {
+                                set("ToBeTicked", toBeTicked!!)
+                            }
+                            if(postProcessing != null) {
+                                set("PostProcessing", postProcessing!!)
+                            }
                         }
                 )
     }

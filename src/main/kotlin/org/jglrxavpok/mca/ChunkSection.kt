@@ -2,8 +2,13 @@ package org.jglrxavpok.mca
 
 import org.jglrxavpok.mca.AnvilException.Companion.missing
 import org.jglrxavpok.nbt.NBTCompound
+import java.lang.IllegalArgumentException
+import kotlin.experimental.and
+import kotlin.experimental.or
 
-// TODO: doc
+/**
+ * 16x16x16 subchunk.
+ */
 class ChunkSection(val y: Byte) {
 
     /**
@@ -12,12 +17,18 @@ class ChunkSection(val y: Byte) {
     private var palette: Palette? = null
     val empty get()= palette == null
     private val blockStates: Array<BlockState> = Array(16*16*16) { BlockState.Air }
+    val blockLights = ByteArray(2048)
+    val skyLights = ByteArray(2048)
 
     init {
         if(y !in 0..15)
             throw AnvilException("Invalid section Y: $y. Must be in 0..15")
     }
 
+    /**
+     * Constructs a ChunkSection from a TAG_Compound.
+     * @throws AnvilException if the Compound in the argument is missing fields for loading
+     */
     @Throws(AnvilException::class)
     constructor(nbt: NBTCompound): this(nbt.getByte("Y") ?: missing("Y")) {
         // empty palette can happen if the section exist but requires more than 8 bits to save the block IDs (in that case, the global ID is directly used)
@@ -41,10 +52,21 @@ class ChunkSection(val y: Byte) {
             }
 
             palette!!.loadReferences(blockStates.asIterable())
+
+            nbt.getByteArray("BlockLight")?.copyInto(blockLights)
+            nbt.getByteArray("SkyLight")?.copyInto(skyLights)
         }
     }
 
+    /**
+     * Sets the block state in this section at the given position.
+     *
+     * Will create the palette if necessary, and will update it after (either created by the call or somewhen else)
+     *
+     * X,Y,Z must be inside this section (ie in a 16x16x16 cube)
+     */
     operator fun set(x: Int, y: Int, z: Int, block: BlockState) {
+        checkBounds(x, y, z)
         if(palette == null) {
             palette = Palette() // initialize new palette
             palette!!.blocks += BlockState.Air
@@ -59,10 +81,105 @@ class ChunkSection(val y: Byte) {
         }
     }
 
-    // TODO: block light
-    // TODO: sky light
+    private fun checkBounds(x: Int, y: Int, z: Int) {
+        if(x !in 0..15) throw IllegalArgumentException("x ($x) is not in 0..15")
+        if(y !in 0..15) throw IllegalArgumentException("y ($y) is not in 0..15")
+        if(z !in 0..15) throw IllegalArgumentException("z ($z) is not in 0..15")
+    }
 
+    /**
+     * Returns the block light at the given position
+     *
+     * If this section is empty, will throw AnvilException
+     *
+     * X,Y,Z must be in a 16x16x16 cube.
+     *
+     * @throws AnvilException if a get is attempted while this section is empty
+     */
+    fun getBlockLight(x: Int, y: Int, z: Int): Byte {
+        if(empty)
+            throw AnvilException("Trying to access empty section!")
+        checkBounds(x, y, z)
+        val index = y*16*16 + z*16 + x
+        return if(index % 2 == 0) {
+            blockLights[index/2] and 0x0F
+        } else {
+            ((blockLights[index/2].toInt() shr 4) and 0x0F).toByte()
+        }
+    }
+
+    /**
+     * Returns the sky light at the given position
+     *
+     * If this section is empty, will throw AnvilException
+     *
+     * X,Y,Z must be in a 16x16x16 cube.
+     *
+     * @throws AnvilException if a get is attempted while this section is empty
+     */
+    fun getSkyLight(x: Int, y: Int, z: Int): Byte {
+        if(empty)
+            throw AnvilException("Trying to access empty section!")
+        checkBounds(x, y, z)
+        val index = y*16*16 + z*16 + x
+        return if(index % 2 == 0) {
+            skyLights[index/2] and 0x0F
+        } else {
+            ((skyLights[index/2].toInt() shr 4) and 0x0F).toByte()
+        }
+    }
+
+    /**
+     * Sets the sky light in this section at the given position.
+     *
+     * X,Y,Z must be inside this section (ie in a 16x16x16 cube)
+     */
+    fun setSkyLight(x: Int, y: Int, z: Int, light: Byte) {
+        checkBounds(x, y, z)
+        fillInIfEmpty()
+        val index = y*16*16 + z*16 + x
+        if(index % 2 == 0) {
+            skyLights[index/2] = (skyLights[index/2] and 0xF0.toByte()) or (light and 0x0F)
+        } else {
+            skyLights[index/2] = (skyLights[index/2] and 0x0F.toByte()) or ((light.toInt() shl 4) and 0x0F).toByte()
+        }
+    }
+
+    /**
+     * Sets the sky light in this section at the given position.
+     *
+     * X,Y,Z must be inside this section (ie in a 16x16x16 cube)
+     */
+    fun setBlockLight(x: Int, y: Int, z: Int, light: Byte) {
+        checkBounds(x, y, z)
+        fillInIfEmpty()
+        val index = y*16*16 + z*16 + x
+        if(index % 2 == 0) {
+            blockLights[index/2] = (blockLights[index/2] and 0xF0.toByte()) or (light and 0x0F)
+        } else {
+            blockLights[index/2] = (blockLights[index/2] and 0x0F.toByte()) or ((light.toInt() shl 4) and 0x0F).toByte()
+        }
+    }
+
+    private fun fillInIfEmpty() {
+        if(empty) {
+            palette = Palette() // initialize new palette
+            palette!!.blocks += BlockState.Air
+            palette!!.loadReferences(blockStates.asIterable()) // load as all air
+        }
+    }
+
+    /**
+     * Returns the block state at the given position
+     *
+     * If this section is empty, will throw AnvilException
+     *
+     * X,Y,Z must be in a 16x16x16 cube.
+     *
+     * @throws AnvilException if a get is attempted while this section is empty
+     */
     operator fun get(x: Int, y: Int, z: Int): BlockState {
+        checkBounds(x, y, z)
         if(empty)
             throw AnvilException("Trying to access empty section!")
         return blockStates[index(x,y,z)]
@@ -73,8 +190,8 @@ class ChunkSection(val y: Byte) {
     fun toNBT(): NBTCompound {
         return NBTCompound().apply {
             setByte("Y", y)
-            // TODO setByteArray("BlockLight", blockLight)
-            // TODO setByteArray("SkyLight", skyLight)
+            setByteArray("BlockLight", blockLights)
+            setByteArray("SkyLight", skyLights)
             if(!empty) {
                 set("Palette", palette!!.toNBT())
                 setLongArray("BlockStates", palette!!.compactIDs(blockStates))
