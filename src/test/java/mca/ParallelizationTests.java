@@ -19,6 +19,14 @@ import java.util.concurrent.Future;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.junit.Assert.assertEquals;
 
+/**
+ * While these tests are far from perfect and can clearly report false positives, the sheer amount of chunks to try to save/load at the same time
+ * amounts to such probabilities of corruption that a false positive is extremely unlikely.
+ *
+ * Run these tests multiple times if you are suspicious.
+ *
+ * These tests are very basic, and by no means guarantee 100% thread-safety
+ */
 public class ParallelizationTests {
 
     @Test

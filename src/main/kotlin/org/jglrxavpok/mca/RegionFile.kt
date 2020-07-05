@@ -4,7 +4,7 @@ import org.jglrxavpok.nbt.NBTCompound
 import org.jglrxavpok.nbt.NBTReader
 import org.jglrxavpok.nbt.NBTWriter
 import java.io.*
-import java.lang.IllegalArgumentException
+import java.nio.ByteBuffer
 import java.util.concurrent.ConcurrentHashMap
 import java.util.zip.DeflaterOutputStream
 import java.util.zip.GZIPInputStream
@@ -126,11 +126,10 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
 
     private fun readColumn(x: Int, z: Int): ChunkColumn {
         val offset = fileOffset(x, z)
-        file.seek(offset.toLong())
-        val length = file.readInt()
-        val compressionType = file.readByte()
+        val length = readInt(offset.toLong())
+        val compressionType = readByte(offset+4L)
         val rawData = ByteArray(length-1)
-        file.read(rawData)
+        readBytes(offset+5L, rawData)
 
         val reader = NBTReader(when(compressionType) {
             GZipCompression -> BufferedInputStream(GZIPInputStream(ByteArrayInputStream(rawData)))
@@ -173,37 +172,41 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
         val previousSectorCount = sizeInSectors(locations[index(x.chunkInsideRegion(), z.chunkInsideRegion())])
         val previousSectorStart = sectorOffset(locations[index(x.chunkInsideRegion(), z.chunkInsideRegion())])
         // start by saving to free sectors, before cleaning up the old data
+        var appendToEnd = false
+        var position: Long
+        var sectorStart: Int
         synchronized(freeSectors) {
-            var sectorStart = findAvailableSectors(sectorCount)
-            var appendToEnd = false
-            if(sectorStart == -1) { // we need to allocate sectors
+            sectorStart = findAvailableSectors(sectorCount)
+            if (sectorStart == -1) { // we need to allocate sectors
                 val eof = file.length()
-                file.seek(eof)
+                position = eof
                 sectorStart = (eof / SectorSize).toInt()
                 appendToEnd = true
             } else {
-                file.seek((sectorStart * SectorSize).toLong())
+                position = (sectorStart * SectorSize).toLong()
             }
-            for (i in sectorStart until sectorStart+sectorCount) {
-                if(i < freeSectors.size) {
+            for (i in sectorStart until sectorStart + sectorCount) {
+                if (i < freeSectors.size) {
                     freeSectors[i] = false
                 } else {
                     freeSectors += false // increase size of freeSectors
                 }
             }
+        }
 
-            val location = index(column.x, column.z)
-            file.writeInt(dataSize)
-            file.writeByte(ZlibCompression.toInt())
-            file.write(dataOut.toByteArray())
-            if(appendToEnd) { // we are at the EOF, we may have to add some padding
-                addPadding()
-            }
-            locations[location] = buildLocation(sectorStart, sectorCount)
-            writeLocation(column.x, column.z)
-            timestamps[location] = System.currentTimeMillis().toInt()
-            writeTimestamp(column.x, column.z)
+        val location = index(column.x, column.z)
+        writeInt(position, dataSize)
+        writeByte(position+4, ZlibCompression)
+        writeBytes(position+5, dataOut.toByteArray())
+        if(appendToEnd) { // we are at the EOF, we may have to add some padding
+            addPadding()
+        }
+        locations[location] = buildLocation(sectorStart, sectorCount)
+        writeLocation(column.x, column.z)
+        timestamps[location] = System.currentTimeMillis().toInt()
+        writeTimestamp(column.x, column.z)
 
+        synchronized(freeSectors) {
             // the data has been written, now free previous storage
             for (i in previousSectorStart until previousSectorStart+previousSectorCount) {
                 freeSectors[i] = true
@@ -212,11 +215,14 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
     }
 
     private fun addPadding() {
-        val missingPadding = file.length() % SectorSize
-        // file is not a multiple of 4kib, add padding
-        if(missingPadding > 0) {
-            for(i in 0 until SectorSize-missingPadding) {
-                file.write(0)
+        synchronized(file) {
+            val missingPadding = file.length() % SectorSize
+            // file is not a multiple of 4kib, add padding
+            if(missingPadding > 0) {
+                val pos = file.length()
+                for(i in 0 until SectorSize-missingPadding) {
+                    writeByte(pos+i, 0)
+                }
             }
         }
     }
@@ -225,16 +231,44 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
      * Writes the chunk data location for a given chunk inside the file
      */
     private fun writeLocation(x: Int, z: Int) {
-        file.seek(index(x, z) * 4L)
-        file.writeInt(locations[index(x, z)])
+        writeInt(index(x, z) * 4L, locations[index(x, z)])
+    }
+
+    private fun writeByte(pos: Long, b: Byte) {
+        file.channel.write(ByteBuffer.allocateDirect(1).put(0, b), pos)
+    }
+
+    private fun writeBytes(pos: Long, bytes: ByteArray) {
+        file.channel.write(ByteBuffer.wrap(bytes), pos)
+    }
+
+    private fun writeInt(pos: Long, int: Int) {
+        file.channel.write(ByteBuffer.allocateDirect(4).putInt(0, int), pos)
+    }
+
+    private fun readBytes(pos: Long, destination: ByteArray) {
+        val buf = ByteBuffer.allocateDirect(destination.size)
+        file.channel.read(buf, pos)
+        for (i in destination.indices) destination[i] = buf[i]
+    }
+
+    private fun readByte(pos: Long): Byte {
+        val buf = ByteBuffer.allocateDirect(1)
+        file.channel.read(buf, pos)
+        return buf[0]
+    }
+
+    private fun readInt(pos: Long): Int {
+        val buf = ByteBuffer.allocateDirect(4)
+        file.channel.read(buf, pos)
+        return buf.getInt(0)
     }
 
     /**
      * Writes the chunk timestamp for a given chunk inside the file
      */
     private fun writeTimestamp(x: Int, z: Int) {
-        file.seek(index(x, z) * 4L + 4096)
-        file.writeInt(timestamps[index(x, z)])
+        writeInt(index(x, z) * 4L + 4096, timestamps[index(x, z)])
     }
 
     /**
