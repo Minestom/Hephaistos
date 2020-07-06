@@ -102,7 +102,7 @@ class ChunkSection(val y: Byte) {
         if(empty)
             throw AnvilException("Trying to access empty section!")
         checkBounds(x, y, z)
-        val index = y*16*16 + z*16 + x
+        val index = index(x,y,z)
         return if(index % 2 == 0) {
             blockLights[index/2] and 0x0F
         } else {
@@ -124,7 +124,7 @@ class ChunkSection(val y: Byte) {
         if(empty)
             throw AnvilException("Trying to access empty section!")
         checkBounds(x, y, z)
-        val index = y*16*16 + z*16 + x
+        val index = index(x,y,z)
         return if(index % 2 == 0) {
             skyLights[index/2] and 0x0F
         } else {
@@ -140,7 +140,7 @@ class ChunkSection(val y: Byte) {
     fun setSkyLight(x: Int, y: Int, z: Int, light: Byte) {
         checkBounds(x, y, z)
         fillInIfEmpty()
-        val index = y*16*16 + z*16 + x
+        val index = index(x,y,z)
         if(index % 2 == 0) {
             skyLights[index/2] = (skyLights[index/2] and 0xF0.toByte()) or (light and 0x0F)
         } else {
@@ -156,7 +156,7 @@ class ChunkSection(val y: Byte) {
     fun setBlockLight(x: Int, y: Int, z: Int, light: Byte) {
         checkBounds(x, y, z)
         fillInIfEmpty()
-        val index = y*16*16 + z*16 + x
+        val index = index(x,y,z)
         if(index % 2 == 0) {
             blockLights[index/2] = (blockLights[index/2] and 0xF0.toByte()) or (light and 0x0F)
         } else {
@@ -189,7 +189,7 @@ class ChunkSection(val y: Byte) {
         return blockStates[index(x,y,z)]
     }
 
-    private fun index(x: Int, y: Int, z: Int) = y*16*16+x*16+z
+    private fun index(x: Int, y: Int, z: Int) = y*16*16+z*16+x
 
     /**
      * Converts this ChunkSection into its NBT representation
