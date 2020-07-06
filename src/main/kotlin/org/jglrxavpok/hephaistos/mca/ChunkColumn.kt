@@ -93,13 +93,11 @@ class ChunkColumn(val x: Int, val z: Int) {
         val sectionsNBT = level.getList<NBTCompound>("Sections") ?: missing("Sections")
         for(nbt in sectionsNBT) {
             val sectionY = nbt.getByte("Y") ?: missing("Y")
-            if(sectionY == (-1).toByte()) { // mark that they are empty sections?
-                continue
-            }
             if(sectionY !in 0..15) {
-                throw AnvilException("Invalid Y value for section: $sectionY. Must be in 0..15")
+                System.err.println("[Hephaistos] Invalid Y value for section: $sectionY. Must be in 0..15, ignoring.")
+            } else {
+                sections[sectionY.toInt()] = ChunkSection(nbt)
             }
-            sections[sectionY.toInt()] = ChunkSection(nbt)
         }
     }
 
