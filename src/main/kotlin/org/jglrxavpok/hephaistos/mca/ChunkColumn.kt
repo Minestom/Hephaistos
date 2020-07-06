@@ -93,9 +93,7 @@ class ChunkColumn(val x: Int, val z: Int) {
         val sectionsNBT = level.getList<NBTCompound>("Sections") ?: missing("Sections")
         for(nbt in sectionsNBT) {
             val sectionY = nbt.getByte("Y") ?: missing("Y")
-            if(sectionY !in 0..15) {
-                System.err.println("[Hephaistos] Invalid Y value for section: $sectionY. Must be in 0..15, ignoring.")
-            } else {
+            if(sectionY in 0..15) { // otherwise invalid Y value for section, ignore others. valid mca files from vanilla Minecraft can have Y below 0 or above 15
                 sections[sectionY.toInt()] = ChunkSection(nbt)
             }
         }
