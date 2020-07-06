@@ -1,4 +1,4 @@
-package org.jglrxavpok.nbt
+package org.jglrxavpok.hephaistos.nbt
 
 import java.io.DataInputStream
 import java.io.DataOutputStream

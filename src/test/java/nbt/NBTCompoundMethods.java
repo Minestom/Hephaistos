@@ -1,6 +1,6 @@
 package nbt;
 
-import org.jglrxavpok.nbt.*;
+import org.jglrxavpok.hephaistos.nbt.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

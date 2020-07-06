@@ -1,9 +1,9 @@
 package mca;
 
-import org.jglrxavpok.mca.BlockState;
-import org.jglrxavpok.mca.ChunkSection;
-import org.jglrxavpok.nbt.NBTCompound;
-import org.jglrxavpok.nbt.NBTList;
+import org.jglrxavpok.hephaistos.mca.BlockState;
+import org.jglrxavpok.hephaistos.mca.ChunkSection;
+import org.jglrxavpok.hephaistos.nbt.NBTCompound;
+import org.jglrxavpok.hephaistos.nbt.NBTList;
 import org.junit.Test;
 
 import java.util.HashMap;

@@ -1,9 +1,9 @@
 package mca;
 
-import org.jglrxavpok.mca.AnvilException;
-import org.jglrxavpok.mca.BlockState;
-import org.jglrxavpok.mca.ChunkColumn;
-import org.jglrxavpok.mca.RegionFile;
+import org.jglrxavpok.hephaistos.mca.AnvilException;
+import org.jglrxavpok.hephaistos.mca.BlockState;
+import org.jglrxavpok.hephaistos.mca.ChunkColumn;
+import org.jglrxavpok.hephaistos.mca.RegionFile;
 import org.junit.Before;
 import org.junit.Test;
 

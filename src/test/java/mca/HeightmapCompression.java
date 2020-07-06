@@ -1,6 +1,6 @@
 package mca;
 
-import org.jglrxavpok.mca.Heightmap;
+import org.jglrxavpok.hephaistos.mca.Heightmap;
 import org.junit.Test;
 
 import static org.junit.Assert.assertArrayEquals;

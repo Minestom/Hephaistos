@@ -1,13 +1,16 @@
-package org.jglrxavpok.mca
+package org.jglrxavpok.hephaistos.mca
 
-import org.jglrxavpok.nbt.NBTCompound
-import org.jglrxavpok.nbt.NBTList
-import org.jglrxavpok.nbt.NBTTypes
+import org.jglrxavpok.hephaistos.nbt.NBTCompound
+import org.jglrxavpok.hephaistos.nbt.NBTList
+import org.jglrxavpok.hephaistos.nbt.NBTTypes
 import java.lang.IllegalArgumentException
 import kotlin.math.ceil
 import kotlin.math.log2
 
-// TODO: doc
+/**
+ * Represents the palette of blocks used in a chunk section. This palette allows to save space when saving to disk or transferring over network,
+ * as it lowers the required number of bits used to represent a block state, by remapping global IDs to local IDs, with fewer bits per entry.
+ */
 class Palette() {
 
     val blocks = ArrayList<BlockState>()
@@ -59,6 +62,9 @@ class Palette() {
         }
     }
 
+    /**
+     * Converts this Palette into its NBT representation
+     */
     fun toNBT(): NBTList<NBTCompound> {
         val list = NBTList<NBTCompound>(NBTTypes.TAG_Compound)
         for(b in blocks) {

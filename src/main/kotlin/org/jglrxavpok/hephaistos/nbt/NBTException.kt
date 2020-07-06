@@ -1,4 +1,4 @@
-package org.jglrxavpok.nbt
+package org.jglrxavpok.hephaistos.nbt
 
 import java.lang.Exception
 

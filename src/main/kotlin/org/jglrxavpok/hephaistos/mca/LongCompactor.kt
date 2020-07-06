@@ -1,9 +1,12 @@
-package org.jglrxavpok.mca
+package org.jglrxavpok.hephaistos.mca
 
 import kotlin.math.ceil
 
-// TODO: doc
-
+/**
+ * Compresses the given ints into a long array, at the given lengthInBits bitrate.
+ *
+ * lengthInBits must be at least 1
+ */
 fun compress(data: IntArray, lengthInBits: Int): LongArray {
     val compacted = LongArray(ceil(data.size*lengthInBits/64.0).toInt())
     var bitIndex = 0
@@ -29,6 +32,9 @@ fun compress(data: IntArray, lengthInBits: Int): LongArray {
     return compacted
 }
 
+/**
+ * Decompresses compressed 'data' into a int array, with lengthInBits bits per int.
+ */
 fun decompress(data: LongArray, lengthInBits: Int): IntArray {
     var bitIndex = 0
     val count = (data.size.toLong()*64 / lengthInBits).toInt()

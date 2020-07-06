@@ -1,8 +1,8 @@
 package mca;
 
-import org.jglrxavpok.mca.BlockState;
-import org.jglrxavpok.mca.LongCompactorKt;
-import org.jglrxavpok.mca.Palette;
+import org.jglrxavpok.hephaistos.mca.BlockState;
+import org.jglrxavpok.hephaistos.mca.LongCompactorKt;
+import org.jglrxavpok.hephaistos.mca.Palette;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

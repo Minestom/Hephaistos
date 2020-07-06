@@ -6,6 +6,7 @@
 This library is both a NBT library and a Minecraft Anvil format library.
 
 Made in Kotlin, it is accessible for all languages that run on the JVM.
+As it is in Kotlin, this means your project may have to add a new dependency on the Kotlin runtime library.
 
 ## NBT
 Based on the up-to-date specs present at [Wiki.vg](https://wiki.vg/NBT) 

@@ -1,8 +1,8 @@
 package mca;
 
-import org.jglrxavpok.mca.AnvilException;
-import org.jglrxavpok.mca.ChunkColumn;
-import org.jglrxavpok.mca.RegionFile;
+import org.jglrxavpok.hephaistos.mca.AnvilException;
+import org.jglrxavpok.hephaistos.mca.ChunkColumn;
+import org.jglrxavpok.hephaistos.mca.RegionFile;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,7 +28,7 @@ public class MCALoading {
     }
 
     @Test
-    public void read() throws AnvilException {
+    public void read() throws AnvilException, IOException {
         RegionFile region = new RegionFile(file, 0, 0);
         ChunkColumn column0_0 = region.getChunk(0, 0);
         assertNotNull(column0_0);

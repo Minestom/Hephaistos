@@ -1,9 +1,9 @@
 package mca;
 
-import org.jglrxavpok.mca.AnvilException;
-import org.jglrxavpok.mca.BlockState;
-import org.jglrxavpok.mca.ChunkColumn;
-import org.jglrxavpok.mca.RegionFile;
+import org.jglrxavpok.hephaistos.mca.AnvilException;
+import org.jglrxavpok.hephaistos.mca.BlockState;
+import org.jglrxavpok.hephaistos.mca.ChunkColumn;
+import org.jglrxavpok.hephaistos.mca.RegionFile;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -217,7 +217,7 @@ public class MCASaving {
     }
 
     @Test
-    public void setBiomes() throws AnvilException {
+    public void setBiomes() throws AnvilException, IOException {
         RegionFile region = new RegionFile(file, 0, 0);
         region.getOrCreateChunk(0, 0); // force create chunk
         assertEquals(ChunkColumn.UnknownBiome, region.getBiome(0,0,0));
@@ -226,7 +226,7 @@ public class MCASaving {
     }
 
     @Test
-    public void setBlockLight() throws AnvilException {
+    public void setBlockLight() throws AnvilException, IOException {
         RegionFile region = new RegionFile(file, 0, 0);
         ChunkColumn c = region.getOrCreateChunk(0, 0);
         c.getSections()[0].setBlockLight(0,0,0, (byte) 15);
@@ -236,7 +236,7 @@ public class MCASaving {
     }
 
     @Test
-    public void setSkyLight() throws AnvilException {
+    public void setSkyLight() throws AnvilException, IOException {
         RegionFile region = new RegionFile(file, 0, 0);
         ChunkColumn c = region.getOrCreateChunk(0, 0);
         c.getSections()[0].setSkyLight(0,0,0, (byte) 15);

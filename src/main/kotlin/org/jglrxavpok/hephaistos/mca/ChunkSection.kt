@@ -1,7 +1,7 @@
-package org.jglrxavpok.mca
+package org.jglrxavpok.hephaistos.mca
 
-import org.jglrxavpok.mca.AnvilException.Companion.missing
-import org.jglrxavpok.nbt.NBTCompound
+import org.jglrxavpok.hephaistos.mca.AnvilException.Companion.missing
+import org.jglrxavpok.hephaistos.nbt.NBTCompound
 import java.lang.IllegalArgumentException
 import kotlin.experimental.and
 import kotlin.experimental.or
@@ -97,6 +97,7 @@ class ChunkSection(val y: Byte) {
      *
      * @throws AnvilException if a get is attempted while this section is empty
      */
+    @Throws(AnvilException::class)
     fun getBlockLight(x: Int, y: Int, z: Int): Byte {
         if(empty)
             throw AnvilException("Trying to access empty section!")
@@ -118,6 +119,7 @@ class ChunkSection(val y: Byte) {
      *
      * @throws AnvilException if a get is attempted while this section is empty
      */
+    @Throws(AnvilException::class)
     fun getSkyLight(x: Int, y: Int, z: Int): Byte {
         if(empty)
             throw AnvilException("Trying to access empty section!")
@@ -179,6 +181,7 @@ class ChunkSection(val y: Byte) {
      *
      * @throws AnvilException if a get is attempted while this section is empty
      */
+    @Throws(AnvilException::class)
     operator fun get(x: Int, y: Int, z: Int): BlockState {
         checkBounds(x, y, z)
         if(empty)
@@ -188,6 +191,9 @@ class ChunkSection(val y: Byte) {
 
     private fun index(x: Int, y: Int, z: Int) = y*16*16+x*16+z
 
+    /**
+     * Converts this ChunkSection into its NBT representation
+     */
     fun toNBT(): NBTCompound {
         return NBTCompound().apply {
             setByte("Y", y)

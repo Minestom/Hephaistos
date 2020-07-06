@@ -1,26 +1,24 @@
-package org.jglrxavpok.nbt
+package org.jglrxavpok.hephaistos.nbt
 
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.util.*
 
-class NBTString(var value: String): NBT {
+class NBTByte(var value: Byte) : NBT {
+    override val ID = NBTTypes.TAG_Byte
 
-    override val ID = NBTTypes.TAG_String
-
-    constructor(): this("")
+    constructor(): this(0)
 
     override fun readContents(source: DataInputStream) {
-        value = source.readUTF()
+        value = source.readByte()
     }
 
     override fun writeContents(destination: DataOutputStream) {
-        destination.writeUTF(value)
+        destination.writeByte(value.toInt())
     }
 
     override fun toSNBT(): String {
-        val escaped = value.replace("\"", "\\\"")
-        return "\"$escaped\""
+        return "${value}B"
     }
 
     override fun toString() = toSNBT()
@@ -29,7 +27,7 @@ class NBTString(var value: String): NBT {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as NBTString
+        other as NBTByte
 
         if (value != other.value) return false
 
@@ -39,4 +37,5 @@ class NBTString(var value: String): NBT {
     override fun hashCode(): Int {
         return Objects.hash(value)
     }
+
 }

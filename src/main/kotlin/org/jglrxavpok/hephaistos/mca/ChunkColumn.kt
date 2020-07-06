@@ -1,10 +1,10 @@
-package org.jglrxavpok.mca
+package org.jglrxavpok.hephaistos.mca
 
-import org.jglrxavpok.mca.AnvilException.Companion.missing
-import org.jglrxavpok.nbt.NBTCompound
-import org.jglrxavpok.nbt.NBTList
-import org.jglrxavpok.nbt.NBTShort
-import org.jglrxavpok.nbt.NBTTypes
+import org.jglrxavpok.hephaistos.mca.AnvilException.Companion.missing
+import org.jglrxavpok.hephaistos.nbt.NBTCompound
+import org.jglrxavpok.hephaistos.nbt.NBTList
+import org.jglrxavpok.hephaistos.nbt.NBTShort
+import org.jglrxavpok.hephaistos.nbt.NBTTypes
 
 /**
  * 16x256x16 (XYZ) area of the world. Consists of 16 ChunkSections vertically stacked.
@@ -165,6 +165,9 @@ class ChunkColumn(val x: Int, val z: Int) {
         return biomes!![index/2]
     }
 
+    /**
+     * Converts this ChunkColumn into its NBT representation
+     */
     fun toNBT(): NBTCompound {
         return NBTCompound()
                 .setInt("DataVersion", dataVersion)

@@ -1,9 +1,8 @@
 package nbt;
 
 import kotlin.Pair;
-import org.jglrxavpok.nbt.*;
+import org.jglrxavpok.hephaistos.nbt.*;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

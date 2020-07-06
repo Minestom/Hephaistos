@@ -1,24 +1,24 @@
-package org.jglrxavpok.nbt
+package org.jglrxavpok.hephaistos.nbt
 
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.util.*
 
-class NBTFloat(var value: Float) : NBT {
-    override val ID = NBTTypes.TAG_Float
+class NBTDouble(var value: Double) : NBT {
+    override val ID = NBTTypes.TAG_Double
 
-    constructor(): this(0f)
+    constructor(): this(0.0)
 
     override fun readContents(source: DataInputStream) {
-        value = source.readFloat()
+        value = source.readDouble()
     }
 
     override fun writeContents(destination: DataOutputStream) {
-        destination.writeFloat(value)
+        destination.writeDouble(value)
     }
 
     override fun toSNBT(): String {
-        return "${value}F"
+        return "${value}D"
     }
 
     override fun toString() = toSNBT()
@@ -27,7 +27,7 @@ class NBTFloat(var value: Float) : NBT {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as NBTFloat
+        other as NBTDouble
 
         if (value != other.value) return false
 

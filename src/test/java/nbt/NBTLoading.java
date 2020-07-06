@@ -1,7 +1,7 @@
 package nbt;
 
 import kotlin.Pair;
-import org.jglrxavpok.nbt.*;
+import org.jglrxavpok.hephaistos.nbt.*;
 import org.junit.Assert;
 import org.junit.Test;
 

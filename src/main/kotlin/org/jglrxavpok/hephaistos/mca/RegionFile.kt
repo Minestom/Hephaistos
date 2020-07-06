@@ -1,8 +1,8 @@
-package org.jglrxavpok.mca
+package org.jglrxavpok.hephaistos.mca
 
-import org.jglrxavpok.nbt.NBTCompound
-import org.jglrxavpok.nbt.NBTReader
-import org.jglrxavpok.nbt.NBTWriter
+import org.jglrxavpok.hephaistos.nbt.NBTCompound
+import org.jglrxavpok.hephaistos.nbt.NBTReader
+import org.jglrxavpok.hephaistos.nbt.NBTWriter
 import java.io.*
 import java.nio.ByteBuffer
 import java.util.concurrent.ConcurrentHashMap
@@ -20,7 +20,7 @@ import kotlin.math.ceil
  * [Code based on Mojang source code](https://www.mojang.com/2012/02/new-minecraft-map-format-anvil/)
  * [also based on the Minecraft Wiki "Region File format page"](https://minecraft.gamepedia.com/Region_file_format)
  */
-class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAccessFile, val regionX: Int, val regionZ: Int): Closeable {
+class RegionFile @Throws(AnvilException::class, IOException::class) constructor(val file: RandomAccessFile, val regionX: Int, val regionZ: Int): Closeable {
 
     companion object {
         private val GZipCompression: Byte = 1
@@ -89,6 +89,7 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
      * @throws AnvilException if the given coordinates are not inside the region
      * @return Can return null if the requested chunk is not present in the file
      */
+    @Throws(AnvilException::class, IOException::class)
     fun getChunk(x: Int, z: Int): ChunkColumn? {
         if(out(x, z)) throw AnvilException("Out of RegionFile: $x,$z (chunk)")
 
@@ -107,6 +108,7 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
      * @see RegionFile.getChunk
      * @throws AnvilException if the given coordinates are not inside the region
      */
+    @Throws(AnvilException::class, IOException::class)
     fun getOrCreateChunk(x: Int, z: Int): ChunkColumn {
         if(out(x, z)) throw AnvilException("Out of RegionFile: $x,$z (chunk)")
 
@@ -124,6 +126,7 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
         return column
     }
 
+    @Throws(AnvilException::class, IOException::class)
     private fun readColumn(x: Int, z: Int): ChunkColumn {
         val offset = fileOffset(x, z)
         val length = readInt(offset.toLong())
@@ -169,8 +172,8 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
             throw AnvilException("Sorry, but your ChunkColumn totals over 1MB of data, impossible to save it inside a RegionFile.")
         }
 
-        val previousSectorCount = sizeInSectors(locations[index(x.chunkInsideRegion(), z.chunkInsideRegion())])
-        val previousSectorStart = sectorOffset(locations[index(x.chunkInsideRegion(), z.chunkInsideRegion())])
+        val previousSectorCount = sizeInSectors(locations[index(x, z)])
+        val previousSectorStart = sectorOffset(locations[index(x, z)])
         // start by saving to free sectors, before cleaning up the old data
         var appendToEnd = false
         var position: Long
@@ -300,6 +303,7 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
      *
      * @see hasLoadedChunk
      */
+    @Throws(AnvilException::class)
     fun hasChunk(x: Int, z: Int): Boolean {
         if(out(x, z)) throw AnvilException("Out of RegionFile: $x,$z (chunk)")
 
@@ -313,6 +317,7 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
      * @see hasChunk
      * @see getOrCreateChunk
      */
+    @Throws(AnvilException::class)
     fun hasLoadedChunk(x: Int, z: Int): Boolean {
         if(hasChunk(x, z)) return true
 
@@ -328,11 +333,12 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
      *
      * @throws IllegalArgumentException if x,y,z is not a valid position inside this region
      */
+    @Throws(AnvilException::class, IllegalArgumentException::class)
     fun setBlockState(x: Int, y: Int, z: Int, blockState: BlockState) {
         if(out(x.blockToChunk(), z.blockToChunk())) throw IllegalArgumentException("Out of region $x;$z (block)")
         if(y !in 0..255) throw IllegalArgumentException("y ($y) must be in 0..255")
 
-        val chunk = getOrCreateChunk(x.blockToChunk().chunkInsideRegion(), z.blockToChunk().chunkInsideRegion())
+        val chunk = getOrCreateChunk(x.blockToChunk(), z.blockToChunk())
         chunk.setBlockState(x.blockInsideChunk(), y, z.blockInsideChunk(), blockState)
     }
 
@@ -346,11 +352,12 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
      * @throws IllegalArgumentException if x,y,z is not a valid position inside this region
      * @throws AnvilException if the chunk corresponding to x,z does not exist in this region (ie not loaded by the game, nor created and waiting for saving with this lib)
      */
+    @Throws(AnvilException::class, IllegalArgumentException::class)
     fun getBlockState(x: Int, y: Int, z: Int): BlockState {
         if(out(x.blockToChunk(), z.blockToChunk())) throw IllegalArgumentException("Out of region $x;$z (block)")
         if(y !in 0..255) throw IllegalArgumentException("y ($y) must be in 0..255")
 
-        val chunk = getChunk(x.blockToChunk().chunkInsideRegion(), z.blockToChunk().chunkInsideRegion()) ?: throw AnvilException("No chunk at $x,$y,$z")
+        val chunk = getChunk(x.blockToChunk(), z.blockToChunk()) ?: throw AnvilException("No chunk at $x,$y,$z")
         return chunk.getBlockState(x.blockInsideChunk(), y, z.blockInsideChunk())
     }
 
@@ -363,11 +370,12 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
      *
      * @throws IllegalArgumentException if x,y,z is not a valid position inside this region
      */
+    @Throws(AnvilException::class, IllegalArgumentException::class)
     fun setBiome(x: Int, y: Int, z: Int, biomeID: Int) {
         if(out(x.blockToChunk(), z.blockToChunk())) throw IllegalArgumentException("Out of region $x;$z (block)")
         if(y !in 0..255) throw IllegalArgumentException("y ($y) must be in 0..255")
 
-        val chunk = getOrCreateChunk(x.blockToChunk().chunkInsideRegion(), z.blockToChunk().chunkInsideRegion())
+        val chunk = getOrCreateChunk(x.blockToChunk(), z.blockToChunk())
         chunk.setBiome(x.blockInsideChunk(), y, z.blockInsideChunk(), biomeID)
     }
 
@@ -382,11 +390,12 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
      * @throws IllegalArgumentException if x,y,z is not a valid position inside this region
      * @throws AnvilException if the chunk corresponding to x,z does not exist in this region (ie not loaded by the game, nor created and waiting for saving with this lib)
      */
+    @Throws(AnvilException::class, IllegalArgumentException::class)
     fun getBiome(x: Int, y: Int, z: Int): Int {
         if(out(x.blockToChunk(), z.blockToChunk())) throw IllegalArgumentException("Out of region $x;$z (block)")
         if(y !in 0..255) throw IllegalArgumentException("y ($y) must be in 0..255")
 
-        val chunk = getChunk(x.blockToChunk().chunkInsideRegion(), z.blockToChunk().chunkInsideRegion()) ?: throw AnvilException("No chunk at $x,$y,$z")
+        val chunk = getChunk(x.blockToChunk(), z.blockToChunk()) ?: throw AnvilException("No chunk at $x,$y,$z")
         return chunk.getBiome(x.blockInsideChunk(), y, z.blockInsideChunk())
     }
 
@@ -433,10 +442,12 @@ class RegionFile @Throws(AnvilException::class) constructor(val file: RandomAcce
      * Unloads from memory the given column. Allows to relieve the JVM memory.
      * This DOES NOT save the chunk column.
      *
-     * One should no longer use the column object
+     * One should no longer use the column object.
+     *
+     * @throws IllegalArgumentException if the column was not previously inside this region
      */
     fun forget(column: ChunkColumn) {
-        val index = index(column.x.chunkInsideRegion(), column.z.chunkInsideRegion())
+        val index = index(column.x, column.z)
         if(columnCache[index] == column) {
             columnCache.remove(index)
         } else {

@@ -1,34 +1,30 @@
-package org.jglrxavpok.nbt
+package org.jglrxavpok.hephaistos.nbt
 
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.util.*
 
-class NBTIntArray(var value: IntArray) : NBT {
+class NBTByteArray(var value: ByteArray) : NBT {
     val length get()= value.size
 
-    override val ID = NBTTypes.TAG_Int_Array
+    override val ID = NBTTypes.TAG_Byte_Array
 
-    constructor(): this(IntArray(0))
+    constructor(): this(ByteArray(0))
 
     override fun readContents(source: DataInputStream) {
         val length = source.readInt()
-        value = IntArray(length)
-        for(i in 0 until length) {
-            value[i] = source.readInt()
-        }
+        value = ByteArray(length)
+        source.readFully(value)
     }
 
     override fun writeContents(destination: DataOutputStream) {
         destination.writeInt(length)
-        for(i in 0 until length) {
-            destination.writeInt(value[i])
-        }
+        destination.write(value)
     }
 
     override fun toSNBT(): String {
-        val list = value.joinToString(",") { "$it" }
-        return "[I;$list]"
+        val list = value.joinToString(",") { "${it}B" }
+        return "[B;$list]"
     }
 
     override fun toString() = toSNBT()
@@ -37,7 +33,7 @@ class NBTIntArray(var value: IntArray) : NBT {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as NBTIntArray
+        other as NBTByteArray
 
         if (!value.contentEquals(other.value)) return false
 
@@ -47,4 +43,5 @@ class NBTIntArray(var value: IntArray) : NBT {
     override fun hashCode(): Int {
         return Objects.hash(*value.toTypedArray())
     }
+
 }

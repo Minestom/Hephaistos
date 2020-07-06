@@ -1,8 +1,8 @@
-package org.jglrxavpok.mca
+package org.jglrxavpok.hephaistos.mca
 
-import org.jglrxavpok.mca.AnvilException.Companion.missing
-import org.jglrxavpok.nbt.NBTCompound
-import org.jglrxavpok.nbt.NBTString
+import org.jglrxavpok.hephaistos.mca.AnvilException.Companion.missing
+import org.jglrxavpok.hephaistos.nbt.NBTCompound
+import org.jglrxavpok.hephaistos.nbt.NBTString
 
 /**
  * Represents a block state in a section NBT

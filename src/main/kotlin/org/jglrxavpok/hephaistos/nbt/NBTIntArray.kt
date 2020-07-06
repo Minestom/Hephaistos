@@ -1,34 +1,34 @@
-package org.jglrxavpok.nbt
+package org.jglrxavpok.hephaistos.nbt
 
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.util.*
 
-class NBTLongArray(var value: LongArray) : NBT {
+class NBTIntArray(var value: IntArray) : NBT {
     val length get()= value.size
 
-    override val ID = NBTTypes.TAG_Long_Array
+    override val ID = NBTTypes.TAG_Int_Array
 
-    constructor(): this(LongArray(0))
+    constructor(): this(IntArray(0))
 
     override fun readContents(source: DataInputStream) {
         val length = source.readInt()
-        value = LongArray(length)
+        value = IntArray(length)
         for(i in 0 until length) {
-            value[i] = source.readLong()
+            value[i] = source.readInt()
         }
     }
 
     override fun writeContents(destination: DataOutputStream) {
         destination.writeInt(length)
         for(i in 0 until length) {
-            destination.writeLong(value[i])
+            destination.writeInt(value[i])
         }
     }
 
     override fun toSNBT(): String {
-        val list = value.joinToString(",") { "${it}L" }
-        return "[L;$list]"
+        val list = value.joinToString(",") { "$it" }
+        return "[I;$list]"
     }
 
     override fun toString() = toSNBT()
@@ -37,7 +37,7 @@ class NBTLongArray(var value: LongArray) : NBT {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as NBTLongArray
+        other as NBTIntArray
 
         if (!value.contentEquals(other.value)) return false
 

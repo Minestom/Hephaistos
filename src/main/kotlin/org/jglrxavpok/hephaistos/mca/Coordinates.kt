@@ -1,4 +1,4 @@
-package org.jglrxavpok.mca
+package org.jglrxavpok.hephaistos.mca
 
 import kotlin.math.floor
 
