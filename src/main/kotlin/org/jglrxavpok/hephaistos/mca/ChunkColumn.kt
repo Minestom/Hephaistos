@@ -65,13 +65,19 @@ class ChunkColumn(val x: Int, val z: Int) {
         inhabitedTime = level.getLong("InhabitedTime") ?: missing("InhabitedTime")
         generationStatus = GenerationStatus.fromID(level.getString("Status") ?: missing("Status"))
         biomes = level.getIntArray("Biomes")
-        val heightmaps = level.getCompound("Heightmaps") ?: missing("Heightmaps")
-        motionBlockingHeightMap = Heightmap(heightmaps.getLongArray("MOTION_BLOCKING") ?: missing("MOTION_BLOCKING"))
-        worldSurfaceHeightMap = Heightmap(heightmaps.getLongArray("WORLD_SURFACE") ?: missing("WORLD_SURFACE"))
-        motionBlockingNoLeavesHeightMap = heightmaps.getLongArray("MOTION_BLOCKING_NO_LEAVES")?.let { Heightmap(it) }
-        worldSurfaceWorldGenHeightMap = heightmaps.getLongArray("WORLD_SURFACE_WG")?.let { Heightmap(it) }
-        oceanFloorHeightMap = heightmaps.getLongArray("OCEAN_FLOOR")?.let { Heightmap(it) }
-        oceanFloorWorldGenHeightMap = heightmaps.getLongArray("OCEAN_FLOOR_WG")?.let { Heightmap(it) }
+        if(generationStatus.ordinal >= GenerationStatus.Heightmaps.ordinal) {
+            val heightmaps = level.getCompound("Heightmaps") ?: missing("Heightmaps")
+            motionBlockingHeightMap = Heightmap(heightmaps.getLongArray("MOTION_BLOCKING") ?: missing("MOTION_BLOCKING"))
+            worldSurfaceHeightMap = Heightmap(heightmaps.getLongArray("WORLD_SURFACE") ?: missing("WORLD_SURFACE"))
+            motionBlockingNoLeavesHeightMap = heightmaps.getLongArray("MOTION_BLOCKING_NO_LEAVES")?.let { Heightmap(it) }
+            worldSurfaceWorldGenHeightMap = heightmaps.getLongArray("WORLD_SURFACE_WG")?.let { Heightmap(it) }
+            oceanFloorHeightMap = heightmaps.getLongArray("OCEAN_FLOOR")?.let { Heightmap(it) }
+            oceanFloorWorldGenHeightMap = heightmaps.getLongArray("OCEAN_FLOOR_WG")?.let { Heightmap(it) }
+        } else {
+            // chunk is under construction, generate empty heightmaps
+            motionBlockingHeightMap = Heightmap(LongArray(36))
+            worldSurfaceHeightMap = Heightmap(LongArray(36))
+        }
 
         // we allow empty lists for these
         entities = level.getList("Entities") ?: NBTList<NBTCompound>(NBTTypes.TAG_Compound)
