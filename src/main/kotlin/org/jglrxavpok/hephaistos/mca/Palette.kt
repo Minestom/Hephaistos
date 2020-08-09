@@ -77,11 +77,17 @@ class Palette() {
      * Produces a long array with the compacted IDs based on this palette.
      * Bit length is selected on the size of this palette (`ceil(log2(size))`), ID correspond to the index inside this palette
      */
-    fun compactIDs(states: Array<BlockState>): LongArray {
+    @JvmOverloads
+    fun compactIDs(states: Array<BlockState>, version: SupportedVersion = SupportedVersion.Latest): LongArray {
         // convert state list into uncompressed data
         val indices = states.map(blocks::indexOf).toIntArray()
         val bitLength = ceil(log2(blocks.size.toFloat())).toInt().coerceAtLeast(1) // at least one bit
-        return compress(indices, bitLength)
+        return when(version) {
+            SupportedVersion.MC_1_15 -> compress(indices, bitLength)
+            SupportedVersion.MC_1_16 -> pack(indices, bitLength)
+
+            else -> throw AnvilException("Unsupported version for compacting palette: $version")
+        }
     }
 
     /**

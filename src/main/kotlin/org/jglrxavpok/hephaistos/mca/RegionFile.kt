@@ -25,6 +25,7 @@ class RegionFile @Throws(AnvilException::class, IOException::class) constructor(
     companion object {
         private val GZipCompression: Byte = 1
         private val ZlibCompression: Byte = 2
+        private val NoCompression: Byte = 3
         private val MaxEntryCount = 1024
         private val SectorSize = 4096
         private val Sector1MB = 1024*1024 / SectorSize
@@ -122,7 +123,7 @@ class RegionFile @Throws(AnvilException::class, IOException::class) constructor(
 
         // neither in file nor memory, create a new column
         val column = ChunkColumn(x, z)
-        columnCache[index(x, z)] = column
+        columnCache[index] = column
         return column
     }
 
@@ -137,6 +138,7 @@ class RegionFile @Throws(AnvilException::class, IOException::class) constructor(
         val reader = NBTReader(when(compressionType) {
             GZipCompression -> BufferedInputStream(GZIPInputStream(ByteArrayInputStream(rawData)))
             ZlibCompression -> BufferedInputStream(InflaterInputStream(ByteArrayInputStream(rawData)))
+            NoCompression -> BufferedInputStream(ByteArrayInputStream(rawData))
             else -> throw AnvilException("Invalid compression type: $compressionType (only 1 and 2 known)")
         }, false /* decompression performed by GZIPInputStream or InflaterInputStream */)
 
@@ -172,13 +174,15 @@ class RegionFile @Throws(AnvilException::class, IOException::class) constructor(
             throw AnvilException("Sorry, but your ChunkColumn totals over 1MB of data, impossible to save it inside a RegionFile.")
         }
 
+        val location = index(column.x, column.z)
         val previousSectorCount = sizeInSectors(locations[index(x, z)])
         val previousSectorStart = sectorOffset(locations[index(x, z)])
         // start by saving to free sectors, before cleaning up the old data
         var appendToEnd = false
         var position: Long
         var sectorStart: Int
-        synchronized(freeSectors) {
+
+        synchronized(file) {
             sectorStart = findAvailableSectors(sectorCount)
             if (sectorStart == -1) { // we need to allocate sectors
                 val eof = file.length()
@@ -201,19 +205,20 @@ class RegionFile @Throws(AnvilException::class, IOException::class) constructor(
             }
         }
 
-        val location = index(column.x, column.z)
         writeInt(position, dataSize)
         writeByte(position+4, ZlibCompression)
         writeBytes(position+5, dataOut.toByteArray())
+
         if(appendToEnd) { // we are at the EOF, we may have to add some padding
             addPadding()
         }
+
         locations[location] = buildLocation(sectorStart, sectorCount)
         writeLocation(column.x, column.z)
         timestamps[location] = System.currentTimeMillis().toInt()
         writeTimestamp(column.x, column.z)
 
-        synchronized(freeSectors) {
+        synchronized(file) {
             // the data has been written, now free previous storage
             for (i in previousSectorStart until previousSectorStart+previousSectorCount) {
                 freeSectors[i] = true
@@ -226,10 +231,7 @@ class RegionFile @Throws(AnvilException::class, IOException::class) constructor(
             val missingPadding = file.length() % SectorSize
             // file is not a multiple of 4kib, add padding
             if(missingPadding > 0) {
-                val pos = file.length()
-                for(i in 0 until SectorSize-missingPadding) {
-                    writeByte(pos+i, 0)
-                }
+                file.setLength(file.length()+ (SectorSize-missingPadding))
             }
         }
     }
@@ -419,7 +421,7 @@ class RegionFile @Throws(AnvilException::class, IOException::class) constructor(
     // better save off a few cycles when possible
     @Suppress("NOTHING_TO_INLINE") private inline fun out(x: Int, z: Int) = x.chunkToRegion() != regionX || z.chunkToRegion() != regionZ
     @Suppress("NOTHING_TO_INLINE") private inline fun sizeInSectors(location: Int) = (location and 0xFF)
-    @Suppress("NOTHING_TO_INLINE") private inline fun sectorOffset(location: Int) = location shr 8
+    @Suppress("NOTHING_TO_INLINE") private inline fun sectorOffset(location: Int) = location ushr 8
     @Suppress("NOTHING_TO_INLINE") private inline fun index(chunkX: Int, chunkZ: Int) = (chunkX.chunkInsideRegion() and 31) + (chunkZ.chunkInsideRegion() and 31) * 32
     @Suppress("NOTHING_TO_INLINE") private inline fun fileOffset(chunkX: Int, chunkZ: Int) = sectorOffset(locations[index(chunkX, chunkZ)]) * SectorSize
     @Suppress("NOTHING_TO_INLINE") private inline fun buildLocation(start: Int, length: Int) = ((start shl 8) or (length and 0xFF)) and 0xFFFFFFFF.toInt()

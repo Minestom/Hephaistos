@@ -19,7 +19,8 @@ class ChunkColumn(val x: Int, val z: Int) {
         val UnknownBiome = -1
     }
 
-    var dataVersion = 0
+    var version: SupportedVersion = SupportedVersion.Latest
+    var dataVersion = version.lowestDataVersion
     var generationStatus: GenerationStatus = GenerationStatus.Empty
     var lastUpdate: Long = 0L
     var inhabitedTime: Long = 0L
@@ -60,6 +61,7 @@ class ChunkColumn(val x: Int, val z: Int) {
         (chunkData.getCompound("Level") ?: missing("Level")).getInt("zPos") ?: missing("zPos")
     ) {
         dataVersion = chunkData.getInt("DataVersion") ?: missing("DataVersion")
+        version = SupportedVersion.closest(dataVersion)
         val level = chunkData.getCompound("Level") ?: missing("Level")
         lastUpdate = level.getLong("LastUpdate") ?: missing("LastUpdate")
         inhabitedTime = level.getLong("InhabitedTime") ?: missing("InhabitedTime")
@@ -67,16 +69,16 @@ class ChunkColumn(val x: Int, val z: Int) {
         biomes = level.getIntArray("Biomes")
         if(generationStatus.ordinal >= GenerationStatus.Heightmaps.ordinal) {
             val heightmaps = level.getCompound("Heightmaps") ?: missing("Heightmaps")
-            motionBlockingHeightMap = Heightmap(heightmaps.getLongArray("MOTION_BLOCKING") ?: missing("MOTION_BLOCKING"))
-            worldSurfaceHeightMap = Heightmap(heightmaps.getLongArray("WORLD_SURFACE") ?: missing("WORLD_SURFACE"))
-            motionBlockingNoLeavesHeightMap = heightmaps.getLongArray("MOTION_BLOCKING_NO_LEAVES")?.let { Heightmap(it) }
-            worldSurfaceWorldGenHeightMap = heightmaps.getLongArray("WORLD_SURFACE_WG")?.let { Heightmap(it) }
-            oceanFloorHeightMap = heightmaps.getLongArray("OCEAN_FLOOR")?.let { Heightmap(it) }
-            oceanFloorWorldGenHeightMap = heightmaps.getLongArray("OCEAN_FLOOR_WG")?.let { Heightmap(it) }
+            motionBlockingHeightMap = Heightmap(heightmaps.getLongArray("MOTION_BLOCKING") ?: missing("MOTION_BLOCKING"), version)
+            worldSurfaceHeightMap = Heightmap(heightmaps.getLongArray("WORLD_SURFACE") ?: missing("WORLD_SURFACE"), version)
+            motionBlockingNoLeavesHeightMap = heightmaps.getLongArray("MOTION_BLOCKING_NO_LEAVES")?.let { Heightmap(it, version) }
+            worldSurfaceWorldGenHeightMap = heightmaps.getLongArray("WORLD_SURFACE_WG")?.let { Heightmap(it, version) }
+            oceanFloorHeightMap = heightmaps.getLongArray("OCEAN_FLOOR")?.let { Heightmap(it, version) }
+            oceanFloorWorldGenHeightMap = heightmaps.getLongArray("OCEAN_FLOOR_WG")?.let { Heightmap(it, version) }
         } else {
             // chunk is under construction, generate empty heightmaps
-            motionBlockingHeightMap = Heightmap(LongArray(36))
-            worldSurfaceHeightMap = Heightmap(LongArray(36))
+            motionBlockingHeightMap = Heightmap()
+            worldSurfaceHeightMap = Heightmap()
         }
 
         // we allow empty lists for these
@@ -100,7 +102,7 @@ class ChunkColumn(val x: Int, val z: Int) {
         for(nbt in sectionsNBT) {
             val sectionY = nbt.getByte("Y") ?: missing("Y")
             if(sectionY in 0..15) { // otherwise invalid Y value for section, ignore others. valid mca files from vanilla Minecraft can have Y below 0 or above 15
-                sections[sectionY.toInt()] = ChunkSection(nbt)
+                sections[sectionY.toInt()] = ChunkSection(nbt, version)
             }
         }
     }
@@ -184,17 +186,17 @@ class ChunkColumn(val x: Int, val z: Int) {
                                 setIntArray("Biomes", biomes!!)
                             }
                             set("Heightmaps", NBTCompound().apply {
-                                setLongArray("MOTION_BLOCKING", motionBlockingHeightMap.compact())
-                                motionBlockingNoLeavesHeightMap?.let { setLongArray("MOTION_BLOCKING_NO_LEAVES", it.compact()) }
-                                oceanFloorHeightMap?.let { setLongArray("OCEAN_FLOOR", it.compact()) }
-                                oceanFloorWorldGenHeightMap?.let { setLongArray("OCEAN_FLOOR_WG", it.compact()) }
-                                setLongArray("WORLD_SURFACE", worldSurfaceHeightMap.compact())
-                                worldSurfaceWorldGenHeightMap?.let { setLongArray("WORLD_SURFACE_WG", it.compact()) }
+                                setLongArray("MOTION_BLOCKING", motionBlockingHeightMap.compact(version))
+                                motionBlockingNoLeavesHeightMap?.let { setLongArray("MOTION_BLOCKING_NO_LEAVES", it.compact(version)) }
+                                oceanFloorHeightMap?.let { setLongArray("OCEAN_FLOOR", it.compact(version)) }
+                                oceanFloorWorldGenHeightMap?.let { setLongArray("OCEAN_FLOOR_WG", it.compact(version)) }
+                                setLongArray("WORLD_SURFACE", worldSurfaceHeightMap.compact(version))
+                                worldSurfaceWorldGenHeightMap?.let { setLongArray("WORLD_SURFACE_WG", it.compact(version)) }
                             })
                             val sections = NBTList<NBTCompound>(NBTTypes.TAG_Compound)
                             for (section in this@ChunkColumn.sections) {
                                 if(!section.empty) {
-                                    sections += section.toNBT()
+                                    sections += section.toNBT(version)
                                 }
                             }
                             set("Sections", sections)

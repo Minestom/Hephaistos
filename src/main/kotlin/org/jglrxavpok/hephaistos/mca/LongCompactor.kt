@@ -1,6 +1,7 @@
 package org.jglrxavpok.hephaistos.mca
 
 import kotlin.math.ceil
+import kotlin.math.floor
 
 /**
  * Compresses the given ints into a long array, at the given lengthInBits bitrate.
@@ -62,4 +63,48 @@ fun decompress(data: LongArray, lengthInBits: Int): IntArray {
         bitIndex += lengthInBits
     }
     return result
+}
+
+/**
+ * Unpacks int values of 'lengthInBits' bits from a long array.
+ * Contrary to decompress, this method will produce unused bits and do not overflow remaining bits to the next long.
+ *
+ * (ie 2 >32 bit long values will produce two longs, but the highest bits of each long will be unused)
+ */
+fun unpack(longs: LongArray, lengthInBits: Int): IntArray {
+    val intPerLong = floor(64.0 / lengthInBits)
+    val intCount = ceil(longs.size * intPerLong).toInt()
+    val ints = IntArray(intCount)
+    val intPerLongCeil = ceil(intPerLong).toInt()
+    val mask = (1 shl lengthInBits)-1L
+    for(i in ints.indices) {
+        val longIndex = i / intPerLongCeil
+        val subIndex = i % intPerLongCeil
+        val value = ((longs[longIndex] shr (subIndex*lengthInBits)) and mask).toInt()
+        ints[i] = value
+    }
+    return ints
+}
+
+/**
+ * Packs ints into a long array. Produces unused bits and does not partially overflow to next long on boundaries.
+ */
+fun pack(ints: IntArray, lengthInBits: Int): LongArray {
+    val intPerLong = floor(64.0 / lengthInBits).toInt()
+    val longCount = ceil(ints.size / intPerLong.toDouble()).toInt()
+    val longs = LongArray(longCount)
+    val mask = (1 shl lengthInBits)-1L
+    for(i in longs.indices) {
+        var long = 0L
+        for(intIndex in 0 until intPerLong) {
+            val bitIndex = intIndex * lengthInBits
+            val intActualIndex = intIndex+i*intPerLong
+            if(intActualIndex < ints.size) {
+                val value = (ints[intActualIndex].toLong() and mask) shl bitIndex
+                long = long or (value)
+            }
+        }
+        longs[i] = long
+    }
+    return longs
 }

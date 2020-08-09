@@ -5,6 +5,7 @@ import org.jglrxavpok.hephaistos.nbt.NBTCompound
 import java.lang.IllegalArgumentException
 import kotlin.experimental.and
 import kotlin.experimental.or
+import kotlin.math.ceil
 
 /**
  * 16x16x16 subchunk.
@@ -30,7 +31,8 @@ class ChunkSection(val y: Byte) {
      * @throws AnvilException if the Compound in the argument is missing fields for loading
      */
     @Throws(AnvilException::class)
-    constructor(nbt: NBTCompound): this(nbt.getByte("Y") ?: missing("Y")) {
+    @JvmOverloads
+    constructor(nbt: NBTCompound, version: SupportedVersion = SupportedVersion.Latest): this(nbt.getByte("Y") ?: missing("Y")) {
         // empty palette can happen if the section exist but requires more than 8 bits to save the block IDs (in that case, the global ID is directly used)
         val paletteNBT = nbt.getList<NBTCompound>("Palette")
 
@@ -42,9 +44,25 @@ class ChunkSection(val y: Byte) {
         } else if(palette != null) {
             val compactedBlockStates = nbt.getLongArray("BlockStates") ?: missing("BlockStates")
             val sizeInBits = compactedBlockStates.size*64 / 4096
-            val ids = decompress(compactedBlockStates, sizeInBits)
-            if(ids.size != 16*16*16) {
-                throw AnvilException("Invalid decompressed BlockStates length (${ids.size}). Must be 4096 (16x16x16)")
+            val ids: IntArray
+            when(version) {
+                SupportedVersion.MC_1_15 -> {
+                    ids = decompress(compactedBlockStates, sizeInBits)
+                    if(ids.size != 16*16*16) {
+                        throw AnvilException("Invalid decompressed BlockStates length (${ids.size}). Must be 4096 (16x16x16)")
+                    }
+                }
+
+                SupportedVersion.MC_1_16 -> {
+                    val intPerLong = 64 / sizeInBits
+                    val expectedCompressedLength = ceil(4096.0 / intPerLong).toInt()
+                    if(compactedBlockStates.size != expectedCompressedLength) {
+                        throw AnvilException("Invalid compressed BlockStates length (${compactedBlockStates.size}). At $sizeInBits bit per value, expected $expectedCompressedLength bytes")
+                    }
+                    ids = unpack(compactedBlockStates, sizeInBits).sliceArray(0 until 4096)
+                }
+
+                else -> throw AnvilException("Unsupported version for compressed block states: $version")
             }
 
             for((index, id) in ids.withIndex()) {
@@ -194,14 +212,15 @@ class ChunkSection(val y: Byte) {
     /**
      * Converts this ChunkSection into its NBT representation
      */
-    fun toNBT(): NBTCompound {
+    @JvmOverloads
+    fun toNBT(version: SupportedVersion = SupportedVersion.Latest): NBTCompound {
         return NBTCompound().apply {
             setByte("Y", y)
             setByteArray("BlockLight", blockLights)
             setByteArray("SkyLight", skyLights)
             if(!empty) {
                 set("Palette", palette!!.toNBT())
-                setLongArray("BlockStates", palette!!.compactIDs(blockStates))
+                setLongArray("BlockStates", palette!!.compactIDs(blockStates, version))
             }
         }
     }
