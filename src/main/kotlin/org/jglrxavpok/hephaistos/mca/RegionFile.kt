@@ -203,22 +203,20 @@ class RegionFile @Throws(AnvilException::class, IOException::class) constructor(
                     freeSectors += false // increase size of freeSectors
                 }
             }
-        }
 
-        writeInt(position, dataSize)
-        writeByte(position+4, ZlibCompression)
-        writeBytes(position+5, dataOut.toByteArray())
+            writeInt(position, dataSize)
+            writeByte(position+4, ZlibCompression)
+            writeBytes(position+5, dataOut.toByteArray())
 
-        if(appendToEnd) { // we are at the EOF, we may have to add some padding
-            addPadding()
-        }
+            if(appendToEnd) { // we are at the EOF, we may have to add some padding
+                addPadding()
+            }
 
-        locations[location] = buildLocation(sectorStart, sectorCount)
-        writeLocation(column.x, column.z)
-        timestamps[location] = System.currentTimeMillis().toInt()
-        writeTimestamp(column.x, column.z)
+            locations[location] = buildLocation(sectorStart, sectorCount)
+            writeLocation(column.x, column.z)
+            timestamps[location] = System.currentTimeMillis().toInt()
+            writeTimestamp(column.x, column.z)
 
-        synchronized(file) {
             // the data has been written, now free previous storage
             for (i in previousSectorStart until previousSectorStart+previousSectorCount) {
                 freeSectors[i] = true
