@@ -4,13 +4,13 @@ snbt: element
     EOF
     ;
 
-element: byte
-             | float
-             | double
-             | short
-             | long
-             | int
-             | string
+element: byteNBT
+             | floatNBT
+             | doubleNBT
+             | shortNBT
+             | longNBT
+             | intNBT
+             | stringNBT
              | byteArray
              | intArray
              | longArray
@@ -19,19 +19,19 @@ element: byte
 ;
 
 compound: '{' (namedElement (',' namedElement)*)? ','? '}';
-namedElement: name=string ':' value=element;
+namedElement: name=stringNBT ':' value=element;
 
 list: '[' (element (',' element)*)? ','? ']';
-byteArray: '[' 'B' ';' (byte (',' byte)* ','?)? ']';
-intArray: '[' 'I' ';' (int (',' int)* ','?)? ']';
-longArray: '[' 'L' ';' (long (',' long)* ','?)? ']';
-double: integerPart=integralNumber ('.' fractionalPart=INTEGER)? ('d'|'D');
-float: integerPart=integralNumber ('.' fractionalPart=INTEGER)? ('f'|'F');
-long: LONG;
-byte: BYTE | BOOLEAN;
-short: SHORT;
-int: integralNumber;
-string: identifier | DoubleQuoteText | SingleQuoteText;
+byteArray: '[' 'B' ';' (byteNBT (',' byteNBT)* ','?)? ']';
+intArray: '[' 'I' ';' (intNBT (',' intNBT)* ','?)? ']';
+longArray: '[' 'L' ';' (longNBT (',' longNBT)* ','?)? ']';
+doubleNBT: integerPart=integralNumber ('.' fractionalPart=INTEGER)? ('d'|'D');
+floatNBT: integerPart=integralNumber ('.' fractionalPart=INTEGER)? ('f'|'F');
+longNBT: LONG;
+byteNBT: BYTE | BOOLEAN;
+shortNBT: SHORT;
+intNBT: integralNumber;
+stringNBT: identifier | DoubleQuoteText | SingleQuoteText;
 identifier: IDENTIFIER_LETTERS+;
 
 integralNumber: NEGATIVE_SIGN? INTEGER;
