@@ -26,6 +26,13 @@ class NBTLongArray(var value: LongArray) : NBT {
         }
     }
 
+    operator fun get(index: Int) = value[index]
+
+    operator fun set(index: Int, v: Long): NBTLongArray {
+        value[index] = v
+        return this
+    }
+
     override fun toSNBT(): String {
         val list = value.joinToString(",") { "${it}L" }
         return "[L;$list]"

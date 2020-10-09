@@ -4,10 +4,13 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.util.*
 
-class NBTShort(var value: Short) : NBT {
+class NBTShort(value: Short) : NBTNumber<Short>(value) {
     override val ID = NBTTypes.TAG_Short
 
     constructor(): this(0)
+
+    // help Java compiler to find the correct type (boxed vs primitive types)
+    fun getValue(): Short = value
 
     override fun readContents(source: DataInputStream) {
         value = source.readShort()
@@ -19,22 +22,5 @@ class NBTShort(var value: Short) : NBT {
 
     override fun toSNBT(): String {
         return "${value}S"
-    }
-
-    override fun toString() = toSNBT()
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as NBTShort
-
-        if (value != other.value) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return Objects.hash(value)
     }
 }

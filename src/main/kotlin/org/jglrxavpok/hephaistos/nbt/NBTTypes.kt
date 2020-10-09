@@ -40,21 +40,40 @@ object NBTTypes {
         else -> throw IllegalArgumentException("$id is not a valid NBT type ID! Must be in 0-12")
     }
 
-    internal inline fun <reified Tag: NBT> getID() = when(Tag::class) {
-        NBTEnd::class -> TAG_End
-        NBTByte::class -> TAG_Byte
-        NBTShort::class -> TAG_Short
-        NBTInt::class -> TAG_Int
-        NBTLong::class -> TAG_Long
-        NBTFloat::class -> TAG_Float
-        NBTDouble::class -> TAG_Double
-        NBTByteArray::class -> TAG_Byte_Array
-        NBTString::class -> TAG_String
-        NBTCompound::class -> TAG_Compound
-        NBTIntArray::class -> TAG_Int_Array
-        NBTLongArray::class -> TAG_Long_Array
-        NBTList::class -> TAG_List
+    fun <T: NBT> getID(nbtClass: Class<T>) = when(nbtClass) {
+        NBTEnd::class.java -> TAG_End
+        NBTByte::class.java -> TAG_Byte
+        NBTShort::class.java -> TAG_Short
+        NBTInt::class.java -> TAG_Int
+        NBTLong::class.java -> TAG_Long
+        NBTFloat::class.java -> TAG_Float
+        NBTDouble::class.java -> TAG_Double
+        NBTByteArray::class.java -> TAG_Byte_Array
+        NBTString::class.java -> TAG_String
+        NBTCompound::class.java -> TAG_Compound
+        NBTIntArray::class.java -> TAG_Int_Array
+        NBTLongArray::class.java -> TAG_Long_Array
+        NBTList::class.java -> TAG_List
 
-        else -> throw IllegalArgumentException("Unrecognized NBT class: ${Tag::class.qualifiedName}")
+        else -> throw IllegalArgumentException("Unrecognized NBT class: ${nbtClass.canonicalName}")
     }
+
+    fun name(type: Int): String = when(type) {
+        TAG_End -> "TAG_End"
+        TAG_Byte -> "TAG_Byte"
+        TAG_Short -> "TAG_Short"
+        TAG_Int -> "TAG_Int"
+        TAG_Long -> "TAG_Long"
+        TAG_Float -> "TAG_Float"
+        TAG_Double -> "TAG_Double"
+        TAG_Byte_Array -> "TAG_Byte_Array"
+        TAG_String -> "TAG_String"
+        TAG_Compound -> "TAG_Compound"
+        TAG_Int_Array -> "TAG_Int_Array"
+        TAG_Long_Array -> "TAG_Long_Array"
+        TAG_List -> "TAG_List"
+        else -> throw IllegalArgumentException("$type is not a valid NBT type ID! Must be in 0-12")
+    }
+
+    inline fun <reified Tag: NBT> getID() = getID(Tag::class.java)
 }

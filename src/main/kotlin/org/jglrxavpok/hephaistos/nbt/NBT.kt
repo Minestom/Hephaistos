@@ -36,6 +36,9 @@ interface NBT {
      */
     fun toSNBT(): String
 
+    // TODO @Throws(NBTException::class)
+    //fun parseSNBT(snbt: String)
+
     /**
      * Produces a human-readable version of this tag. Must be the same as `toSNBT()`, except for TAG_End which returns "<TAG_End>"
      */

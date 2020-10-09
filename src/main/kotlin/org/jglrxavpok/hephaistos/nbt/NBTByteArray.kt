@@ -27,6 +27,13 @@ class NBTByteArray(var value: ByteArray) : NBT {
         return "[B;$list]"
     }
 
+    operator fun get(index: Int) = value[index]
+
+    operator fun set(index: Int, v: Byte): NBTByteArray {
+        value[index] = v
+        return this
+    }
+
     override fun toString() = toSNBT()
 
     override fun equals(other: Any?): Boolean {

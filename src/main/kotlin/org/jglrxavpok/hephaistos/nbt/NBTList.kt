@@ -72,6 +72,8 @@ class NBTList<Tag: NBT>(val subtagType: Int): Iterable<Tag>, NBT {
      * Appends a tag of the end of this list
      */
     fun add(tag: Tag) {
+        if(tag.ID != subtagType)
+            throw NBTException("Element to add is not of type ${NBTTypes.name(subtagType)} but of type ${NBTTypes.name(tag.ID)}")
         tags += tag
     }
 

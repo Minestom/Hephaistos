@@ -166,6 +166,54 @@ public class NBTCompoundMethods {
         assertArrayEquals(new long[] { 1, 2, 3 }, nbt.getLongArray("a"));
     }
 
+    @Test
+    public void getAsLong() {
+        nbt.set("a", new NBTInt(42));
+        assertEquals(1, nbt.getSize());
+        assertEquals(null, nbt.getLong("a"));
+        assertEquals(42L, nbt.getAsLong("a").longValue());
+    }
+
+    @Test
+    public void getAsByte() {
+        nbt.set("a", new NBTInt(42));
+        assertEquals(1, nbt.getSize());
+        assertEquals(null, nbt.getByte("a"));
+        assertEquals(42, nbt.getAsByte("a").byteValue());
+    }
+
+    @Test
+    public void getAsDouble() {
+        nbt.set("a", new NBTInt(42));
+        assertEquals(1, nbt.getSize());
+        assertEquals(null, nbt.getDouble("a"));
+        assertEquals(42.0, nbt.getAsDouble("a").doubleValue(), 10e-6);
+    }
+
+    @Test
+    public void getAsFloat() {
+        nbt.set("a", new NBTInt(42));
+        assertEquals(1, nbt.getSize());
+        assertEquals(null, nbt.getFloat("a"));
+        assertEquals(42f, nbt.getAsFloat("a").floatValue(), 10e-6f);
+    }
+
+    @Test
+    public void getAsInt() {
+        nbt.set("a", new NBTLong(42));
+        assertEquals(1, nbt.getSize());
+        assertEquals(null, nbt.getInt("a"));
+        assertEquals(42, nbt.getAsInt("a").intValue());
+    }
+
+    @Test
+    public void getAsShort() {
+        nbt.set("a", new NBTLong(42));
+        assertEquals(1, nbt.getSize());
+        assertEquals(null, nbt.getShort("a"));
+        assertEquals(42, nbt.getAsShort("a").shortValue());
+    }
+
     @After
     public void clean() {
         nbt.clear();

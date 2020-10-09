@@ -4,10 +4,13 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.util.*
 
-class NBTFloat(var value: Float) : NBT {
+class NBTFloat(value: Float) : NBTNumber<Float>(value) {
     override val ID = NBTTypes.TAG_Float
 
     constructor(): this(0f)
+
+    // help Java compiler to find the correct type (boxed vs primitive types)
+    fun getValue(): Float = value
 
     override fun readContents(source: DataInputStream) {
         value = source.readFloat()
@@ -19,22 +22,5 @@ class NBTFloat(var value: Float) : NBT {
 
     override fun toSNBT(): String {
         return "${value}F"
-    }
-
-    override fun toString() = toSNBT()
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as NBTFloat
-
-        if (value != other.value) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return Objects.hash(value)
     }
 }

@@ -2,12 +2,15 @@ package org.jglrxavpok.hephaistos.nbt
 
 import java.io.DataInputStream
 import java.io.DataOutputStream
-import java.util.*
 
-class NBTDouble(var value: Double) : NBT {
+class NBTDouble(value: Double) : NBTNumber<Double>(value) {
+
     override val ID = NBTTypes.TAG_Double
 
     constructor(): this(0.0)
+
+    // help Java compiler to find the correct type (boxed vs primitive types)
+    fun getValue(): Double = value
 
     override fun readContents(source: DataInputStream) {
         value = source.readDouble()
@@ -19,22 +22,5 @@ class NBTDouble(var value: Double) : NBT {
 
     override fun toSNBT(): String {
         return "${value}D"
-    }
-
-    override fun toString() = toSNBT()
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as NBTDouble
-
-        if (value != other.value) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return Objects.hash(value)
     }
 }

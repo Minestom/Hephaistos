@@ -26,6 +26,13 @@ class NBTIntArray(var value: IntArray) : NBT {
         }
     }
 
+    operator fun get(index: Int) = value[index]
+
+    operator fun set(index: Int, v: Int): NBTIntArray {
+        value[index] = v
+        return this
+    }
+
     override fun toSNBT(): String {
         val list = value.joinToString(",") { "$it" }
         return "[I;$list]"
