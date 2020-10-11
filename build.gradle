@@ -16,20 +16,13 @@ repositories {
 }
 
 sourceSets {
-    antlr {
-        kotlin {
-            srcDir 'src/antlr/kotlin'
-        }
-        java {
-            srcDir 'src/antlr/gen'
-        }
-    }
     main {
         kotlin {
             srcDir 'src/main/kotlin'
         }
-        compileClasspath += sourceSets.antlr.runtimeClasspath
-        runtimeClasspath += sourceSets.antlr.runtimeClasspath
+        java {
+            srcDir 'src/antlr/gen'
+        }
     }
     gsonBased {
         kotlin {
@@ -66,7 +59,7 @@ dependencies {
     gsonBasedImplementation 'com.google.code.gson:gson:2.8.6'
 
     // https://mvnrepository.com/artifact/org.antlr/antlr4-runtime
-    antlrCompile group: 'org.antlr', name: 'antlr4-runtime', version: '4.8-1'
+    implementation group: 'org.antlr', name: 'antlr4-runtime', version: '4.8-1'
 
     // https://mvnrepository.com/artifact/junit/junit
     testCompile group: 'junit', name: 'junit', version: '4.13'

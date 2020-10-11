@@ -106,10 +106,4 @@ public interface SNBTVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitIdentifier(SNBTParser.IdentifierContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link SNBTParser#integralNumber}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitIntegralNumber(SNBTParser.IntegralNumberContext ctx);
 }

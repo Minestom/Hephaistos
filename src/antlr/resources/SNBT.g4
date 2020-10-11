@@ -6,10 +6,10 @@ snbt: element
 
 element: byteNBT
              | floatNBT
-             | doubleNBT
              | shortNBT
              | longNBT
              | intNBT
+             | doubleNBT
              | stringNBT
              | byteArray
              | intArray
@@ -25,25 +25,27 @@ list: '[' (element (',' element)*)? ','? ']';
 byteArray: '[' 'B' ';' (byteNBT (',' byteNBT)* ','?)? ']';
 intArray: '[' 'I' ';' (intNBT (',' intNBT)* ','?)? ']';
 longArray: '[' 'L' ';' (longNBT (',' longNBT)* ','?)? ']';
-doubleNBT: integerPart=integralNumber ('.' fractionalPart=INTEGER)? ('d'|'D');
-floatNBT: integerPart=integralNumber ('.' fractionalPart=INTEGER)? ('f'|'F');
+doubleNBT: DOUBLE;
+floatNBT: FLOAT;
 longNBT: LONG;
 byteNBT: BYTE | BOOLEAN;
 shortNBT: SHORT;
-intNBT: integralNumber;
+intNBT: INTEGER;
 stringNBT: identifier | DoubleQuoteText | SingleQuoteText;
 identifier: IDENTIFIER_LETTERS+;
-
-integralNumber: NEGATIVE_SIGN? INTEGER;
 
 DoubleQuoteText: '"' ((~('"')| ('\\' '"'))*) '"';
 SingleQuoteText: '\'' ((~('\'')| ('\\' '\''))*) '\'';
 
 BOOLEAN: 'false' | 'true';
 NEGATIVE_SIGN: '-';
-INTEGER: [0-9]+;
-LONG: [0-9]+ ('l'|'L');
-BYTE: [0-9]+ ('b'|'B');
-SHORT: [0-9]+ ('s'|'S');
+FLOAT: '-'? ([0-9]* ('.' [0-9]*)? | [0-9]+) ('f'|'F');
+DOUBLE: '-'? ([0-9]* ('.' [0-9]*)? | [0-9]+) ('d'|'D')
+        | '-'? [0-9]* '.' [0-9]+
+        | '-'? [0-9]+ '.' [0-9]*;
+INTEGER: '-'? [0-9]+;
+LONG: '-'? [0-9]+ ('l'|'L');
+BYTE: '-'? [0-9]+ ('b'|'B');
+SHORT: '-'? [0-9]+ ('s'|'S');
 IDENTIFIER_LETTERS: [a-zA-Z0-9_]+;
 WS: (' ' | '\t' | '\r' | '\n')+ -> channel(HIDDEN);

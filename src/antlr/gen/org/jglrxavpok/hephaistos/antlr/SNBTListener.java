@@ -167,14 +167,4 @@ public interface SNBTListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitIdentifier(SNBTParser.IdentifierContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link SNBTParser#integralNumber}.
-	 * @param ctx the parse tree
-	 */
-	void enterIntegralNumber(SNBTParser.IntegralNumberContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link SNBTParser#integralNumber}.
-	 * @param ctx the parse tree
-	 */
-	void exitIntegralNumber(SNBTParser.IntegralNumberContext ctx);
 }

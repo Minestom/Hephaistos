@@ -203,18 +203,6 @@ public class SNBTBaseListener implements SNBTListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitIdentifier(SNBTParser.IdentifierContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterIntegralNumber(SNBTParser.IntegralNumberContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitIntegralNumber(SNBTParser.IntegralNumberContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
