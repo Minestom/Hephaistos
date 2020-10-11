@@ -13,24 +13,37 @@ object SNBTParsingVisitor: SNBTBaseVisitor<NBT>() {
         }
     }
 
-    override fun visitCompound(ctx: SNBTParser.CompoundContext?): NBT? {
-        return super.visitCompound(ctx)
+    override fun visitCompound(ctx: SNBTParser.CompoundContext): NBT {
+        val compound = NBTCompound()
+        ctx.namedElement().forEach {
+            compound[(visit(it.name) as NBTString).value] = visit(it.value)
+        }
+        return compound
     }
 
-    override fun visitList(ctx: SNBTParser.ListContext?): NBT? {
-        return super.visitList(ctx)
+    override fun visitList(ctx: SNBTParser.ListContext): NBT {
+        val elements = ctx.element().map { visit(it) }
+        val subtagType = if(elements.isEmpty()) NBTTypes.TAG_String else elements[0].ID
+        val list = NBTList<NBT>(subtagType)
+        for(tag in elements) {
+            list += tag
+        }
+        return list
     }
 
-    override fun visitByteArray(ctx: SNBTParser.ByteArrayContext?): NBT? {
-        return super.visitByteArray(ctx)
+    override fun visitByteArray(ctx: SNBTParser.ByteArrayContext): NBT? {
+        val array = ctx.byteNBT().map { (visitByteNBT(it) as NBTByte).value }.toByteArray()
+        return NBTByteArray(array)
     }
 
-    override fun visitIntArray(ctx: SNBTParser.IntArrayContext?): NBT? {
-        return super.visitIntArray(ctx)
+    override fun visitIntArray(ctx: SNBTParser.IntArrayContext): NBT {
+        val array = ctx.intNBT().map { (visitIntNBT(it) as NBTInt).value }.toIntArray()
+        return NBTIntArray(array)
     }
 
-    override fun visitLongArray(ctx: SNBTParser.LongArrayContext?): NBT? {
-        return super.visitLongArray(ctx)
+    override fun visitLongArray(ctx: SNBTParser.LongArrayContext): NBT {
+        val array = ctx.longNBT().map { (visitLongNBT(it) as NBTLong).value }.toLongArray()
+        return NBTLongArray(array)
     }
 
     override fun visitDoubleNBT(ctx: SNBTParser.DoubleNBTContext): NBT {
