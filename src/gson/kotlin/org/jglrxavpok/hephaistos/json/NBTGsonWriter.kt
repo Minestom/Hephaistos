@@ -24,7 +24,7 @@ class NBTGsonWriter(val gson: Gson = GsonInstance) {
                 }
             }
 
-            is NBTEnd -> error("Cannot convert TAG_End to a JsonElement")
+            is NBTEnd -> throw NBTException("Cannot convert TAG_End to a JsonElement")
             else -> error("Cannot serialize type ${element.ID}, not supported by this writer")
         }
     }

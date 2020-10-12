@@ -21,15 +21,6 @@ class NBTGsonReader(private val reader: Reader): AutoCloseable, Closeable {
 
     fun <Tag: NBT> read(nbtClass: Class<Tag>): Tag = read(NBTTypes.getID(nbtClass)) as Tag
 
-    private fun <Tag: NBT> readList(subtagType: Class<Tag>): NBTList<Tag> {
-        val array = GsonInstance.fromJson(reader, JsonArray::class.java)
-        val list = NBTList<Tag>(NBTTypes.getID(subtagType))
-        for(elem in array) {
-            list += parse(NBTTypes.getID(subtagType), elem)
-        }
-        return list
-    }
-
     fun guessType(element: JsonElement): Int {
         return when {
             element.isJsonObject -> NBTTypes.TAG_Compound
@@ -49,7 +40,7 @@ class NBTGsonReader(private val reader: Reader): AutoCloseable, Closeable {
                         } else {
                             NBTTypes.TAG_Double
                         }
-                    else -> NBTTypes.TAG_String
+                    else -> error("Primitive that is neither a boolean, a string, nor a number?")
                 }
             }
 
@@ -90,7 +81,7 @@ class NBTGsonReader(private val reader: Reader): AutoCloseable, Closeable {
                 NBTTypes.TAG_Float -> NBTFloat(element.asFloat)
                 NBTTypes.TAG_Double -> NBTDouble(element.asDouble)
                 NBTTypes.TAG_Byte_Array -> NBTByteArray(element.asJsonArray.map { it.asByte }.toByteArray())
-                NBTTypes.TAG_String -> NBTString(element.asString)
+                NBTTypes.TAG_String -> if(element.isJsonNull) NBTString("") else NBTString(element.asString)
 
                 NBTTypes.TAG_Compound -> toCompound(element.asJsonObject)
 

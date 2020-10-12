@@ -90,4 +90,12 @@ public class TestReaderPrimitives {
             assertEquals(425, ((NBTLong)element).getValue());
         }
     }
+    @Test
+    public void nullShouldBeGuessedAsEmptyString() {
+        try(NBTGsonReader reader = new NBTGsonReader(new StringReader("null"))) {
+            NBT element = reader.readWithGuess();
+            assertTrue("Must be a NBTString", element instanceof NBTString);
+            assertEquals("", ((NBTString)element).getValue());
+        }
+    }
 }
