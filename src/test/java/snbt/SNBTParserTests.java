@@ -109,4 +109,88 @@ public class SNBTParserTests {
         }
     }
 
+    @Test
+    public void parseDoubleWithTerminal() {
+        String snbt = "2.14d";
+        try(SNBTParser parser = new SNBTParser(new StringReader(snbt))) {
+            NBT element = parser.parse();
+            assertTrue(element instanceof NBTDouble);
+            assertEquals(2.14f, ((NBTDouble) element).getValue(), 10e-6);
+        }
+    }
+
+    @Test
+    public void parseNegativeDoubleWithTerminal() {
+        String snbt = "-1.184d";
+        try(SNBTParser parser = new SNBTParser(new StringReader(snbt))) {
+            NBT element = parser.parse();
+            assertTrue(element instanceof NBTDouble);
+            assertEquals(-1.184D, ((NBTDouble) element).getValue(), 10e-6);
+        }
+    }
+
+    @Test
+    public void parseDoubleWithoutTerminal() {
+        String snbt = "25.987";
+        try(SNBTParser parser = new SNBTParser(new StringReader(snbt))) {
+            NBT element = parser.parse();
+            assertTrue(element instanceof NBTDouble);
+            assertEquals(25.987, ((NBTDouble) element).getValue(), 10e-6);
+        }
+    }
+
+    @Test
+    public void parseNegativeDoubleWithoutTerminal() {
+        String snbt = "-111.11";
+        try(SNBTParser parser = new SNBTParser(new StringReader(snbt))) {
+            NBT element = parser.parse();
+            assertTrue(element instanceof NBTDouble);
+            assertEquals(-111.11, ((NBTDouble) element).getValue(), 10e-6);
+        }
+    }
+
+    @Test
+    public void parseIntegerArray() {
+        String snbt = "[I;456,987,10]";
+        try(SNBTParser parser = new SNBTParser(new StringReader(snbt))) {
+            NBT element = parser.parse();
+            assertTrue(element instanceof NBTIntArray);
+            assertArrayEquals(new int[] { 456, 987, 10 }, ((NBTIntArray) element).getValue());
+        }
+    }
+
+    @Test
+    public void parseByteArray() {
+        String snbt = "[B;10b,-11B,127b]";
+        try(SNBTParser parser = new SNBTParser(new StringReader(snbt))) {
+            NBT element = parser.parse();
+            assertTrue(element instanceof NBTByteArray);
+            assertArrayEquals(new byte[] { 10, -11, 127 }, ((NBTByteArray) element).getValue());
+        }
+    }
+
+    @Test
+    public void parseLongArray() {
+        String snbt = "[L;123456789l,-1563487L,16354658L]";
+        try(SNBTParser parser = new SNBTParser(new StringReader(snbt))) {
+            NBT element = parser.parse();
+            assertTrue(element instanceof NBTLongArray);
+            assertArrayEquals(new long[] { 123456789L, -1563487L, 16354658L }, ((NBTLongArray) element).getValue());
+        }
+    }
+
+    @Test
+    public void parseBoolean() {
+        try(SNBTParser parser = new SNBTParser(new StringReader("false"))) {
+            NBT element = parser.parse();
+            assertTrue(element instanceof NBTByte);
+            assertEquals(0, ((NBTByte) element).getValue());
+        }
+
+        try(SNBTParser parser = new SNBTParser(new StringReader("true"))) {
+            NBT element = parser.parse();
+            assertTrue(element instanceof NBTByte);
+            assertEquals(1, ((NBTByte) element).getValue());
+        }
+    }
 }
