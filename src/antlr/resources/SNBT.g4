@@ -47,5 +47,5 @@ INTEGER: '-'? [0-9]+;
 LONG: '-'? [0-9]+ ('l'|'L');
 BYTE: '-'? [0-9]+ ('b'|'B');
 SHORT: '-'? [0-9]+ ('s'|'S');
-IDENTIFIER_LETTERS: [a-zA-Z0-9_]+;
 WS: (' ' | '\t' | '\r' | '\n')+ -> channel(HIDDEN);
+IDENTIFIER_LETTERS: [a-zA-Z0-9_ ]+;

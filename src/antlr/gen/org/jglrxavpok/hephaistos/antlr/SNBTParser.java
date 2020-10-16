@@ -19,8 +19,7 @@ public class SNBTParser extends Parser {
 	public static final int
 		T__0=1, T__1=2, T__2=3, T__3=4, T__4=5, T__5=6, T__6=7, T__7=8, T__8=9, 
 		T__9=10, DoubleQuoteText=11, SingleQuoteText=12, BOOLEAN=13, NEGATIVE_SIGN=14, 
-		FLOAT=15, DOUBLE=16, INTEGER=17, LONG=18, BYTE=19, SHORT=20, IDENTIFIER_LETTERS=21, 
-		WS=22;
+		FLOAT=15, DOUBLE=16, INTEGER=17, LONG=18, BYTE=19, SHORT=20, WS=21, IDENTIFIER_LETTERS=22;
 	public static final int
 		RULE_snbt = 0, RULE_element = 1, RULE_compound = 2, RULE_namedElement = 3, 
 		RULE_list = 4, RULE_byteArray = 5, RULE_intArray = 6, RULE_longArray = 7, 
@@ -46,7 +45,7 @@ public class SNBTParser extends Parser {
 		return new String[] {
 			null, null, null, null, null, null, null, null, null, null, null, "DoubleQuoteText", 
 			"SingleQuoteText", "BOOLEAN", "NEGATIVE_SIGN", "FLOAT", "DOUBLE", "INTEGER", 
-			"LONG", "BYTE", "SHORT", "IDENTIFIER_LETTERS", "WS"
+			"LONG", "BYTE", "SHORT", "WS", "IDENTIFIER_LETTERS"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
@@ -1250,7 +1249,7 @@ public class SNBTParser extends Parser {
 		"\u0094\31\3\2\2\2\u0095\u0096\7\26\2\2\u0096\33\3\2\2\2\u0097\u0098\7"+
 		"\23\2\2\u0098\35\3\2\2\2\u0099\u009d\5 \21\2\u009a\u009d\7\r\2\2\u009b"+
 		"\u009d\7\16\2\2\u009c\u0099\3\2\2\2\u009c\u009a\3\2\2\2\u009c\u009b\3"+
-		"\2\2\2\u009d\37\3\2\2\2\u009e\u00a0\7\27\2\2\u009f\u009e\3\2\2\2\u00a0"+
+		"\2\2\2\u009d\37\3\2\2\2\u009e\u00a0\7\30\2\2\u009f\u009e\3\2\2\2\u00a0"+
 		"\u00a1\3\2\2\2\u00a1\u009f\3\2\2\2\u00a1\u00a2\3\2\2\2\u00a2!\3\2\2\2"+
 		"\24\619<?MPS_cequw\u0083\u0087\u0089\u009c\u00a1";
 	public static final ATN _ATN =

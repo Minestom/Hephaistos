@@ -63,7 +63,7 @@ class NBTCompound(): NBT {
 
     override fun toSNBT(): String {
         val tagStr = tags.map { entry ->
-            "${entry.key}:${entry.value.toSNBT()}"
+            "\"${entry.key.replace("\"", "\\\"")}\":${entry.value.toSNBT()}"
         }.joinToString(",")
         return "{$tagStr}"
     }
