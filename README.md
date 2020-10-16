@@ -8,6 +8,9 @@ This library is both a NBT library and a Minecraft Anvil format library.
 Made in Kotlin, it is accessible for all languages that run on the JVM.
 As it is in Kotlin, this means your project may have to add a new dependency on the Kotlin runtime library.
 
+Hephaistos can read NBT from SNBT, binary format or (with additional dependencies) JSON.
+See more in the "parsing" section below for more information.
+
 ## NBT
 Based on the up-to-date specs present at [Wiki.vg](https://wiki.vg/NBT) 
 and on the [Minecraft Wiki](https://minecraft.gamepedia.com/NBT_format#TAG_definition). 
@@ -53,6 +56,34 @@ try(NBTWriter writer = new NBTWriter(new File("level.dat"), true /*compressed*/)
     writer.writeNamed("", level);
 } catch (IOException e) {
     e.printStackTrace();
+}
+```
+
+## Parsing
+Hephaistos can parse and write NBT data from/to SNBT, NBT binary format or JSON.
+
+### NBT binary format
+Use `NBTWriter#writeNamed` and `NBTReader#read()`.
+
+### SNBT format
+If you want to read SNBT, use `SNBTParser#parse` with a `Reader` which contains the SNBT string to parse.
+
+If you want to write SNBT, simply use the `toSNBT()` method on any `NBT` instance.
+
+### JSON format
+Using JSON requires an additional library. For the moment, only Gson is supported by Hephaistos.
+
+To access the Gson-based reader and writer, you will need to add a new dependency in your `build.gradle` file (example with Jitpack.io names):
+```groovy
+
+dependencies {
+    api("com.github.jglrxavpok:Hephaistos:${project.hephaistos_version}")
+    implementation("com.github.jglrxavpok:Hephaistos:${project.hephaistos_version}:gson")
+    implementation("com.github.jglrxavpok:Hephaistos:${project.hephaistos_version}") {
+        capabilities {
+            requireCapability("org.jglrxavpok.nbt:Hephaistos-gson")
+        }
+    }
 }
 ```
 
