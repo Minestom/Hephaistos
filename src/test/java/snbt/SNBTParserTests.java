@@ -10,7 +10,7 @@ import static org.junit.Assert.*;
 public class SNBTParserTests {
 
     @Test
-    public void parseInt() {
+    public void parseInt() throws NBTException {
         String snbt = "42";
         try(SNBTParser parser = new SNBTParser(new StringReader(snbt))) {
             NBT element = parser.parse();
@@ -20,7 +20,7 @@ public class SNBTParserTests {
     }
 
     @Test
-    public void parseNegativeInt() {
+    public void parseNegativeInt() throws NBTException {
         String snbt = "-99";
         try(SNBTParser parser = new SNBTParser(new StringReader(snbt))) {
             NBT element = parser.parse();
@@ -30,7 +30,7 @@ public class SNBTParserTests {
     }
 
     @Test
-    public void parseByte() {
+    public void parseByte() throws NBTException {
         String snbt = "42b";
         try(SNBTParser parser = new SNBTParser(new StringReader(snbt))) {
             NBT element = parser.parse();
@@ -40,7 +40,7 @@ public class SNBTParserTests {
     }
 
     @Test
-    public void parseNegativeByte() {
+    public void parseNegativeByte() throws NBTException {
         String snbt = "-99B";
         try(SNBTParser parser = new SNBTParser(new StringReader(snbt))) {
             NBT element = parser.parse();
@@ -50,7 +50,7 @@ public class SNBTParserTests {
     }
 
     @Test
-    public void parseShort() {
+    public void parseShort() throws NBTException {
         String snbt = "22000s";
         try(SNBTParser parser = new SNBTParser(new StringReader(snbt))) {
             NBT element = parser.parse();
@@ -60,7 +60,7 @@ public class SNBTParserTests {
     }
 
     @Test
-    public void parseNegativeShort() {
+    public void parseNegativeShort() throws NBTException {
         String snbt = "-21999S";
         try(SNBTParser parser = new SNBTParser(new StringReader(snbt))) {
             NBT element = parser.parse();
@@ -70,7 +70,7 @@ public class SNBTParserTests {
     }
 
     @Test
-    public void parseLong() {
+    public void parseLong() throws NBTException {
         String snbt = "1234567890000000l";
         try(SNBTParser parser = new SNBTParser(new StringReader(snbt))) {
             NBT element = parser.parse();
@@ -80,7 +80,7 @@ public class SNBTParserTests {
     }
 
     @Test
-    public void parseNegativeLong() {
+    public void parseNegativeLong() throws NBTException {
         String snbt = "-9876543210000000L";
         try(SNBTParser parser = new SNBTParser(new StringReader(snbt))) {
             NBT element = parser.parse();
@@ -90,7 +90,7 @@ public class SNBTParserTests {
     }
 
     @Test
-    public void parseFloat() {
+    public void parseFloat() throws NBTException {
         String snbt = "3.14f";
         try(SNBTParser parser = new SNBTParser(new StringReader(snbt))) {
             NBT element = parser.parse();
@@ -100,7 +100,7 @@ public class SNBTParserTests {
     }
 
     @Test
-    public void parseNegativeFloat() {
+    public void parseNegativeFloat() throws NBTException {
         String snbt = "-6.28F";
         try(SNBTParser parser = new SNBTParser(new StringReader(snbt))) {
             NBT element = parser.parse();
@@ -110,7 +110,7 @@ public class SNBTParserTests {
     }
 
     @Test
-    public void parseDoubleWithTerminal() {
+    public void parseDoubleWithTerminal() throws NBTException {
         String snbt = "2.14d";
         try(SNBTParser parser = new SNBTParser(new StringReader(snbt))) {
             NBT element = parser.parse();
@@ -120,7 +120,7 @@ public class SNBTParserTests {
     }
 
     @Test
-    public void parseNegativeDoubleWithTerminal() {
+    public void parseNegativeDoubleWithTerminal() throws NBTException {
         String snbt = "-1.184d";
         try(SNBTParser parser = new SNBTParser(new StringReader(snbt))) {
             NBT element = parser.parse();
@@ -130,7 +130,7 @@ public class SNBTParserTests {
     }
 
     @Test
-    public void parseDoubleWithoutTerminal() {
+    public void parseDoubleWithoutTerminal() throws NBTException {
         String snbt = "25.987";
         try(SNBTParser parser = new SNBTParser(new StringReader(snbt))) {
             NBT element = parser.parse();
@@ -140,7 +140,7 @@ public class SNBTParserTests {
     }
 
     @Test
-    public void parseNegativeDoubleWithoutTerminal() {
+    public void parseNegativeDoubleWithoutTerminal() throws NBTException {
         String snbt = "-111.11";
         try(SNBTParser parser = new SNBTParser(new StringReader(snbt))) {
             NBT element = parser.parse();
@@ -150,7 +150,7 @@ public class SNBTParserTests {
     }
 
     @Test
-    public void parseIntegerArray() {
+    public void parseIntegerArray() throws NBTException {
         String snbt = "[I;456,987,10]";
         try(SNBTParser parser = new SNBTParser(new StringReader(snbt))) {
             NBT element = parser.parse();
@@ -160,7 +160,7 @@ public class SNBTParserTests {
     }
 
     @Test
-    public void parseByteArray() {
+    public void parseByteArray() throws NBTException {
         String snbt = "[B;10b,-11B,127b]";
         try(SNBTParser parser = new SNBTParser(new StringReader(snbt))) {
             NBT element = parser.parse();
@@ -170,7 +170,7 @@ public class SNBTParserTests {
     }
 
     @Test
-    public void parseLongArray() {
+    public void parseLongArray() throws NBTException {
         String snbt = "[L;123456789l,-1563487L,16354658L]";
         try(SNBTParser parser = new SNBTParser(new StringReader(snbt))) {
             NBT element = parser.parse();
@@ -180,7 +180,7 @@ public class SNBTParserTests {
     }
 
     @Test
-    public void parseBoolean() {
+    public void parseBoolean() throws NBTException {
         try(SNBTParser parser = new SNBTParser(new StringReader("false"))) {
             NBT element = parser.parse();
             assertTrue(element instanceof NBTByte);

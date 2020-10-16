@@ -1,6 +1,7 @@
 package snbt;
 
 import org.jglrxavpok.hephaistos.nbt.*;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.StringReader;
@@ -10,7 +11,7 @@ import static org.junit.Assert.*;
 public class SNBTCoherencyTests {
 
     @Test
-    public void testCoherence() {
+    public void testCoherence() throws NBTException {
         NBTCompound c = new NBTCompound();
 
         NBTCompound inside = new NBTCompound();
@@ -36,5 +37,14 @@ public class SNBTCoherencyTests {
         try(SNBTParser parser = new SNBTParser(new StringReader(snbt))) {
             assertEquals(c, parser.parse());
         }
+    }
+
+    @Test(expected = NBTException.class)
+    public void syntaxError() throws NBTException {
+        String snbt = "{display:{Lore:[\"text here\"]}";
+        try(SNBTParser parser = new SNBTParser(new StringReader(snbt))) {
+            parser.parse();
+        }
+        Assert.fail("Missing bracket, should not parse");
     }
 }

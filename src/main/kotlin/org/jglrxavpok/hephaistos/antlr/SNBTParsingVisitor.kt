@@ -1,5 +1,6 @@
 package org.jglrxavpok.hephaistos.antlr
 
+import org.antlr.v4.runtime.tree.ErrorNode
 import org.jglrxavpok.hephaistos.nbt.*
 
 object SNBTParsingVisitor: SNBTBaseVisitor<NBT>() {
@@ -92,5 +93,4 @@ object SNBTParsingVisitor: SNBTBaseVisitor<NBT>() {
     override fun visitIdentifier(ctx: SNBTParser.IdentifierContext?): NBT? {
         error("Should not access this rule directly")
     }
-
 }
