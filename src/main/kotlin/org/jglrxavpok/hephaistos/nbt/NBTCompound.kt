@@ -61,6 +61,11 @@ class NBTCompound(): NBT {
         return this
     }
 
+    /**
+     * Creates a list with the current available keys
+     */
+    fun getKeys(): List<String> = tags.keys.toList()
+
     override fun toSNBT(): String {
         val tagStr = tags.map { entry ->
             "\"${entry.key.replace("\"", "\\\"")}\":${entry.value.toSNBT()}"
@@ -69,7 +74,6 @@ class NBTCompound(): NBT {
     }
 
     override fun toString() = toSNBT()
-
 
 
     // Convenience methods
