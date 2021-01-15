@@ -26,4 +26,6 @@ class NBTByte(value: Byte) : NBTNumber<Byte>(value) {
     override fun toSNBT(): String {
         return "${value}B"
     }
+
+    override fun deepClone() = NBTByte(value)
 }

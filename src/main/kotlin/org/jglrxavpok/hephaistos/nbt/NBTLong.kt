@@ -23,4 +23,6 @@ class NBTLong(value: Long) : NBTNumber<Long>(value) {
     override fun toSNBT(): String {
         return "${value}L"
     }
+
+    override fun deepClone() = NBTLong(value)
 }

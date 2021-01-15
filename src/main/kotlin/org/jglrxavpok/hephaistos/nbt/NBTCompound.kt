@@ -278,4 +278,11 @@ class NBTCompound(): NBT {
         }
     }
 
+    override fun deepClone() = NBTCompound().let {
+        for((key, value) in tags) {
+            it[key] = value.deepClone()
+        }
+        it
+    }
+
 }

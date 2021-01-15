@@ -51,4 +51,6 @@ class NBTByteArray(var value: ByteArray) : NBT {
         return Objects.hash(*value.toTypedArray())
     }
 
+    override fun deepClone() = NBTByteArray(value.copyOf())
+
 }

@@ -23,4 +23,6 @@ class NBTFloat(value: Float) : NBTNumber<Float>(value) {
     override fun toSNBT(): String {
         return "${value}F"
     }
+
+    override fun deepClone() = NBTFloat(value)
 }

@@ -23,4 +23,6 @@ class NBTDouble(value: Double) : NBTNumber<Double>(value) {
     override fun toSNBT(): String {
         return "${value}D"
     }
+
+    override fun deepClone() = NBTDouble(value)
 }

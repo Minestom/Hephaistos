@@ -39,4 +39,6 @@ class NBTString(var value: String): NBT {
     override fun hashCode(): Int {
         return Objects.hash(value)
     }
+
+    override fun deepClone() = NBTString(value)
 }

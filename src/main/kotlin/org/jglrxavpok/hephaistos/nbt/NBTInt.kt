@@ -23,4 +23,6 @@ class NBTInt(value: Int) : NBTNumber<Int>(value) {
     override fun toSNBT(): String {
         return "$value"
     }
+
+    override fun deepClone() = NBTInt(value)
 }

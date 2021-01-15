@@ -68,6 +68,10 @@ class NBTList<Tag: NBT>(val subtagType: Int): Iterable<Tag>, NBT {
         add(tag)
     }
 
+    operator fun plusAssign(tags: Iterable<Tag>) {
+        add(tags)
+    }
+
     /**
      * Appends a tag of the end of this list
      */
@@ -76,6 +80,11 @@ class NBTList<Tag: NBT>(val subtagType: Int): Iterable<Tag>, NBT {
             throw NBTException("Element to add is not of type ${NBTTypes.name(subtagType)} but of type ${NBTTypes.name(tag.ID)}")
         tags += tag
     }
+
+    /**
+     * Appends a list of tags to the end of this list
+     */
+    fun add(tags: Iterable<Tag>): Unit = tags.forEach(::add)
 
     /**
      * Casts this list to another list type. Can throw a ClassCastException, so be careful
@@ -118,5 +127,12 @@ class NBTList<Tag: NBT>(val subtagType: Int): Iterable<Tag>, NBT {
 
     override fun iterator(): Iterator<Tag> {
         return tags.iterator()
+    }
+
+    override fun deepClone() = NBTList<Tag>(subtagType).let {
+        it += tags.map { element ->
+            element.deepClone() as Tag
+        }
+        it
     }
 }

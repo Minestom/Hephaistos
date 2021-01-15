@@ -54,4 +54,6 @@ class NBTLongArray(var value: LongArray) : NBT {
     override fun hashCode(): Int {
         return Objects.hash(*value.toTypedArray())
     }
+
+    override fun deepClone() = NBTLongArray(value.copyOf())
 }
