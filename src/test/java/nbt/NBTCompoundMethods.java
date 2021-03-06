@@ -214,6 +214,15 @@ public class NBTCompoundMethods {
         assertEquals(42, nbt.getAsShort("a").shortValue());
     }
 
+    @Test
+    public void removeTag() {
+        nbt.set("a", new NBTString("test value"));
+        assertEquals(1, nbt.getSize());
+        nbt.removeTag("a");
+        assertEquals(0, nbt.getSize());
+        assertNull(nbt.get("a"));
+    }
+
     @After
     public void clean() {
         nbt.clear();

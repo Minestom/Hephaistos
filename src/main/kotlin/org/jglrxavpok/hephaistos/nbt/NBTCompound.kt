@@ -248,6 +248,17 @@ class NBTCompound(): NBT {
      */
     fun <T: NBT> getList(key: String): NBTList<T>? = get(key) as? NBTList<T>
 
+    /**
+     * Removes the tag with the given key.
+     * If no such key exists, no changes are made to this compound.
+     *
+     * @return 'this' for chaining
+     */
+    fun removeTag(key: String): NBTCompound {
+        tags.remove(key)
+        return this
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

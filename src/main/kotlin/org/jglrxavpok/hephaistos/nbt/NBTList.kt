@@ -78,6 +78,32 @@ class NBTList<Tag: NBT>(val subtagType: Int): Iterable<Tag>, NBT {
     }
 
     /**
+     * From ArrayList#removeAt:
+     * > Removes the element at the specified position in this list. Shifts any subsequent elements to the left (subtracts one from their indices).
+     */
+    fun removeAt(index: Int): NBTList<Tag>  {
+        tags.removeAt(index)
+        return this
+    }
+
+    /**
+     * From ArrayList#remove:
+     * > Removes the first occurrence of the specified element from this list, if it is present. If the list does not contain the element, it is unchanged. More formally, removes the element with the lowest index i such that Objects.equals(o, get(i)) (if such an element exists). Returns true if this list contained the specified element (or equivalently, if this list changed as a result of the call).
+     */
+    fun remove(tag: Tag): NBTList<Tag> {
+        tags.remove(tag)
+        return this
+    }
+
+    /**
+     * From ArrayList#indexOf:
+     * > Returns the index of the first occurrence of the specified element in this list, or -1 if this list does not contain the element. More formally, returns the lowest index i such that Objects.equals(o, get(i)), or -1 if there is no such index.
+     */
+    fun indexOf(tag: Tag): Int {
+        return tags.indexOf(tag)
+    }
+
+    /**
      * Casts this list to another list type. Can throw a ClassCastException, so be careful
      */
     @Suppress("UNCHECKED_CAST") // if that throws, it is the user's fault
