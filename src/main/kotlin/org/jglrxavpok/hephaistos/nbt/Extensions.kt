@@ -8,7 +8,7 @@ import java.io.IOException
  * Reads a full tag (ID, name and value when applicable) from this input stream
  */
 @Throws(IOException::class, NBTException::class)
-fun DataInputStream.readFullyFormedTag(): Pair<String, NBT> {
+fun DataInputStream.readFullyFormedTag(): Pair<String, NBT<out Any>> {
     val id = NBTType.fromID(readByte().toInt())
     if(id == NBTType.TAG_End) {
         return "" to NBTEnd()
@@ -22,7 +22,7 @@ fun DataInputStream.readFullyFormedTag(): Pair<String, NBT> {
  * Reads a tag (value only) from this input stream
  */
 @Throws(IOException::class, NBTException::class)
-fun DataInputStream.readTag(id: NBTType): NBT = when (id) {
+fun DataInputStream.readTag(id: NBTType): NBT<out Any> = when (id) {
     NBTType.TAG_List -> {
         NBTList.readFrom(this)
     }
@@ -37,7 +37,7 @@ fun DataInputStream.readTag(id: NBTType): NBT = when (id) {
  * Writes a full tag (ID, name and value when applicable) to this output stream
  */
 @Throws(IOException::class)
-fun DataOutputStream.writeFullyFormedTag(name: String, tag: NBT) {
+fun DataOutputStream.writeFullyFormedTag(name: String, tag: NBT<out Any>) {
     writeByte(tag.ID)
     writeUTF(name)
     tag.writeContents(this)

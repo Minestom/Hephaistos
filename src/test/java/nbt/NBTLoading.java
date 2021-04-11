@@ -15,7 +15,7 @@ public class NBTLoading {
     @Test
     public void helloWorld() throws IOException, NBTException {
         try(NBTReader reader = new NBTReader(NBTLoading.class.getResourceAsStream("/hello_world.nbt"), false)) {
-            Pair<String, NBT> namedTag = reader.readNamed();
+            Pair<String, NBT<?>> namedTag = reader.readNamed();
             assertEquals("hello world", namedTag.getFirst());
             NBT tag = namedTag.getSecond();
             if(tag instanceof NBTCompound) {
@@ -35,7 +35,7 @@ public class NBTLoading {
     @Test
     public void bigtest() throws IOException, NBTException {
         try(NBTReader reader = new NBTReader(NBTLoading.class.getResourceAsStream("/bigtest.nbt"), true)) {
-            Pair<String, NBT> namedTag = reader.readNamed();
+            Pair<String, NBT<?>> namedTag = reader.readNamed();
             assertEquals("Level", namedTag.getFirst());
             NBT tag = namedTag.getSecond();
             assertTrue("root must be TAG_Compound", tag instanceof NBTCompound);

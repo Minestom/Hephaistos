@@ -24,7 +24,7 @@ class NBTWriter @JvmOverloads constructor(destination: OutputStream, compressed:
      * Write a tag with a name inside the destination
      */
     @Throws(IOException::class)
-    fun writeNamed(name: String, tag: NBT) {
+    fun writeNamed(name: String, tag: NBT<out Any>) {
         writer.writeFullyFormedTag(name, tag)
     }
 
@@ -32,7 +32,7 @@ class NBTWriter @JvmOverloads constructor(destination: OutputStream, compressed:
      * Writes the tag contents directly to the destination
      */
     @Throws(IOException::class)
-    fun writeRaw(tag: NBT) {
+    fun writeRaw(tag: NBT<out Any>) {
         tag.writeContents(writer)
     }
 

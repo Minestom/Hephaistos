@@ -2,7 +2,7 @@ package org.jglrxavpok.hephaistos.nbt
 
 import java.util.*
 
-abstract class NBTNumber<Type: Number>(open var value: Type): NBT {
+abstract class NBTNumber<Type: Number>(override var value: Type): NBT<Type> {
 
     override fun hashCode(): Int {
         return Objects.hash(value)

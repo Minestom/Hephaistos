@@ -2,7 +2,7 @@ package org.jglrxavpok.hephaistos.nbt
 
 import java.lang.IllegalArgumentException
 
-enum class NBTType(private val generator: () -> NBT) {
+enum class NBTType(private val generator: () -> NBT<out Any>) {
     TAG_End(::NBTEnd),
     TAG_Byte(::NBTByte),
     TAG_Short(::NBTShort),
@@ -21,7 +21,7 @@ enum class NBTType(private val generator: () -> NBT) {
     fun asID() = ordinal
 
     companion object {
-        fun <T: NBT> getID(nbtClass: Class<T>) = when(nbtClass) {
+        fun <T: NBT<out Any>> getID(nbtClass: Class<T>) = when(nbtClass) {
             NBTEnd::class.java -> TAG_End
             NBTByte::class.java -> TAG_Byte
             NBTShort::class.java -> TAG_Short
@@ -44,7 +44,7 @@ enum class NBTType(private val generator: () -> NBT) {
             else -> throw IllegalArgumentException("$type is not a valid NBT type ID! Must be in 0-12")
         }
 
-        inline fun <reified Tag: NBT> getID() = getID(Tag::class.java)
+        inline fun <reified Tag: NBT<out Any>> getID() = getID(Tag::class.java)
 
         fun fromID(id: Int) = when(id) {
             in 0 until values().size -> values()[id]

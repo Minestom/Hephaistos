@@ -4,7 +4,7 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.util.*
 
-class NBTString(var value: String): NBT {
+class NBTString(override var value: String): NBT<String> {
 
     override val type = NBTType.TAG_String
 

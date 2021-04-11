@@ -14,13 +14,13 @@ class NBTGsonReader(private val reader: Reader): AutoCloseable, Closeable {
         val GsonInstance = Gson()
     }
 
-    inline fun <reified Tag: NBT> read(): Tag {
+    inline fun <reified Tag: NBT<out Any>> read(): Tag {
         return read(NBTType.getID<Tag>()) as Tag
     }
 
-    fun <Tag: NBT> read(nbtClass: Class<Tag>): Tag = read(NBTType.getID(nbtClass)) as Tag
+    fun <Tag: NBT<out Any>> read(nbtClass: Class<Tag>): Tag = read(NBTType.getID(nbtClass)) as Tag
 
-    fun guessType(element: JsonElement): Int {
+    fun guessType(element: JsonElement): NBTType {
         return when {
             element.isJsonObject -> NBTType.TAG_Compound
             element.isJsonNull -> NBTType.TAG_String
@@ -69,7 +69,7 @@ class NBTGsonReader(private val reader: Reader): AutoCloseable, Closeable {
      * The guess is done by getting the first element and guessing its type via #guessType.
      * If the list is empty, this method will always guess that the subtype is TAG_String
      */
-    private fun <Tag: NBT> parse(nbtType: Int, element: JsonElement): Tag {
+    private fun <Tag: NBT<out Any>> parse(nbtType: NBTType, element: JsonElement): Tag {
         try {
             val result = when (nbtType) {
                 NBTType.TAG_End -> NBTEnd()
@@ -93,10 +93,10 @@ class NBTGsonReader(private val reader: Reader): AutoCloseable, Closeable {
                     val elements = element.asJsonArray
 
                     if (elements.size() == 0) { // guess strings
-                        NBTList<NBT>(NBTType.TAG_String)
+                        NBTList<NBT<out Any>>(NBTType.TAG_String)
                     } else {
-                        val firstElement = parse<NBT>(guessType(elements[0]), elements[0])
-                        val list = NBTList<NBT>(firstElement.ID)
+                        val firstElement = parse<NBT<out Any>>(guessType(elements[0]), elements[0])
+                        val list = NBTList<NBT<out Any>>(firstElement.type)
                         for (elem in elements) {
                             list += parse(list.subtagType, elem)
                         }
@@ -112,11 +112,11 @@ class NBTGsonReader(private val reader: Reader): AutoCloseable, Closeable {
         }
     }
 
-    fun read(nbtType: Int): NBT {
+    fun read(nbtType: NBTType): NBT<out Any> {
         return parse(nbtType, GsonInstance.fromJson(reader, JsonElement::class.java))
     }
 
-    fun readWithGuess(): NBT {
+    fun readWithGuess(): NBT<out Any> {
         val element = GsonInstance.fromJson(reader, JsonElement::class.java)
         return parse(guessType(element), element)
     }
@@ -124,7 +124,7 @@ class NBTGsonReader(private val reader: Reader): AutoCloseable, Closeable {
     private fun toCompound(jsonObject: JsonObject): NBTCompound {
         val compound = NBTCompound()
         for((key, value) in jsonObject.entrySet()) {
-            val nbt = parse<NBT>(guessType(value), value)
+            val nbt = parse<NBT<out Any>>(guessType(value), value)
             compound[key] = nbt
         }
         return compound

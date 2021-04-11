@@ -11,7 +11,7 @@ class DSLCompound(): NBTCompound() {
     infix fun String.to(value: LongArray) = set(this, value)
     infix fun String.to(value: IntArray) = set(this, value)
     infix fun String.to(value: String) = set(this, value)
-    infix fun String.to(value: NBT) = set(this, value)
+    infix fun String.to(value: NBT<out Any>) = set(this, value)
 }
 
 inline fun compound(builder: DSLCompound.() -> Unit) = DSLCompound().apply(builder)
@@ -27,7 +27,7 @@ operator fun NBTCompound.set(key: String, value: LongArray) = setLongArray(key, 
 operator fun NBTCompound.set(key: String, value: IntArray) = setIntArray(key, value)
 operator fun NBTCompound.set(key: String, value: String) = setString(key, value)
 
-class DSLList<Tag: NBT>(type: NBTType): NBTList<Tag>(type) {
+class DSLList<Tag: NBT<out Any>>(type: NBTType): NBTList<Tag>(type) {
     operator fun Int.not() = unsafeAdd(NBTInt(this))
     operator fun Float.not() = unsafeAdd(NBTFloat(this))
     operator fun Long.not() = unsafeAdd(NBTLong(this))
@@ -38,9 +38,9 @@ class DSLList<Tag: NBT>(type: NBTType): NBTList<Tag>(type) {
     operator fun LongArray.not() = unsafeAdd(NBTLongArray(this))
     operator fun IntArray.not() = unsafeAdd(NBTIntArray(this))
     operator fun String.not() = unsafeAdd(NBTString(this))
-    operator fun NBT.not() = unsafeAdd(this)
+    operator fun NBT<*>.not() = unsafeAdd(this)
 }
 
-inline fun <reified Tag: NBT> list(builder: DSLList<Tag>.() -> Unit) =
+inline fun <reified Tag: NBT<out Any>> list(builder: DSLList<Tag>.() -> Unit) =
     DSLList<Tag>(NBTType.getID<Tag>()).apply(builder)
 

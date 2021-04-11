@@ -2,12 +2,17 @@ package org.jglrxavpok.hephaistos.nbt
 
 import java.io.DataInputStream
 import java.io.DataOutputStream
+import java.lang.UnsupportedOperationException
 import java.util.concurrent.ConcurrentHashMap
 
-open class NBTCompound(): NBT {
+open class NBTCompound(): NBT<Map<String, NBT<out Any>>> {
     override val type = NBTType.TAG_Compound
 
-    private val tags = ConcurrentHashMap<String, NBT>()
+    private val tags = ConcurrentHashMap<String, NBT<out Any>>()
+
+    override var value: Map<String, NBT<out Any>>
+        get() = LinkedHashMap(tags)
+        set(_value) { throw UnsupportedOperationException("Not allowed to modify the map used internally.") }
 
     /**
      * Number of tags inside this compound
@@ -47,16 +52,9 @@ open class NBTCompound(): NBT {
     }
 
     /**
-     * Returns the tag associated to the given key, if any. Returns 'null' otherwise
-     */
-    operator fun get(key: String): NBT? {
-        return tags[key]
-    }
-
-    /**
      * Sets (and overwrites previous) tag associated to the given key
      */
-    operator fun set(key: String, tag: NBT): NBTCompound {
+    operator fun set(key: String, tag: NBT<out Any>): NBTCompound {
         tags[key] = tag
         return this
     }
@@ -246,7 +244,23 @@ open class NBTCompound(): NBT {
      * Returns the value associated to the given key, if any. Returns 'null' otherwise.
      * Also returns 'null' if the tag is not of the correct type (eg getByte on a NBTCompound will yield 'null')
      */
-    fun <T: NBT> getList(key: String): NBTList<T>? = get(key) as? NBTList<T>
+    fun <T: NBT<out Any>> getList(key: String): NBTList<T>? = get(key) as? NBTList<T>
+
+    /**
+     * Returns the tag associated to the given key, if any. Returns 'null' otherwise.
+     *
+     * The generic parameter can be used to ask for a cast. Will return null if the type does not match
+     */
+    operator fun <T: NBT<out Any>> get(key: String) = tags[key] as? T
+
+    /**
+     * Returns the tag associated to the given key, if any. Returns the given default value otherwise.
+     *
+     * The generic parameter can be used to ask for a cast. Will return the default value if the type does not match
+     */
+    fun <R: Any, T: NBT<R>> getOrDefault(key: String, defaultValue: R): R {
+        return get<T>(key)?.value ?: defaultValue
+    }
 
     /**
      * Removes the tag with the given key.
@@ -274,15 +288,15 @@ open class NBTCompound(): NBT {
         return tags.hashCode()
     }
 
-    operator fun iterator(): Iterator<Pair<String, NBT>> {
-        return object: Iterator<Pair<String, NBT>> {
+    operator fun iterator(): Iterator<Pair<String, NBT<out Any>>> {
+        return object: Iterator<Pair<String, NBT<out Any>>> {
             private val backing = this@NBTCompound.tags.entries.iterator()
 
             override fun hasNext(): Boolean {
                 return backing.hasNext()
             }
 
-            override fun next(): Pair<String, NBT> {
+            override fun next(): Pair<String, NBT<out Any>> {
                 val (name, value) = backing.next()
                 return name to value
             }

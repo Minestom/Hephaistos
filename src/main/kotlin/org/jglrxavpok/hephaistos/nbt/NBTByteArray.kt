@@ -4,7 +4,7 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.util.*
 
-class NBTByteArray(var value: ByteArray) : NBT {
+class NBTByteArray(override var value: ByteArray) : NBT<ByteArray> {
     val length get()= value.size
 
     override val type = NBTType.TAG_Byte_Array

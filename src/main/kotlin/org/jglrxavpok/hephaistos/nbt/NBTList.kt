@@ -3,15 +3,20 @@ package org.jglrxavpok.hephaistos.nbt
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
+import java.lang.UnsupportedOperationException
 import java.util.*
 import kotlin.collections.ArrayList
 
-open class NBTList<Tag: NBT>(val subtagType: NBTType): Iterable<Tag>, NBT {
+open class NBTList<Tag: NBT<out Any>>(val subtagType: NBTType): Iterable<Tag>, NBT<List<Tag>> {
 
     override val type = NBTType.TAG_List
 
     private val tags = ArrayList<Tag>()
     val length get()= tags.size
+
+    override var value: List<Tag>
+        get() = LinkedList(tags)
+        set(_value) { throw UnsupportedOperationException("Not allowed to modify the list used internally.") }
 
     /**
      * Reads the contents of the list, except for the subtag ID, which is supposed to be already read
@@ -77,7 +82,7 @@ open class NBTList<Tag: NBT>(val subtagType: NBTType): Iterable<Tag>, NBT {
         tags += tag
     }
 
-    internal fun unsafeAdd(tag: NBT) {
+    internal fun unsafeAdd(tag: NBT<out Any>) {
         if(tag.type != subtagType)
             throw NBTException("Element to add is not of type ${subtagType.name} but of type ${NBTType.name(tag.ID)}")
         tags += (tag as? Tag) ?: throw NBTException("Could not cast $tag to supported-by-this-list type")
@@ -113,7 +118,7 @@ open class NBTList<Tag: NBT>(val subtagType: NBTType): Iterable<Tag>, NBT {
      * Casts this list to another list type. Can throw a ClassCastException, so be careful
      */
     @Suppress("UNCHECKED_CAST") // if that throws, it is the user's fault
-    fun <T: NBT> asListOf() = this as NBTList<T>
+    fun <T: NBT<out Any>> asListOf() = this as NBTList<T>
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -140,9 +145,9 @@ open class NBTList<Tag: NBT>(val subtagType: NBTType): Iterable<Tag>, NBT {
 
     companion object {
         @Throws(IOException::class)
-        fun readFrom(source: DataInputStream): NBTList<NBT> {
+        fun readFrom(source: DataInputStream): NBTList<NBT<out Any>> {
             val subtagType = source.readByte().toInt()
-            val list = NBTList<NBT>(NBTType.fromID(subtagType))
+            val list = NBTList<NBT<out Any>>(NBTType.fromID(subtagType))
             list.readContents(source)
             return list
         }

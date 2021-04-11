@@ -4,7 +4,7 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.util.*
 
-class NBTLongArray(var value: LongArray) : NBT {
+class NBTLongArray(override var value: LongArray) : NBT<LongArray> {
     val length get()= value.size
 
     override val type = NBTType.TAG_Long_Array

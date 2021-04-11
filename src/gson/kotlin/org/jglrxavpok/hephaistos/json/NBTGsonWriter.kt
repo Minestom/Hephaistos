@@ -9,7 +9,7 @@ class NBTGsonWriter(val gson: Gson = GsonInstance) {
         val GsonInstance = Gson()
     }
 
-    fun write(element: NBT): JsonElement {
+    fun write(element: NBT<out Any>): JsonElement {
         return when(element) {
             is NBTNumber<out Number> -> JsonPrimitive(element.value)
 
@@ -17,7 +17,7 @@ class NBTGsonWriter(val gson: Gson = GsonInstance) {
             is NBTByteArray -> JsonArray().apply { element.value.forEach { add(it) } }
             is NBTLongArray -> JsonArray().apply { element.value.forEach { add(it) } }
             is NBTIntArray -> JsonArray().apply { element.value.forEach { add(it) } }
-            is NBTList<out NBT> -> JsonArray().apply { element.forEach { add(write(it)) } }
+            is NBTList<out NBT<out Any>> -> JsonArray().apply { element.forEach { add(write(it)) } }
             is NBTCompound -> JsonObject().apply {
                 for((name, value) in element) {
                     add(name, write(value))

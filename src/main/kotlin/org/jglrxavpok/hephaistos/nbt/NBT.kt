@@ -3,17 +3,23 @@ package org.jglrxavpok.hephaistos.nbt
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
+import java.lang.UnsupportedOperationException
 
 /**
  * Most basic representation of a NBTag
  */
-interface NBT {
+interface NBT<ValueType: Any> {
 
     val type: NBTType
     /**
      * ID of this tag type
      */
     val ID: Int get()= type.ordinal
+
+    /**
+     * Returns the underlying value of this tag. Will throw `UnsupportedOperationException` for NBTEnd
+     */
+    var value: ValueType
 
     /**
      * Reads the contents of the tag from the given source. The tag ID is supposed to be already read.
@@ -49,5 +55,5 @@ interface NBT {
      *
      * The only exception is NBTString: the String value is not copied into a new String object, as there are immutable in Java
      */
-    fun deepClone(): NBT
+    fun deepClone(): NBT<ValueType>
 }

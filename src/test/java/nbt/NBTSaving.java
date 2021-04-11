@@ -110,7 +110,7 @@ public class NBTSaving {
         NBTWriter output = output();
         output.writeNamed("a", tag);
         output.close();
-        Pair<String, NBT> namedTag = input().readNamed();
+        Pair<String, NBT<?>> namedTag = input().readNamed();
         assertEquals("a", namedTag.getFirst());
         assertEquals(tag.getClass(), namedTag.getSecond().getClass());
         return (T) namedTag.getSecond();

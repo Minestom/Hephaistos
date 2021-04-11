@@ -10,7 +10,7 @@ import org.jglrxavpok.hephaistos.antlr.SNBTParser as ANTLRParser
 class SNBTParser(val reader: Reader): BaseErrorListener(), AutoCloseable, Cloneable {
 
     @Throws(NBTException::class)
-    fun parse(): NBT {
+    fun parse(): NBT<out Any> {
         val stream = CharStreams.fromString(reader.readText())
         val lexer = SNBTLexer(stream)
         lexer.removeErrorListeners()
