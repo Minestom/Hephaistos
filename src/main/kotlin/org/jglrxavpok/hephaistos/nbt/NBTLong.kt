@@ -2,10 +2,9 @@ package org.jglrxavpok.hephaistos.nbt
 
 import java.io.DataInputStream
 import java.io.DataOutputStream
-import java.util.*
 
 class NBTLong(value: Long) : NBTNumber<Long>(value) {
-    override val ID = NBTTypes.TAG_Long
+    override val type = NBTType.TAG_Long
 
     constructor(): this(0)
 

@@ -4,8 +4,8 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.util.concurrent.ConcurrentHashMap
 
-class NBTCompound(): NBT {
-    override val ID = NBTTypes.TAG_Compound
+open class NBTCompound(): NBT {
+    override val type = NBTType.TAG_Compound
 
     private val tags = ConcurrentHashMap<String, NBT>()
 

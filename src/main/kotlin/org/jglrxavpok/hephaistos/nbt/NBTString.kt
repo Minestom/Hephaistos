@@ -6,7 +6,7 @@ import java.util.*
 
 class NBTString(var value: String): NBT {
 
-    override val ID = NBTTypes.TAG_String
+    override val type = NBTType.TAG_String
 
     constructor(): this("")
 

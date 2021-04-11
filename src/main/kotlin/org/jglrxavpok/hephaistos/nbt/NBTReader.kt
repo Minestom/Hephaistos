@@ -46,7 +46,7 @@ class NBTReader @JvmOverloads constructor(source: InputStream, compressed: Boole
      * @throws NBTException if the file does not follow NBT format
      */
     @Throws(IOException::class, NBTException::class)
-    fun readRaw(id: Int): NBT {
+    fun readRaw(id: NBTType): NBT {
         return reader.readTag(id)
     }
 

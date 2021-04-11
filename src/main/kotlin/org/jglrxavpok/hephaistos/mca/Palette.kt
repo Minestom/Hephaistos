@@ -2,7 +2,7 @@ package org.jglrxavpok.hephaistos.mca
 
 import org.jglrxavpok.hephaistos.nbt.NBTCompound
 import org.jglrxavpok.hephaistos.nbt.NBTList
-import org.jglrxavpok.hephaistos.nbt.NBTTypes
+import org.jglrxavpok.hephaistos.nbt.NBTType
 import java.lang.IllegalArgumentException
 import kotlin.math.ceil
 import kotlin.math.log2
@@ -66,7 +66,7 @@ class Palette() {
      * Converts this Palette into its NBT representation
      */
     fun toNBT(): NBTList<NBTCompound> {
-        val list = NBTList<NBTCompound>(NBTTypes.TAG_Compound)
+        val list = NBTList<NBTCompound>(NBTType.TAG_Compound)
         for(b in blocks) {
             list += b.toNBT()
         }

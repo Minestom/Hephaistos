@@ -7,7 +7,7 @@ import java.util.*
 class NBTIntArray(var value: IntArray) : NBT {
     val length get()= value.size
 
-    override val ID = NBTTypes.TAG_Int_Array
+    override val type = NBTType.TAG_Int_Array
 
     constructor(): this(IntArray(0))
 

@@ -9,10 +9,11 @@ import java.io.IOException
  */
 interface NBT {
 
+    val type: NBTType
     /**
      * ID of this tag type
      */
-    val ID: Int
+    val ID: Int get()= type.ordinal
 
     /**
      * Reads the contents of the tag from the given source. The tag ID is supposed to be already read.
@@ -35,9 +36,6 @@ interface NBT {
      * Produces the stringified version of this NBT (or SNBT version). Is empty for TAG_End
      */
     fun toSNBT(): String
-
-    // TODO @Throws(NBTException::class)
-    //fun parseSNBT(snbt: String)
 
     /**
      * Produces a human-readable version of this tag. Must be the same as `toSNBT()`, except for TAG_End which returns "<TAG_End>"

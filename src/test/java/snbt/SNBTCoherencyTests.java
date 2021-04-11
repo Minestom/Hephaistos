@@ -26,7 +26,7 @@ public class SNBTCoherencyTests {
         inside.setFloat("FFF", 0.125f);
         inside.setString("some text", "KSOKPDOK");
         c.set("inside", inside);
-        NBTList<NBTString> testList = new NBTList<>(NBTTypes.TAG_String);
+        NBTList<NBTString> testList = new NBTList<>(NBTType.TAG_String);
         for (int i = 0; i < 10; i++) {
             testList.add(new NBTString("Test#"+i));
         }

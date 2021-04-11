@@ -1,7 +1,6 @@
 package org.jglrxavpok.hephaistos.json
 
 import com.google.gson.Gson
-import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import org.jglrxavpok.hephaistos.nbt.*
@@ -16,29 +15,29 @@ class NBTGsonReader(private val reader: Reader): AutoCloseable, Closeable {
     }
 
     inline fun <reified Tag: NBT> read(): Tag {
-        return read(NBTTypes.getID<Tag>()) as Tag
+        return read(NBTType.getID<Tag>()) as Tag
     }
 
-    fun <Tag: NBT> read(nbtClass: Class<Tag>): Tag = read(NBTTypes.getID(nbtClass)) as Tag
+    fun <Tag: NBT> read(nbtClass: Class<Tag>): Tag = read(NBTType.getID(nbtClass)) as Tag
 
     fun guessType(element: JsonElement): Int {
         return when {
-            element.isJsonObject -> NBTTypes.TAG_Compound
-            element.isJsonNull -> NBTTypes.TAG_String
+            element.isJsonObject -> NBTType.TAG_Compound
+            element.isJsonNull -> NBTType.TAG_String
             element.isJsonPrimitive -> {
                 val primitive = element.asJsonPrimitive
                 when {
-                    primitive.isBoolean -> NBTTypes.TAG_Byte
-                    primitive.isString -> NBTTypes.TAG_String
+                    primitive.isBoolean -> NBTType.TAG_Byte
+                    primitive.isString -> NBTType.TAG_String
                     primitive.isNumber ->
                         if(primitive.asLong.toDouble() == primitive.asDouble) {
                             if('.' in primitive.asString) {
-                                NBTTypes.TAG_Double
+                                NBTType.TAG_Double
                             } else {
-                                NBTTypes.TAG_Long
+                                NBTType.TAG_Long
                             }
                         } else {
-                            NBTTypes.TAG_Double
+                            NBTType.TAG_Double
                         }
                     else -> error("Primitive that is neither a boolean, a string, nor a number?")
                 }
@@ -47,16 +46,16 @@ class NBTGsonReader(private val reader: Reader): AutoCloseable, Closeable {
             element.isJsonArray -> {
                 val array = element.asJsonArray
                 if(array.size() == 0) {
-                    NBTTypes.TAG_List
+                    NBTType.TAG_List
                 } else {
                     val firstElement = element.asJsonArray.get(0)
                     val guessedType = guessType(firstElement)
                     when(guessedType) {
-                        NBTTypes.TAG_Long -> NBTTypes.TAG_Long_Array
-                        NBTTypes.TAG_Byte -> NBTTypes.TAG_Byte_Array
-                        NBTTypes.TAG_Int -> NBTTypes.TAG_Int_Array
+                        NBTType.TAG_Long -> NBTType.TAG_Long_Array
+                        NBTType.TAG_Byte -> NBTType.TAG_Byte_Array
+                        NBTType.TAG_Int -> NBTType.TAG_Int_Array
 
-                        else -> NBTTypes.TAG_List
+                        else -> NBTType.TAG_List
                     }
                 }
             }
@@ -73,28 +72,28 @@ class NBTGsonReader(private val reader: Reader): AutoCloseable, Closeable {
     private fun <Tag: NBT> parse(nbtType: Int, element: JsonElement): Tag {
         try {
             val result = when (nbtType) {
-                NBTTypes.TAG_End -> NBTEnd()
-                NBTTypes.TAG_Byte -> NBTByte(element.asByte)
-                NBTTypes.TAG_Short -> NBTShort(element.asShort)
-                NBTTypes.TAG_Int -> NBTInt(element.asInt)
-                NBTTypes.TAG_Long -> NBTLong(element.asLong)
-                NBTTypes.TAG_Float -> NBTFloat(element.asFloat)
-                NBTTypes.TAG_Double -> NBTDouble(element.asDouble)
-                NBTTypes.TAG_Byte_Array -> NBTByteArray(element.asJsonArray.map { it.asByte }.toByteArray())
-                NBTTypes.TAG_String -> if(element.isJsonNull) NBTString("") else NBTString(element.asString)
+                NBTType.TAG_End -> NBTEnd()
+                NBTType.TAG_Byte -> NBTByte(element.asByte)
+                NBTType.TAG_Short -> NBTShort(element.asShort)
+                NBTType.TAG_Int -> NBTInt(element.asInt)
+                NBTType.TAG_Long -> NBTLong(element.asLong)
+                NBTType.TAG_Float -> NBTFloat(element.asFloat)
+                NBTType.TAG_Double -> NBTDouble(element.asDouble)
+                NBTType.TAG_Byte_Array -> NBTByteArray(element.asJsonArray.map { it.asByte }.toByteArray())
+                NBTType.TAG_String -> if(element.isJsonNull) NBTString("") else NBTString(element.asString)
 
-                NBTTypes.TAG_Compound -> toCompound(element.asJsonObject)
+                NBTType.TAG_Compound -> toCompound(element.asJsonObject)
 
-                NBTTypes.TAG_Int_Array -> NBTIntArray(element.asJsonArray.map { it.asInt }.toIntArray())
-                NBTTypes.TAG_Long_Array -> NBTLongArray(element.asJsonArray.map { it.asLong }.toLongArray())
+                NBTType.TAG_Int_Array -> NBTIntArray(element.asJsonArray.map { it.asInt }.toIntArray())
+                NBTType.TAG_Long_Array -> NBTLongArray(element.asJsonArray.map { it.asLong }.toLongArray())
 
-                NBTTypes.TAG_List -> {
+                NBTType.TAG_List -> {
                     if (!element.isJsonArray)
                         throw NBTException("Expected a list, but was: $element")
                     val elements = element.asJsonArray
 
                     if (elements.size() == 0) { // guess strings
-                        NBTList<NBT>(NBTTypes.TAG_String)
+                        NBTList<NBT>(NBTType.TAG_String)
                     } else {
                         val firstElement = parse<NBT>(guessType(elements[0]), elements[0])
                         val list = NBTList<NBT>(firstElement.ID)

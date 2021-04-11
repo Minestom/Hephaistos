@@ -20,7 +20,7 @@ public class Misc {
 
     @Test(expected = NBTException.class)
     public void ensureSubElementsOfListAreAllSameType() {
-        NBTList<NBT> genericList = new NBTList<NBT>(NBTTypes.TAG_String);
+        NBTList<NBT> genericList = new NBTList<NBT>(NBTType.TAG_String);
         try {
             genericList.add(new NBTString("Some value"));
         } catch (Exception e) {

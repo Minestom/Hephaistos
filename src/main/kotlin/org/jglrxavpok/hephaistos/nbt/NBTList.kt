@@ -6,9 +6,9 @@ import java.io.IOException
 import java.util.*
 import kotlin.collections.ArrayList
 
-class NBTList<Tag: NBT>(val subtagType: Int): Iterable<Tag>, NBT {
+open class NBTList<Tag: NBT>(val subtagType: NBTType): Iterable<Tag>, NBT {
 
-    override val ID = NBTTypes.TAG_List
+    override val type = NBTType.TAG_List
 
     private val tags = ArrayList<Tag>()
     val length get()= tags.size
@@ -32,7 +32,7 @@ class NBTList<Tag: NBT>(val subtagType: Int): Iterable<Tag>, NBT {
      * @see NBT.writeContents
      */
     override fun writeContents(destination: DataOutputStream) {
-        destination.writeByte(subtagType)
+        destination.writeByte(subtagType.asID())
         destination.writeInt(length)
         for(tag in tags) {
             tag.writeContents(destination)
@@ -72,9 +72,15 @@ class NBTList<Tag: NBT>(val subtagType: Int): Iterable<Tag>, NBT {
      * Appends a tag of the end of this list
      */
     fun add(tag: Tag) {
-        if(tag.ID != subtagType)
-            throw NBTException("Element to add is not of type ${NBTTypes.name(subtagType)} but of type ${NBTTypes.name(tag.ID)}")
+        if(tag.type != subtagType)
+            throw NBTException("Element to add is not of type ${subtagType.name} but of type ${NBTType.name(tag.ID)}")
         tags += tag
+    }
+
+    internal fun unsafeAdd(tag: NBT) {
+        if(tag.type != subtagType)
+            throw NBTException("Element to add is not of type ${subtagType.name} but of type ${NBTType.name(tag.ID)}")
+        tags += (tag as? Tag) ?: throw NBTException("Could not cast $tag to supported-by-this-list type")
     }
 
     /**
@@ -127,7 +133,7 @@ class NBTList<Tag: NBT>(val subtagType: Int): Iterable<Tag>, NBT {
     }
 
     override fun hashCode(): Int {
-        var result = subtagType
+        var result = subtagType.asID()
         result = 31 * result + Objects.hash(*tags.toArray())
         return result
     }
@@ -136,7 +142,7 @@ class NBTList<Tag: NBT>(val subtagType: Int): Iterable<Tag>, NBT {
         @Throws(IOException::class)
         fun readFrom(source: DataInputStream): NBTList<NBT> {
             val subtagType = source.readByte().toInt()
-            val list = NBTList<NBT>(subtagType)
+            val list = NBTList<NBT>(NBTType.fromID(subtagType))
             list.readContents(source)
             return list
         }

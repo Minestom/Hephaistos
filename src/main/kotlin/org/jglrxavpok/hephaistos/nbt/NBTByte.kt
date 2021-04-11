@@ -2,13 +2,12 @@ package org.jglrxavpok.hephaistos.nbt
 
 import java.io.DataInputStream
 import java.io.DataOutputStream
-import java.util.*
 
 class NBTByte(value: Byte) : NBTNumber<Byte>(value) {
 
     constructor(boolean: Boolean): this(if(boolean) 1 else 0)
 
-    override val ID = NBTTypes.TAG_Byte
+    override val type = NBTType.TAG_Byte
 
     constructor(): this(0)
 

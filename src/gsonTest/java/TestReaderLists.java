@@ -53,7 +53,7 @@ public class TestReaderLists {
         try(NBTGsonReader reader = new NBTGsonReader(new StringReader(json))) {
             NBTList<NBTString> array = reader.read(NBTList.class);
             assertEquals(4, array.getLength());
-            assertEquals(NBTTypes.TAG_String, array.getSubtagType());
+            assertEquals(NBTType.TAG_String, array.getSubtagType());
             assertEquals("0", array.get(0).getValue());
             assertEquals("1", array.get(1).getValue());
             assertEquals("2", array.get(2).getValue());
@@ -83,7 +83,7 @@ public class TestReaderLists {
             NBT guessed = reader.readWithGuess();
             assertTrue(guessed instanceof NBTList);
             NBTList<NBTDouble> array = (NBTList<NBTDouble>)guessed;
-            assertEquals(NBTTypes.TAG_Double, array.getSubtagType());
+            assertEquals(NBTType.TAG_Double, array.getSubtagType());
             assertEquals(4, array.getLength());
             assertEquals(0.0, array.get(0).getValue(), 10e-6);
             assertEquals(1.0, array.get(1).getValue(), 10e-6);
@@ -107,7 +107,7 @@ public class TestReaderLists {
             NBT guessed = reader.readWithGuess();
             assertTrue(guessed instanceof NBTList);
             NBTList<NBTCompound> array = (NBTList<NBTCompound>)guessed;
-            assertEquals(NBTTypes.TAG_Compound, array.getSubtagType());
+            assertEquals(NBTType.TAG_Compound, array.getSubtagType());
 
             NBTCompound firstObject = array.get(0);
             assertEquals(1, firstObject.getSize());
@@ -127,7 +127,7 @@ public class TestReaderLists {
             NBT array = reader.readWithGuess();
             assertTrue("Guessed NBT must be a list", array instanceof NBTList);
             NBTList<NBTList<NBTString>> list = (NBTList<NBTList<NBTString>>) array;
-            assertEquals("Guessed NBT must be a list of lists", list.getSubtagType(), NBTTypes.TAG_List);
+            assertEquals("Guessed NBT must be a list of lists", list.getSubtagType(), NBTType.TAG_List);
 
             NBTList<NBTString> firstList = list.get(0);
             assertEquals(1, firstList.getLength());
@@ -156,7 +156,7 @@ public class TestReaderLists {
             NBT array = reader.readWithGuess();
             assertTrue("Guessed NBT must be a list", array instanceof NBTList);
             NBTList<NBTString> list = (NBTList<NBTString>) array;
-            assertEquals("Guessed NBT must be a list of strings", list.getSubtagType(), NBTTypes.TAG_String);
+            assertEquals("Guessed NBT must be a list of strings", list.getSubtagType(), NBTType.TAG_String);
             assertEquals(0, list.getLength());
         }
     }

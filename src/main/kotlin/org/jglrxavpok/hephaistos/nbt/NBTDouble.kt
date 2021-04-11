@@ -5,7 +5,7 @@ import java.io.DataOutputStream
 
 class NBTDouble(value: Double) : NBTNumber<Double>(value) {
 
-    override val ID = NBTTypes.TAG_Double
+    override val type = NBTType.TAG_Double
 
     constructor(): this(0.0)
 

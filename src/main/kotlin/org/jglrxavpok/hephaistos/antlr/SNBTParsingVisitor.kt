@@ -1,6 +1,5 @@
 package org.jglrxavpok.hephaistos.antlr
 
-import org.antlr.v4.runtime.tree.ErrorNode
 import org.jglrxavpok.hephaistos.nbt.*
 
 object SNBTParsingVisitor: SNBTBaseVisitor<NBT>() {
@@ -24,7 +23,7 @@ object SNBTParsingVisitor: SNBTBaseVisitor<NBT>() {
 
     override fun visitList(ctx: SNBTParser.ListContext): NBT {
         val elements = ctx.element().map { visit(it) }
-        val subtagType = if(elements.isEmpty()) NBTTypes.TAG_String else elements[0].ID
+        val subtagType = if(elements.isEmpty()) NBTType.TAG_String else elements[0].type
         val list = NBTList<NBT>(subtagType)
         for(tag in elements) {
             list += tag

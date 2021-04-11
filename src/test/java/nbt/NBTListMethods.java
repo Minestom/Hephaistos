@@ -1,9 +1,8 @@
 package nbt;
 
-import org.jglrxavpok.hephaistos.nbt.NBT;
 import org.jglrxavpok.hephaistos.nbt.NBTList;
 import org.jglrxavpok.hephaistos.nbt.NBTString;
-import org.jglrxavpok.hephaistos.nbt.NBTTypes;
+import org.jglrxavpok.hephaistos.nbt.NBTType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,7 +15,7 @@ public class NBTListMethods {
 
     @Before
     public void init() {
-        list = new NBTList<>(NBTTypes.TAG_String);
+        list = new NBTList<>(NBTType.TAG_String);
     }
 
     @Test

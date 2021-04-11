@@ -7,7 +7,7 @@ import java.util.*
 class NBTByteArray(var value: ByteArray) : NBT {
     val length get()= value.size
 
-    override val ID = NBTTypes.TAG_Byte_Array
+    override val type = NBTType.TAG_Byte_Array
 
     constructor(): this(ByteArray(0))
 

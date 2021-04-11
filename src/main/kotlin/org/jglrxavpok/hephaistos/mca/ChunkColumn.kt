@@ -4,7 +4,7 @@ import org.jglrxavpok.hephaistos.mca.AnvilException.Companion.missing
 import org.jglrxavpok.hephaistos.nbt.NBTCompound
 import org.jglrxavpok.hephaistos.nbt.NBTList
 import org.jglrxavpok.hephaistos.nbt.NBTShort
-import org.jglrxavpok.hephaistos.nbt.NBTTypes
+import org.jglrxavpok.hephaistos.nbt.NBTType
 
 /**
  * 16x256x16 (XYZ) area of the world. Consists of 16 ChunkSections vertically stacked.
@@ -37,10 +37,10 @@ class ChunkColumn(val x: Int, val z: Int) {
     var worldSurfaceWorldGenHeightMap: Heightmap? = null
     var oceanFloorHeightMap: Heightmap? = null
     var oceanFloorWorldGenHeightMap: Heightmap? = null
-    var entities: NBTList<NBTCompound> = NBTList(NBTTypes.TAG_Compound)
-    var tileEntities: NBTList<NBTCompound> = NBTList(NBTTypes.TAG_Compound)
-    var tileTicks: NBTList<NBTCompound> = NBTList(NBTTypes.TAG_Compound)
-    var liquidTicks: NBTList<NBTCompound> = NBTList(NBTTypes.TAG_Compound)
+    var entities: NBTList<NBTCompound> = NBTList(NBTType.TAG_Compound)
+    var tileEntities: NBTList<NBTCompound> = NBTList(NBTType.TAG_Compound)
+    var tileTicks: NBTList<NBTCompound> = NBTList(NBTType.TAG_Compound)
+    var liquidTicks: NBTList<NBTCompound> = NBTList(NBTType.TAG_Compound)
     var structures: NBTCompound? = null
     var lights: NBTList<NBTList<NBTShort>>? = null
     var liquidsToBeTicked: NBTList<NBTList<NBTShort>>? = null
@@ -82,10 +82,10 @@ class ChunkColumn(val x: Int, val z: Int) {
         }
 
         // we allow empty lists for these
-        entities = level.getList("Entities") ?: NBTList<NBTCompound>(NBTTypes.TAG_Compound)
-        tileEntities = level.getList("TileEntities") ?: NBTList<NBTCompound>(NBTTypes.TAG_Compound)
-        tileTicks = level.getList("TileTicks") ?: NBTList<NBTCompound>(NBTTypes.TAG_Compound)
-        liquidTicks = level.getList("LiquidTicks") ?: NBTList<NBTCompound>(NBTTypes.TAG_Compound)
+        entities = level.getList("Entities") ?: NBTList<NBTCompound>(NBTType.TAG_Compound)
+        tileEntities = level.getList("TileEntities") ?: NBTList<NBTCompound>(NBTType.TAG_Compound)
+        tileTicks = level.getList("TileTicks") ?: NBTList<NBTCompound>(NBTType.TAG_Compound)
+        liquidTicks = level.getList("LiquidTicks") ?: NBTList<NBTCompound>(NBTType.TAG_Compound)
         structures = level.getCompound("Structures")
 
         val carvingMasks = level.getCompound("CarvingMasks")
@@ -193,7 +193,7 @@ class ChunkColumn(val x: Int, val z: Int) {
                                 setLongArray("WORLD_SURFACE", worldSurfaceHeightMap.compact(version))
                                 worldSurfaceWorldGenHeightMap?.let { setLongArray("WORLD_SURFACE_WG", it.compact(version)) }
                             })
-                            val sections = NBTList<NBTCompound>(NBTTypes.TAG_Compound)
+                            val sections = NBTList<NBTCompound>(NBTType.TAG_Compound)
                             for (section in this@ChunkColumn.sections) {
                                 if(!section.empty) {
                                     sections += section.toNBT(version)

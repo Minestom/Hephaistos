@@ -2,10 +2,9 @@ package org.jglrxavpok.hephaistos.nbt
 
 import java.io.DataInputStream
 import java.io.DataOutputStream
-import java.util.*
 
 class NBTInt(value: Int) : NBTNumber<Int>(value) {
-    override val ID = NBTTypes.TAG_Int
+    override val type = NBTType.TAG_Int
 
     constructor(): this(0)
 

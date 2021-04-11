@@ -41,7 +41,7 @@ public class TestWriterLists {
 
     @Test
     public void writeList() {
-        NBTList<NBTString> list = new NBTList<>(NBTTypes.TAG_String);
+        NBTList<NBTString> list = new NBTList<>(NBTType.TAG_String);
         list.add(new NBTString("My"));
         list.add(new NBTString("Super"));
         list.add(new NBTString("Awesome"));

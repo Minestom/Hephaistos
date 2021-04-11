@@ -76,7 +76,7 @@ public class NBTSaving {
 
     @Test
     public void saveList() throws IOException, NBTException {
-        NBTList<NBTString> nbt = new NBTList<>(NBTTypes.TAG_String);
+        NBTList<NBTString> nbt = new NBTList<>(NBTType.TAG_String);
         nbt.add(new NBTString("A"));
         nbt.add(new NBTString("B"));
         nbt.add(new NBTString("C"));
