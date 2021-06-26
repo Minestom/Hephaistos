@@ -4,12 +4,8 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.lang.UnsupportedOperationException
 
-class NBTEnd: NBT<Unit> {
+object NBTEnd: ImmutableNBT<Unit>, MutableNBT<Unit> {
     override val type = NBTType.TAG_End
-
-    override var value: Unit
-        get() = throw UnsupportedOperationException("NBTEnd has no value.")
-        set(_value) { throw UnsupportedOperationException("NBTEnd has no value.") }
 
     override fun readContents(source: DataInputStream) {}
 
@@ -19,5 +15,17 @@ class NBTEnd: NBT<Unit> {
 
     override fun toString() = "<TAG_End>"
 
-    override fun deepClone() = NBTEnd()
+    override fun deepClone(): NBTEnd = this
+
+    override fun getValue() {
+        throw UnsupportedOperationException()
+    }
+
+    override fun setValue(v: Unit) {
+        throw UnsupportedOperationException()
+    }
+
+    override fun asMutable(): NBTEnd = this
+
+    override fun immutableView(): NBTEnd = this
 }

@@ -19,7 +19,7 @@ public class TestReaderPrimitives {
     @Test
     public void guessString() {
         try(NBTGsonReader reader = new NBTGsonReader(new StringReader("\"AAA\""))) {
-            NBT string = reader.readWithGuess();
+            MutableNBT string = reader.readWithGuess();
             assertTrue("Must be a NBTString", string instanceof NBTString);
             assertEquals("AAA", ((NBTString)string).getValue());
         }
@@ -44,7 +44,7 @@ public class TestReaderPrimitives {
     @Test
     public void guessDouble() {
         try(NBTGsonReader reader = new NBTGsonReader(new StringReader("42.5"))) {
-            NBT element = reader.readWithGuess();
+            MutableNBT element = reader.readWithGuess();
             assertTrue("Must be a NBTDouble", element instanceof NBTDouble);
             assertEquals(42.5, ((NBTDouble)element).getValue(), 10e-6);
         }
@@ -54,7 +54,7 @@ public class TestReaderPrimitives {
     public void readLong() {
         try(NBTGsonReader reader = new NBTGsonReader(new StringReader("425"))) {
             NBTLong element = reader.read(NBTLong.class);
-            assertEquals(425, element.getValue());
+            assertEquals(425, element.getNumberValue());
         }
     }
 
@@ -62,7 +62,7 @@ public class TestReaderPrimitives {
     public void readInt() {
         try(NBTGsonReader reader = new NBTGsonReader(new StringReader("425"))) {
             NBTInt element = reader.read(NBTInt.class);
-            assertEquals(425, element.getValue());
+            assertEquals(425, element.getNumberValue());
         }
     }
 
@@ -70,7 +70,7 @@ public class TestReaderPrimitives {
     public void readShort() {
         try(NBTGsonReader reader = new NBTGsonReader(new StringReader("425"))) {
             NBTShort element = reader.read(NBTShort.class);
-            assertEquals(425, element.getValue());
+            assertEquals(425, element.getNumberValue());
         }
     }
 
@@ -78,22 +78,22 @@ public class TestReaderPrimitives {
     public void readByte() {
         try(NBTGsonReader reader = new NBTGsonReader(new StringReader("42"))) {
             NBTByte element = reader.read(NBTByte.class);
-            assertEquals(42, element.getValue());
+            assertEquals(42, element.getNumberValue());
         }
     }
 
     @Test
     public void guessLong() {
         try(NBTGsonReader reader = new NBTGsonReader(new StringReader("425"))) {
-            NBT element = reader.readWithGuess();
+            MutableNBT element = reader.readWithGuess();
             assertTrue("Must be a NBTLong", element instanceof NBTLong);
-            assertEquals(425, ((NBTLong)element).getValue());
+            assertEquals(425, ((NBTLong)element).getNumberValue());
         }
     }
     @Test
     public void nullShouldBeGuessedAsEmptyString() {
         try(NBTGsonReader reader = new NBTGsonReader(new StringReader("null"))) {
-            NBT element = reader.readWithGuess();
+            MutableNBT element = reader.readWithGuess();
             assertTrue("Must be a NBTString", element instanceof NBTString);
             assertEquals("", ((NBTString)element).getValue());
         }

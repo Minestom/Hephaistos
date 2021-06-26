@@ -15,14 +15,14 @@ public class NBTLoading {
     @Test
     public void helloWorld() throws IOException, NBTException {
         try(NBTReader reader = new NBTReader(NBTLoading.class.getResourceAsStream("/hello_world.nbt"), false)) {
-            Pair<String, NBT<?>> namedTag = reader.readNamed();
+            Pair<String, MutableNBT<?>> namedTag = reader.readNamed();
             assertEquals("hello world", namedTag.getFirst());
-            NBT tag = namedTag.getSecond();
+            MutableNBT tag = namedTag.getSecond();
             if(tag instanceof NBTCompound) {
                 NBTCompound compound = (NBTCompound)tag;
                 assertEquals(1, compound.getSize());
                 assertTrue("Must contain tag 'name'", compound.containsKey("name"));
-                NBT subTag = compound.get("name");
+                MutableNBT subTag = compound.get("name");
                 assertNotNull(subTag);
                 assertTrue(subTag instanceof NBTString);
                 assertEquals("Bananrama", ((NBTString)subTag).getValue());
@@ -35,9 +35,9 @@ public class NBTLoading {
     @Test
     public void bigtest() throws IOException, NBTException {
         try(NBTReader reader = new NBTReader(NBTLoading.class.getResourceAsStream("/bigtest.nbt"), true)) {
-            Pair<String, NBT<?>> namedTag = reader.readNamed();
+            Pair<String, MutableNBT<?>> namedTag = reader.readNamed();
             assertEquals("Level", namedTag.getFirst());
-            NBT tag = namedTag.getSecond();
+            MutableNBT tag = namedTag.getSecond();
             assertTrue("root must be TAG_Compound", tag instanceof NBTCompound);
             NBTCompound level = (NBTCompound) tag;
             assertEquals(11, level.getSize());
@@ -73,11 +73,11 @@ public class NBTLoading {
             NBTList<NBTLong> listTestLong = level.getList("listTest (long)").asListOf();
             {
                 assertEquals(5, listTestLong.getLength());
-                assertEquals(11, listTestLong.get(0).getValue());
-                assertEquals(12, listTestLong.get(1).getValue());
-                assertEquals(13, listTestLong.get(2).getValue());
-                assertEquals(14, listTestLong.get(3).getValue());
-                assertEquals(15, listTestLong.get(4).getValue());
+                assertEquals(11, listTestLong.get(0).getNumberValue());
+                assertEquals(12, listTestLong.get(1).getNumberValue());
+                assertEquals(13, listTestLong.get(2).getNumberValue());
+                assertEquals(14, listTestLong.get(3).getNumberValue());
+                assertEquals(15, listTestLong.get(4).getNumberValue());
             }
 
             NBTList<NBTCompound> listTestCompound = level.getList("listTest (compound)").asListOf();

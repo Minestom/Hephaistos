@@ -100,17 +100,17 @@ public class NBTSaving {
         test(nbt);
     }
 
-    private <T extends NBT> void test(T nbt) throws IOException, NBTException {
+    private <T extends MutableNBT> void test(T nbt) throws IOException, NBTException {
         T saved = saveAndRead(nbt);
         assertTrue(saved != nbt); // don't cheat by returning the same object
         assertEquals(nbt, saved);
     }
 
-    private <T extends NBT> T saveAndRead(NBT tag) throws IOException, NBTException {
+    private <T extends MutableNBT> T saveAndRead(MutableNBT tag) throws IOException, NBTException {
         NBTWriter output = output();
         output.writeNamed("a", tag);
         output.close();
-        Pair<String, NBT<?>> namedTag = input().readNamed();
+        Pair<String, MutableNBT<?>> namedTag = input().readNamed();
         assertEquals("a", namedTag.getFirst());
         assertEquals(tag.getClass(), namedTag.getSecond().getClass());
         return (T) namedTag.getSecond();

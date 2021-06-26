@@ -35,7 +35,7 @@ data class BlockState @JvmOverloads constructor(val name: String, val properties
 private fun loadProperties(properties: NBTCompound): Map<String, String> {
     val result = HashMap<String, String>()
     for ((name, value) in properties) {
-        result[name] = (value as NBTString).value
+        result[name] = (value as NBTString).getValue()
     }
     return result
 }

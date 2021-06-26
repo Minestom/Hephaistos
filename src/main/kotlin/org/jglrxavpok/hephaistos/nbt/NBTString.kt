@@ -2,43 +2,22 @@ package org.jglrxavpok.hephaistos.nbt
 
 import java.io.DataInputStream
 import java.io.DataOutputStream
-import java.util.*
 
-class NBTString(override var value: String): NBT<String> {
-
-    override val type = NBTType.TAG_String
+class NBTString(private var internalValue: String) : ImmutableNBTString(), MutableNBT<String> {
 
     constructor(): this("")
 
+    override fun getValue(): String = internalValue
+
     override fun readContents(source: DataInputStream) {
-        value = source.readUTF()
+        internalValue = source.readUTF()
     }
 
-    override fun writeContents(destination: DataOutputStream) {
-        destination.writeUTF(value)
+    override fun deepClone() = NBTString(internalValue)
+
+    override fun asMutable(): NBTString = this
+
+    override fun setValue(v: String) {
+        internalValue = v
     }
-
-    override fun toSNBT(): String {
-        val escaped = value.replace("\"", "\\\"")
-        return "\"$escaped\""
-    }
-
-    override fun toString() = toSNBT()
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as NBTString
-
-        if (value != other.value) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return Objects.hash(value)
-    }
-
-    override fun deepClone() = NBTString(value)
 }

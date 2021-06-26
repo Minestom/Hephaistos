@@ -3,28 +3,23 @@ package org.jglrxavpok.hephaistos.nbt
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
-class NBTByte(value: Byte) : NBTNumber<Byte>(value) {
+class NBTByte(private var internalValue: Byte) : ImmutableNBTByte(), MutableNBT<Byte> {
 
     constructor(boolean: Boolean): this(if(boolean) 1 else 0)
 
-    override val type = NBTType.TAG_Byte
-
     constructor(): this(0)
 
-    // help Java compiler to find the correct type (boxed vs primitive types)
-    fun getValue(): Byte = value
+    override fun getValue(): Byte = internalValue
 
     override fun readContents(source: DataInputStream) {
-        value = source.readByte()
+        internalValue = source.readByte()
     }
 
-    override fun writeContents(destination: DataOutputStream) {
-        destination.writeByte(value.toInt())
-    }
+    override fun deepClone() = NBTByte(internalValue)
 
-    override fun toSNBT(): String {
-        return "${value}B"
-    }
+    override fun asMutable(): NBTByte = this
 
-    override fun deepClone() = NBTByte(value)
+    override fun setValue(v: Byte) {
+        internalValue = v
+    }
 }

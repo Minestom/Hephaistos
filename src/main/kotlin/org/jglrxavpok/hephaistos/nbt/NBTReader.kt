@@ -26,7 +26,7 @@ class NBTReader @JvmOverloads constructor(source: InputStream, compressed: Boole
      * @throws NBTException if the file does not follow NBT format
      */
     @Throws(IOException::class, NBTException::class)
-    fun readNamed(): Pair<String, NBT<out Any>> {
+    fun readNamed(): Pair<String, MutableNBT<out Any>> {
         return reader.readFullyFormedTag()
     }
 
@@ -36,7 +36,7 @@ class NBTReader @JvmOverloads constructor(source: InputStream, compressed: Boole
      * @throws NBTException if the file does not follow NBT format
      */
     @Throws(IOException::class, NBTException::class)
-    fun read(): NBT<out Any> {
+    fun read(): MutableNBT<out Any> {
         return readNamed().second
     }
 
@@ -46,7 +46,7 @@ class NBTReader @JvmOverloads constructor(source: InputStream, compressed: Boole
      * @throws NBTException if the file does not follow NBT format
      */
     @Throws(IOException::class, NBTException::class)
-    fun readRaw(id: NBTType): NBT<out Any> {
+    fun readRaw(id: NBTType): MutableNBT<out Any> {
         return reader.readTag(id)
     }
 

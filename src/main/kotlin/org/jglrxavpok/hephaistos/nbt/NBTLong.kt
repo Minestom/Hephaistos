@@ -3,25 +3,21 @@ package org.jglrxavpok.hephaistos.nbt
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
-class NBTLong(value: Long) : NBTNumber<Long>(value) {
-    override val type = NBTType.TAG_Long
+class NBTLong(private var internalValue: Long) : ImmutableNBTLong(), MutableNBT<Long> {
 
     constructor(): this(0)
 
-    // help Java compiler to find the correct type (boxed vs primitive types)
-    fun getValue(): Long = value
+    override fun getValue(): Long = internalValue
 
     override fun readContents(source: DataInputStream) {
-        value = source.readLong()
+        internalValue = source.readLong()
     }
 
-    override fun writeContents(destination: DataOutputStream) {
-        destination.writeLong(value)
-    }
+    override fun deepClone() = NBTLong(internalValue)
 
-    override fun toSNBT(): String {
-        return "${value}L"
-    }
+    override fun asMutable(): NBTLong = this
 
-    override fun deepClone() = NBTLong(value)
+    override fun setValue(v: Long) {
+        internalValue = v
+    }
 }

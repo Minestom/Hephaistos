@@ -9,16 +9,21 @@ class NBTGsonWriter(val gson: Gson = GsonInstance) {
         val GsonInstance = Gson()
     }
 
-    fun write(element: NBT<out Any>): JsonElement {
+    fun write(element: ImmutableNBT<out Any>): JsonElement {
         return when(element) {
-            is NBTNumber<out Number> -> JsonPrimitive(element.value)
+            is ImmutableNBTByte -> JsonPrimitive(element.getNumberValue())
+            is ImmutableNBTDouble -> JsonPrimitive(element.getNumberValue())
+            is ImmutableNBTFloat -> JsonPrimitive(element.getNumberValue())
+            is ImmutableNBTInt -> JsonPrimitive(element.getNumberValue())
+            is ImmutableNBTLong -> JsonPrimitive(element.getNumberValue())
+            is ImmutableNBTShort -> JsonPrimitive(element.getNumberValue())
 
-            is NBTString -> JsonPrimitive(element.value)
-            is NBTByteArray -> JsonArray().apply { element.value.forEach { add(it) } }
-            is NBTLongArray -> JsonArray().apply { element.value.forEach { add(it) } }
-            is NBTIntArray -> JsonArray().apply { element.value.forEach { add(it) } }
-            is NBTList<out NBT<out Any>> -> JsonArray().apply { element.forEach { add(write(it)) } }
-            is NBTCompound -> JsonObject().apply {
+            is ImmutableNBTString -> JsonPrimitive(element.getValue())
+            is ImmutableNBTByteArray -> JsonArray().apply { element.getValue().forEach { add(it) } }
+            is ImmutableNBTLongArray -> JsonArray().apply { element.getValue().forEach { add(it) } }
+            is ImmutableNBTIntArray -> JsonArray().apply { element.getValue().forEach { add(it) } }
+            is ImmutableNBTList<out MutableNBT<out Any>> -> JsonArray().apply { element.forEach { add(write(it)) } }
+            is ImmutableNBTCompound -> JsonObject().apply {
                 for((name, value) in element) {
                     add(name, write(value))
                 }

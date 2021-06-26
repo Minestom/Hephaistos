@@ -8,7 +8,7 @@ public class Misc {
 
     @Test
     public void snbtArrays() {
-        NBT array = new NBTByteArray(new byte[]{1, 2, 3});
+        MutableNBT array = new NBTByteArray(new byte[]{1, 2, 3});
         assertEquals("[B;1B,2B,3B]", array.toSNBT());
 
         array = new NBTIntArray(new int[]{1, 2, 3});
@@ -20,7 +20,7 @@ public class Misc {
 
     @Test(expected = NBTException.class)
     public void ensureSubElementsOfListAreAllSameType() {
-        NBTList<NBT<?>> genericList = new NBTList<>(NBTType.TAG_String);
+        NBTList<MutableNBT<?>> genericList = new NBTList<>(NBTType.TAG_String);
         try {
             genericList.add(new NBTString("Some value"));
         } catch (Exception e) {

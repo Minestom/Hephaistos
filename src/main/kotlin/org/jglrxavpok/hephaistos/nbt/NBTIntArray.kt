@@ -4,56 +4,33 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.util.*
 
-class NBTIntArray(override var value: IntArray) : NBT<IntArray> {
-    val length get()= value.size
-
-    override val type = NBTType.TAG_Int_Array
+class NBTIntArray(private var internalValue: IntArray) : ImmutableNBTIntArray(), MutableNBT<IntArray> {
 
     constructor(): this(IntArray(0))
 
     override fun readContents(source: DataInputStream) {
         val length = source.readInt()
-        value = IntArray(length)
-        for(i in 0 until length) {
-            value[i] = source.readInt()
+        internalValue = IntArray(length)
+        for (i in 0 until length) {
+            internalValue[i] = source.readInt()
         }
     }
-
-    override fun writeContents(destination: DataOutputStream) {
-        destination.writeInt(length)
-        for(i in 0 until length) {
-            destination.writeInt(value[i])
-        }
-    }
-
-    operator fun get(index: Int) = value[index]
 
     operator fun set(index: Int, v: Int): NBTIntArray {
-        value[index] = v
+        internalValue[index] = v
         return this
-    }
-
-    override fun toSNBT(): String {
-        val list = value.joinToString(",") { "$it" }
-        return "[I;$list]"
     }
 
     override fun toString() = toSNBT()
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
+    override fun getValue() = internalValue
 
-        other as NBTIntArray
-
-        if (!value.contentEquals(other.value)) return false
-
-        return true
+    override fun setValue(v: IntArray) {
+        internalValue = v
     }
 
-    override fun hashCode(): Int {
-        return Objects.hash(*value.toTypedArray())
-    }
+    override fun deepClone() = NBTIntArray(internalValue.copyOf())
 
-    override fun deepClone() = NBTIntArray(value.copyOf())
+    override fun asMutable(): NBTIntArray = this
+
 }

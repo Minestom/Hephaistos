@@ -65,7 +65,7 @@ public class TestReaderLists {
     public void integerListShouldBeGuessedAsLongArray() {
         String json = "[0,1,2,3]";
         try(NBTGsonReader reader = new NBTGsonReader(new StringReader(json))) {
-            NBT guessed = reader.readWithGuess();
+            MutableNBT guessed = reader.readWithGuess();
             assertTrue(guessed instanceof NBTLongArray);
             NBTLongArray array = (NBTLongArray)guessed;
             assertEquals(4, array.getLength());
@@ -80,7 +80,7 @@ public class TestReaderLists {
     public void floatingPointShouldBeGuessedAsDoubleArray() {
         String json = "[0.0,1.0,2.0,3.0]";
         try(NBTGsonReader reader = new NBTGsonReader(new StringReader(json))) {
-            NBT guessed = reader.readWithGuess();
+            MutableNBT guessed = reader.readWithGuess();
             assertTrue(guessed instanceof NBTList);
             NBTList<NBTDouble> array = (NBTList<NBTDouble>)guessed;
             assertEquals(NBTType.TAG_Double, array.getSubtagType());
@@ -104,7 +104,7 @@ public class TestReaderLists {
                 "}\n" +
                 "]";
         try(NBTGsonReader reader = new NBTGsonReader(new StringReader(json))) {
-            NBT guessed = reader.readWithGuess();
+            MutableNBT guessed = reader.readWithGuess();
             assertTrue(guessed instanceof NBTList);
             NBTList<NBTCompound> array = (NBTList<NBTCompound>)guessed;
             assertEquals(NBTType.TAG_Compound, array.getSubtagType());
@@ -124,7 +124,7 @@ public class TestReaderLists {
     public void guessListOfList() {
         String json = "[[\"aaa\"], [\"bbb\", \"ccc\"]]";
         try(NBTGsonReader reader = new NBTGsonReader(new StringReader(json))) {
-            NBT array = reader.readWithGuess();
+            MutableNBT array = reader.readWithGuess();
             assertTrue("Guessed NBT must be a list", array instanceof NBTList);
             NBTList<NBTList<NBTString>> list = (NBTList<NBTList<NBTString>>) array;
             assertEquals("Guessed NBT must be a list of lists", list.getSubtagType(), NBTType.TAG_List);
@@ -144,7 +144,7 @@ public class TestReaderLists {
     public void allElementsOfListsShouldBeOfSameType() {
         String json = "[[\"aaa\"], 0]";
         try(NBTGsonReader reader = new NBTGsonReader(new StringReader(json))) {
-            NBT n = reader.readWithGuess();
+            MutableNBT n = reader.readWithGuess();
             fail("This list should not be read correctly because lists must have the same type for each sub-element, and this one does not");
         }
     }
@@ -153,7 +153,7 @@ public class TestReaderLists {
     public void emptyListShouldReturnStringList() {
         String json = "[]";
         try(NBTGsonReader reader = new NBTGsonReader(new StringReader(json))) {
-            NBT array = reader.readWithGuess();
+            MutableNBT array = reader.readWithGuess();
             assertTrue("Guessed NBT must be a list", array instanceof NBTList);
             NBTList<NBTString> list = (NBTList<NBTString>) array;
             assertEquals("Guessed NBT must be a list of strings", list.getSubtagType(), NBTType.TAG_String);

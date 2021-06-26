@@ -4,56 +4,33 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.util.*
 
-class NBTLongArray(override var value: LongArray) : NBT<LongArray> {
-    val length get()= value.size
-
-    override val type = NBTType.TAG_Long_Array
+class NBTLongArray(private var internalValue: LongArray) : ImmutableNBTLongArray(), MutableNBT<LongArray> {
 
     constructor(): this(LongArray(0))
 
     override fun readContents(source: DataInputStream) {
         val length = source.readInt()
-        value = LongArray(length)
-        for(i in 0 until length) {
-            value[i] = source.readLong()
+        internalValue = LongArray(length)
+        for (i in 0 until length) {
+            internalValue[i] = source.readLong()
         }
     }
-
-    override fun writeContents(destination: DataOutputStream) {
-        destination.writeInt(length)
-        for(i in 0 until length) {
-            destination.writeLong(value[i])
-        }
-    }
-
-    operator fun get(index: Int) = value[index]
 
     operator fun set(index: Int, v: Long): NBTLongArray {
-        value[index] = v
+        internalValue[index] = v
         return this
-    }
-
-    override fun toSNBT(): String {
-        val list = value.joinToString(",") { "${it}L" }
-        return "[L;$list]"
     }
 
     override fun toString() = toSNBT()
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
+    override fun getValue() = internalValue
 
-        other as NBTLongArray
-
-        if (!value.contentEquals(other.value)) return false
-
-        return true
+    override fun setValue(v: LongArray) {
+        internalValue = v
     }
 
-    override fun hashCode(): Int {
-        return Objects.hash(*value.toTypedArray())
-    }
+    override fun deepClone() = NBTLongArray(internalValue.copyOf())
 
-    override fun deepClone() = NBTLongArray(value.copyOf())
+    override fun asMutable(): NBTLongArray = this
+
 }

@@ -36,7 +36,7 @@ public class NBTCompoundMethods {
         nbt.setShort("a", (short) 42);
         assertEquals(1, nbt.getSize());
         assertTrue(nbt.get("a") instanceof NBTShort);
-        assertEquals(42, ((NBTShort)nbt.get("a")).getValue());
+        assertEquals(42, ((NBTShort)nbt.get("a")).getValue().shortValue());
     }
 
     @Test
@@ -51,7 +51,7 @@ public class NBTCompoundMethods {
         nbt.setByte("a", (byte) 0xCA);
         assertEquals(1, nbt.getSize());
         assertTrue(nbt.get("a") instanceof NBTByte);
-        assertEquals((byte)0xCA, ((NBTByte)nbt.get("a")).getValue());
+        assertEquals((byte)0xCA, ((NBTByte)nbt.get("a")).getValue().byteValue());
     }
 
     @Test
@@ -66,7 +66,7 @@ public class NBTCompoundMethods {
         nbt.setInt("a", 0xBABE);
         assertEquals(1, nbt.getSize());
         assertTrue(nbt.get("a") instanceof NBTInt);
-        assertEquals(0xBABE, ((NBTInt)nbt.get("a")).getValue());
+        assertEquals(0xBABE, ((NBTInt)nbt.get("a")).getValue().intValue());
     }
 
     @Test
@@ -81,7 +81,7 @@ public class NBTCompoundMethods {
         nbt.setLong("a", 0xCAFEBABEL);
         assertEquals(1, nbt.getSize());
         assertTrue(nbt.get("a") instanceof NBTLong);
-        assertEquals(0xCAFEBABEL, ((NBTLong)nbt.get("a")).getValue());
+        assertEquals(0xCAFEBABEL, ((NBTLong)nbt.get("a")).getValue().longValue());
     }
 
     @Test

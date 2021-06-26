@@ -168,3 +168,20 @@ It is also possible to create chunks on-demand:
         column0_0.getTileEntities()
         column0_0.getEntities()
 ```
+
+## On immutability
+Hephaistos v2.0.0 introduced immutable versions of the different NBT elements. These immutable versions are only interfaces, 
+and no default implementations are provided by Hephaistos currently.
+
+Mutable versions of NBT kept their original name (meaning NBTString is still the mutable version), they "just" extend ImmutableNBT too 
+(ImmutableNBTString in this example).
+
+In particular, ImmutableNBTList and ImmutableNBTCompound are immutable at only the surface level: there are no `setValue`, 
+or `setTag` methods, but it is still possible to modify the underlying list/map by using `getValue()`, and the sub-elements will be mutable. The main reason for this behaviour
+is that I wanted NBTCompound/NBTList to be up-cast to ImmutableNBTCompound/ImmutableNBTList "for free", but NBTCompound and NBTList have 
+a MutableMap / MutableList internally. This field needs to tell the compiler whether the elements will be ImmutableNBT or MutableNBT, but by making
+NBTCompound extend ImmutableNBTCompound, it was not possible to make an easy & allocation-free conversion from one to another.
+
+This also means it is not possible to create a `ImmutableNBTList<ImmutableNBTString>` for the moment.
+
+Sadly Java does not support const-correctness which would have solved the problem entirely.
