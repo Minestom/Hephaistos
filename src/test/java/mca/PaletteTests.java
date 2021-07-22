@@ -4,21 +4,20 @@ import org.jglrxavpok.hephaistos.mca.BlockState;
 import org.jglrxavpok.hephaistos.mca.LongCompactorKt;
 import org.jglrxavpok.hephaistos.mca.Palette;
 import org.jglrxavpok.hephaistos.mca.SupportedVersion;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PaletteTests {
 
     private Palette palette;
     private static final BlockState STONE = new BlockState("minecraft:stone", new HashMap<>());
 
-    @Before
+    @BeforeEach
     public void init() {
         palette = new Palette();
     }
@@ -32,9 +31,12 @@ public class PaletteTests {
         assertEquals(1, palette.getBlocks().size());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void decreaseReferenceOfNonExistentBlock() {
-        palette.decreaseReference(BlockState.Air);
+        assertThrows(IllegalArgumentException.class, () ->
+            palette.decreaseReference(BlockState.Air)
+        );
+
     }
 
     @Test
@@ -100,7 +102,7 @@ public class PaletteTests {
         assertArrayEquals(expected, palette.compactIDs(states, SupportedVersion.MC_1_16));
     }
 
-    @After
+    @AfterEach
     public void clean() {
         palette = null;
     }
