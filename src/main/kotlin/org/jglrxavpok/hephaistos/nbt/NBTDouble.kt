@@ -7,14 +7,8 @@ class NBTDouble(value: Double) : NBTNumber<Double>(value) {
 
     override val ID = NBTTypes.TAG_Double
 
-    constructor(): this(0.0)
-
     // help Java compiler to find the correct type (boxed vs primitive types)
     fun getValue(): Double = value
-
-    override fun readContents(source: DataInputStream) {
-        value = source.readDouble()
-    }
 
     override fun writeContents(destination: DataOutputStream) {
         destination.writeDouble(value)
@@ -24,5 +18,9 @@ class NBTDouble(value: Double) : NBTNumber<Double>(value) {
         return "${value}D"
     }
 
-    override fun deepClone() = NBTDouble(value)
+    companion object: NBTReaderCompanion<NBTDouble> {
+        override fun readContents(source: DataInputStream): NBTDouble {
+            return NBTDouble(source.readDouble())
+        }
+    }
 }

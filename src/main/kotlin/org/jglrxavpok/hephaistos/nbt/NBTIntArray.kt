@@ -11,14 +11,6 @@ class NBTIntArray(var value: IntArray) : NBT {
 
     constructor(): this(IntArray(0))
 
-    override fun readContents(source: DataInputStream) {
-        val length = source.readInt()
-        value = IntArray(length)
-        for(i in 0 until length) {
-            value[i] = source.readInt()
-        }
-    }
-
     override fun writeContents(destination: DataOutputStream) {
         destination.writeInt(length)
         for(i in 0 until length) {
@@ -56,4 +48,16 @@ class NBTIntArray(var value: IntArray) : NBT {
     }
 
     override fun deepClone() = NBTIntArray(value.copyOf())
+
+    companion object : NBTReaderCompanion<NBTIntArray> {
+        override fun readContents(source: DataInputStream): NBTIntArray {
+            val length = source.readInt()
+            val value = IntArray(length)
+            for(i in 0 until length) {
+                value[i] = source.readInt()
+            }
+
+            return NBTIntArray(value)
+        }
+    }
 }

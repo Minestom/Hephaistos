@@ -3,10 +3,10 @@ package org.jglrxavpok.hephaistos.nbt
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
-class NBTEnd: NBT {
+object NBTEnd: NBT, NBTReaderCompanion<NBTEnd> {
     override val ID = NBTTypes.TAG_End
 
-    override fun readContents(source: DataInputStream) {}
+    override fun readContents(source: DataInputStream): NBTEnd = this
 
     override fun writeContents(destination: DataOutputStream) {}
 
@@ -14,5 +14,5 @@ class NBTEnd: NBT {
 
     override fun toString() = "<TAG_End>"
 
-    override fun deepClone() = NBTEnd()
+    override fun deepClone() = this
 }

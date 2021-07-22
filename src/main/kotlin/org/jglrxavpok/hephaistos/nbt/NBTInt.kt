@@ -7,14 +7,8 @@ import java.util.*
 class NBTInt(value: Int) : NBTNumber<Int>(value) {
     override val ID = NBTTypes.TAG_Int
 
-    constructor(): this(0)
-
     // help Java compiler to find the correct type (boxed vs primitive types)
     fun getValue(): Int = value
-
-    override fun readContents(source: DataInputStream) {
-        value = source.readInt()
-    }
 
     override fun writeContents(destination: DataOutputStream) {
         destination.writeInt(value)
@@ -24,5 +18,9 @@ class NBTInt(value: Int) : NBTNumber<Int>(value) {
         return "$value"
     }
 
-    override fun deepClone() = NBTInt(value)
+    companion object: NBTReaderCompanion<NBTInt> {
+        override fun readContents(source: DataInputStream): NBTInt {
+            return NBTInt(source.readInt())
+        }
+    }
 }

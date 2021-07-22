@@ -4,7 +4,7 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.util.concurrent.ConcurrentHashMap
 
-class NBTCompound(): NBT {
+class NBTCompound: NBT {
     override val ID = NBTTypes.TAG_Compound
 
     private val tags = ConcurrentHashMap<String, NBT>()
@@ -13,15 +13,6 @@ class NBTCompound(): NBT {
      * Number of tags inside this compound
      */
     val size get()= tags.size
-
-    override fun readContents(source: DataInputStream) {
-        do {
-            val tag = source.readFullyFormedTag()
-            if(tag.second !is NBTEnd) {
-                tags[tag.first] = tag.second
-            }
-        } while(tag.second !is NBTEnd)
-    }
 
     override fun writeContents(destination: DataOutputStream) {
         for(entry in tags.entries) {
@@ -294,6 +285,19 @@ class NBTCompound(): NBT {
             it[key] = value.deepClone()
         }
         it
+    }
+
+    companion object : NBTReaderCompanion<NBTCompound> {
+        override fun readContents(source: DataInputStream) = with(NBTCompound()) {
+            do {
+                val tag = source.readFullyFormedTag()
+                if(tag.second !is NBTEnd) {
+                    tags[tag.first] = tag.second
+                }
+            } while(tag.second !is NBTEnd)
+
+            return@with this
+        }
     }
 
 }

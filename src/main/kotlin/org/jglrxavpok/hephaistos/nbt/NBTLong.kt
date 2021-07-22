@@ -12,10 +12,6 @@ class NBTLong(value: Long) : NBTNumber<Long>(value) {
     // help Java compiler to find the correct type (boxed vs primitive types)
     fun getValue(): Long = value
 
-    override fun readContents(source: DataInputStream) {
-        value = source.readLong()
-    }
-
     override fun writeContents(destination: DataOutputStream) {
         destination.writeLong(value)
     }
@@ -24,5 +20,9 @@ class NBTLong(value: Long) : NBTNumber<Long>(value) {
         return "${value}L"
     }
 
-    override fun deepClone() = NBTLong(value)
+    companion object: NBTReaderCompanion<NBTLong> {
+        override fun readContents(source: DataInputStream): NBTLong {
+            return NBTLong(source.readLong())
+        }
+    }
 }

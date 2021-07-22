@@ -14,20 +14,6 @@ class NBTList<Tag: NBT>(val subtagType: Int): Iterable<Tag>, NBT {
     val length get()= tags.size
 
     /**
-     * Reads the contents of the list, except for the subtag ID, which is supposed to be already read
-     * @see NBT.readContents
-     */
-    override fun readContents(source: DataInputStream) {
-        clear()
-        val length = source.readInt()
-        for (i in 0 until length) {
-            @Suppress("UNCHECKED_CAST") // Due to the specs and the way Hephaistos is made, this cast should not fail.
-            val tag = source.readTag(subtagType) as Tag
-            tags.add(tag)
-        }
-    }
-
-    /**
      * Writes the contents of the list, WITH for the subtag ID
      * @see NBT.writeContents
      */
@@ -132,12 +118,22 @@ class NBTList<Tag: NBT>(val subtagType: Int): Iterable<Tag>, NBT {
         return result
     }
 
-    companion object {
+    companion object : NBTReaderCompanion<NBTList<NBT>> {
+        /**
+         * Reads the contents of the list, except for the subtag ID, which is supposed to be already read
+         * @see NBT.readContents
+         */
         @Throws(IOException::class)
-        fun readFrom(source: DataInputStream): NBTList<NBT> {
+        override fun readContents(source: DataInputStream): NBTList<NBT> {
             val subtagType = source.readByte().toInt()
             val list = NBTList<NBT>(subtagType)
-            list.readContents(source)
+            val length = source.readInt()
+            for (i in 0 until length) {
+                @Suppress("UNCHECKED_CAST") // Due to the specs and the way Hephaistos is made, this cast should not fail.
+                val tag = source.readTag(subtagType)
+                list.tags.add(tag)
+            }
+
             return list
         }
     }

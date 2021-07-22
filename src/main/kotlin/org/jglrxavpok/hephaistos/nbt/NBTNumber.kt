@@ -2,7 +2,7 @@ package org.jglrxavpok.hephaistos.nbt
 
 import java.util.*
 
-abstract class NBTNumber<Type: Number>(open var value: Type): NBT {
+abstract class NBTNumber<Type: Number>(open val value: Type): NBT {
 
     override fun hashCode(): Int {
         return Objects.hash(value)
@@ -19,5 +19,7 @@ abstract class NBTNumber<Type: Number>(open var value: Type): NBT {
 
         return true
     }
+
+    final override fun deepClone() = this
 
 }

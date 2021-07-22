@@ -10,14 +10,8 @@ class NBTByte(value: Byte) : NBTNumber<Byte>(value) {
 
     override val ID = NBTTypes.TAG_Byte
 
-    constructor(): this(0)
-
     // help Java compiler to find the correct type (boxed vs primitive types)
     fun getValue(): Byte = value
-
-    override fun readContents(source: DataInputStream) {
-        value = source.readByte()
-    }
 
     override fun writeContents(destination: DataOutputStream) {
         destination.writeByte(value.toInt())
@@ -27,5 +21,9 @@ class NBTByte(value: Byte) : NBTNumber<Byte>(value) {
         return "${value}B"
     }
 
-    override fun deepClone() = NBTByte(value)
+    companion object: NBTReaderCompanion<NBTByte> {
+        override fun readContents(source: DataInputStream): NBTByte {
+            return NBTByte(source.readByte())
+        }
+    }
 }

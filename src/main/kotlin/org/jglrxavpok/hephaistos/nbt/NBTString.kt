@@ -4,15 +4,9 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.util.*
 
-class NBTString(var value: String): NBT {
+class NBTString(val value: String): NBT {
 
     override val ID = NBTTypes.TAG_String
-
-    constructor(): this("")
-
-    override fun readContents(source: DataInputStream) {
-        value = source.readUTF()
-    }
 
     override fun writeContents(destination: DataOutputStream) {
         destination.writeUTF(value)
@@ -40,5 +34,11 @@ class NBTString(var value: String): NBT {
         return Objects.hash(value)
     }
 
-    override fun deepClone() = NBTString(value)
+    override fun deepClone() = this
+
+    companion object: NBTReaderCompanion<NBTString> {
+        override fun readContents(source: DataInputStream): NBTString {
+            return NBTString(source.readUTF())
+        }
+    }
 }

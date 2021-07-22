@@ -11,7 +11,7 @@ import java.io.IOException
 fun DataInputStream.readFullyFormedTag(): Pair<String, NBT> {
     val id = readByte().toInt()
     if(id == NBTTypes.TAG_End) {
-        return "" to NBTEnd()
+        return "" to NBTEnd
     }
     val name = readUTF()
 
@@ -22,15 +22,9 @@ fun DataInputStream.readFullyFormedTag(): Pair<String, NBT> {
  * Reads a tag (value only) from this input stream
  */
 @Throws(IOException::class, NBTException::class)
-fun DataInputStream.readTag(id: Int): NBT = when (id) {
-    NBTTypes.TAG_List -> {
-        NBTList.readFrom(this)
-    }
-    else -> {
-        val res = NBTTypes.newFromTypeID(id)
-        res.readContents(this)
-        res
-    }
+fun DataInputStream.readTag(id: Int): NBT {
+    val readerCompanion = NBTTypes.readerCompanionFromID(id)
+    return readerCompanion.readContents(this)
 }
 
 /**

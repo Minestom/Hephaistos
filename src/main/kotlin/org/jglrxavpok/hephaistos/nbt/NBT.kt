@@ -15,16 +15,6 @@ interface NBT {
     val ID: Int
 
     /**
-     * Reads the contents of the tag from the given source. The tag ID is supposed to be already read.
-     *
-     * For NBTLists, it assumes the subtag type ID as already been read
-     * @throws IOException if an error occurred during reading
-     * @throws NBTException if the data stream does not respect NBT specs
-     */
-    @Throws(IOException::class, NBTException::class)
-    fun readContents(source: DataInputStream)
-
-    /**
      * Writes the contents of the tag to the given destination. The tag ID is supposed to be already written
      * @throws IOException if an error occurred during writing
      */
