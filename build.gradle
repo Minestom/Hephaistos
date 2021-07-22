@@ -12,10 +12,6 @@ java {
 group 'org.jglrxavpok.nbt'
 version '1.1.8'
 
-repositories {
-    mavenCentral()
-}
-
 sourceSets {
     main {
         kotlin {
@@ -54,16 +50,27 @@ java {
     withSourcesJar()
 }
 
-dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'org.jetbrains.kotlin.jvm'
 
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+
+        // https://mvnrepository.com/artifact/junit/junit
+        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.7.2'
+    }
+}
+
+dependencies {
     gsonBasedImplementation 'com.google.code.gson:gson:2.8.6'
 
     // https://mvnrepository.com/artifact/org.antlr/antlr4-runtime
     api group: 'org.antlr', name: 'antlr4-runtime', version: '4.8-1'
-
-    // https://mvnrepository.com/artifact/junit/junit
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.7.2'
 }
 
 compileKotlin {
