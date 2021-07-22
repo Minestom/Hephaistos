@@ -1,8 +1,9 @@
 package nbt;
 
 import org.jglrxavpok.hephaistos.nbt.*;
-import org.junit.Test;
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Misc {
 
@@ -18,14 +19,10 @@ public class Misc {
         assertEquals("[L;1L,2L,3L]", array.toSNBT());
     }
 
-    @Test(expected = NBTException.class)
+    @Test
     public void ensureSubElementsOfListAreAllSameType() {
-        NBTList<NBT> genericList = new NBTList<NBT>(NBTTypes.TAG_String);
-        try {
-            genericList.add(new NBTString("Some value"));
-        } catch (Exception e) {
-            fail();
-        }
+        NBTList<NBT> genericList = new NBTList<>(NBTTypes.TAG_String);
+        genericList.add(new NBTString("Some value"));
         genericList.add(new NBTInt(42));
     }
 }

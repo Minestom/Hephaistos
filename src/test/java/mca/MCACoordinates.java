@@ -4,88 +4,90 @@ import org.jglrxavpok.hephaistos.mca.AnvilException;
 import org.jglrxavpok.hephaistos.mca.BlockState;
 import org.jglrxavpok.hephaistos.mca.ChunkColumn;
 import org.jglrxavpok.hephaistos.mca.RegionFile;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class MCACoordinates {
 
-    private RegionFile region;
-    private RegionFile region2;
+    private static RegionFile region;
+    private static RegionFile region2;
 
-    @Before
-    public void init() throws IOException, AnvilException {
-        File target = new File("tmp_coords_r.0.0.mca");
-        File target2 = new File("tmp_coords_r2.0.0.mca");
-        target.createNewFile();
-        target2.createNewFile();
+    @BeforeAll
+    static void init() throws IOException, AnvilException {
+        Path target = Path.of("./tmp_coords_r.0.0.mca");
+        Path target2 = Path.of("./tmp_coords_r2.0.0.mca");
+        Files.createFile(target);
+        Files.createFile(target2);
         RandomAccessFile file = new RandomAccessFile(target, "rw");
         RandomAccessFile file2 = new RandomAccessFile(target2, "rw");
         region = new RegionFile(file, 0, 0);
         region2 = new RegionFile(file2, 5, -2);
     }
 
-    @Test(expected = AnvilException.class)
-    public void throwOnInvalidCoordsX() throws IOException, AnvilException {
-        region.getChunk(-1, 0);
-    }
-
-    @Test(expected = AnvilException.class)
-    public void throwOnInvalidCoordsZ() throws IOException, AnvilException {
-        region.getChunk(0, -1);
-    }
-
-    @Test(expected = AnvilException.class)
-    public void throwOnInvalidCoordsX_2() throws IOException, AnvilException {
-        region.getChunk(32, 0);
-    }
-
-    @Test(expected = AnvilException.class)
-    public void throwOnInvalidCoordsZ_2() throws IOException, AnvilException {
-        region.getChunk(0, 32);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void throwOnInvalidChunkLocalPositionXNegative() throws IOException {
-        ChunkColumn column;
-        try {
-            column = region2.getOrCreateChunk(5*32+5, -2*32+5);
-            column.setBlockState(-1, 0, 0, BlockState.Air);
-        } catch (AnvilException e) {
-            Assert.fail("Chunk has a valid position inside the RegionFile, should not throw");
-        }
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void throwOnInvalidChunkLocalPositionXOverMax() throws IOException {
-        ChunkColumn column;
-        try {
-            column = region2.getOrCreateChunk(5*32+5, -2*32+5);
-            column.setBlockState(16, 0, 0, BlockState.Air);
-        } catch (AnvilException e) {
-            Assert.fail("Chunk has a valid position inside the RegionFile, should not throw");
-        }
+    @Test
+    public void throwOnInvalidCoordsX() {
+        assertThrows(AnvilException.class, () ->
+            region.getChunk(-1, 0)
+        );
     }
 
     @Test
-    public void validChunkLocalPositionX() throws IOException {
-        ChunkColumn column;
-        try {
+    public void throwOnInvalidCoordsZ() {
+        assertThrows(AnvilException.class, () ->
+            region.getChunk(0, -1)
+        );
+    }
+
+    @Test
+    public void throwOnInvalidCoordsX_2() {
+        assertThrows(AnvilException.class, () ->
+            region.getChunk(32, 0)
+        );
+    }
+
+    @Test
+    public void throwOnInvalidCoordsZ_2() {
+        assertThrows(AnvilException.class, () ->
+            region.getChunk(0, 32)
+        );
+    }
+
+    @Test
+    public void throwOnInvalidChunkLocalPositionXNegative() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            ChunkColumn column;
+            column = region2.getOrCreateChunk(5 * 32 + 5, -2 * 32 + 5);
+            column.setBlockState(-1, 0, 0, BlockState.Air);
+        }, "Chunk has a valid position inside the RegionFile, should not throw");
+    }
+
+    @Test
+    public void throwOnInvalidChunkLocalPositionXOverMax() throws IOException {
+        assertThrows(IllegalArgumentException.class, () -> {
+            ChunkColumn column;
+            column = region2.getOrCreateChunk(5*32+5, -2*32+5);
+            column.setBlockState(16, 0, 0, BlockState.Air);
+        }, "Chunk has a valid position inside the RegionFile, should not throw");
+    }
+
+    @Test
+    public void validChunkLocalPositionX() {
+        assertThrows(IOException.class, () -> {
+            ChunkColumn column;
             column = region2.getOrCreateChunk(5*32+5, -2*32+5);
             column.setBlockState(8, 0, 0, BlockState.Air);
-        } catch (AnvilException e) {
-            Assert.fail("Chunk has a valid position inside the RegionFile, should not throw");
-        }
+        }, "Chunk has a valid position inside the RegionFile, should not throw");
     }
 
     @Test
@@ -139,7 +141,7 @@ public class MCACoordinates {
             column = region2.getOrCreateChunk(5*32+5, -2*32+5);
             column.setBlockState(0, -1, 0, BlockState.Air);
         } catch (AnvilException e) {
-            Assert.fail("Chunk has a valid position inside the RegionFile, should not throw");
+            fail("Chunk has a valid position inside the RegionFile, should not throw");
         }
     }
 
@@ -151,7 +153,7 @@ public class MCACoordinates {
             column = region2.getOrCreateChunk(5*32+5, -2*32+5);
             column.setBlockState(0, 256, 0, BlockState.Air);
         } catch (AnvilException e) {
-            Assert.fail("Chunk has a valid position inside the RegionFile, should not throw");
+            fail("Chunk has a valid position inside the RegionFile, should not throw");
         }
     }
 
@@ -166,7 +168,7 @@ public class MCACoordinates {
         assertEquals(BlockState.Air, chunk.getBlockState(0, 0, 0));
     }
 
-    @After
+    @AfterAll
     public void clean() throws IOException {
         region.close();
         region2.close();

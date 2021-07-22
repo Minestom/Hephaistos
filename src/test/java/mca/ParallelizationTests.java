@@ -4,8 +4,8 @@ import org.jglrxavpok.hephaistos.mca.AnvilException;
 import org.jglrxavpok.hephaistos.mca.BlockState;
 import org.jglrxavpok.hephaistos.mca.ChunkColumn;
 import org.jglrxavpok.hephaistos.mca.RegionFile;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,7 +18,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * While these tests are far from perfect and can clearly report false positives, the sheer amount of chunks to try to save/load at the same time
@@ -30,7 +30,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class ParallelizationTests {
 
-    @Before
+    @BeforeAll
     public void init() throws IOException {
         if(Files.deleteIfExists(Paths.get("tmp_parallel_empty_r.0.0.mca")))
             System.out.println("deleted");
@@ -76,12 +76,12 @@ public class ParallelizationTests {
     }
 
     private void verify(ChunkColumn column, int id) {
-        assertEquals("Mismatch in generation status: "+column.getX()+"; "+column.getZ(), ChunkColumn.GenerationStatus.Full, column.getGenerationStatus());
+        assertEquals(ChunkColumn.GenerationStatus.Full, column.getGenerationStatus(), "Mismatch in generation status: "+column.getX()+"; "+column.getZ());
         BlockState state = new BlockState(String.valueOf(id));
         for (int z = 0; z < 16; z++) {
             for (int x = 0; x < 16; x++) {
                 for (int y = 0; y < 256; y++) {
-                    assertEquals("Failed at Chunk("+column.getX()+"; "+column.getZ()+") at X="+x+"; Y="+y+"; Z="+z, state, column.getBlockState(x, y, z));
+                    assertEquals(state, column.getBlockState(x, y, z), "Failed at Chunk("+column.getX()+"; "+column.getZ()+") at X="+x+"; Y="+y+"; Z="+z);
                 }
             }
         }

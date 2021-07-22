@@ -2,13 +2,12 @@ package nbt;
 
 import kotlin.Pair;
 import org.jglrxavpok.hephaistos.nbt.*;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.Objects;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class NBTLoading {
 
@@ -21,7 +20,7 @@ public class NBTLoading {
             if(tag instanceof NBTCompound) {
                 NBTCompound compound = (NBTCompound)tag;
                 assertEquals(1, compound.getSize());
-                assertTrue("Must contain tag 'name'", compound.containsKey("name"));
+                assertTrue(compound.containsKey("name"), "Must contain tag 'name'");
                 NBT subTag = compound.get("name");
                 assertNotNull(subTag);
                 assertTrue(subTag instanceof NBTString);
@@ -38,7 +37,7 @@ public class NBTLoading {
             Pair<String, NBT> namedTag = reader.readNamed();
             assertEquals("Level", namedTag.getFirst());
             NBT tag = namedTag.getSecond();
-            assertTrue("root must be TAG_Compound", tag instanceof NBTCompound);
+            assertTrue(tag instanceof NBTCompound, "root must be TAG_Compound");
             NBTCompound level = (NBTCompound) tag;
             assertEquals(11, level.getSize());
 
@@ -92,7 +91,7 @@ public class NBTLoading {
 
                 NBTCompound compound1 = Objects.requireNonNull(listTestCompound.get(1));
                 {
-                    Assert.assertEquals(2, compound1.getSize());
+                    assertEquals(2, compound1.getSize());
                     assertEquals(1264099775885L, compound1.getLong("created-on").longValue());
                     assertEquals("Compound tag #1", compound1.getString("name"));
                 }

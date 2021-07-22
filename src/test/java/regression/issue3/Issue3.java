@@ -3,18 +3,12 @@ package regression.issue3;
 import org.jglrxavpok.hephaistos.mca.AnvilException;
 import org.jglrxavpok.hephaistos.mca.ChunkColumn;
 import org.jglrxavpok.hephaistos.mca.RegionFile;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
 public class Issue3 {
-
-    @Before
-    public void init() {
-
-    }
 
     @Test
     public void loadAllChunks() throws IOException, AnvilException {

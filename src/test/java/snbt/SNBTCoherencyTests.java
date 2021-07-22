@@ -1,12 +1,11 @@
 package snbt;
 
 import org.jglrxavpok.hephaistos.nbt.*;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringReader;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SNBTCoherencyTests {
 
@@ -39,12 +38,13 @@ public class SNBTCoherencyTests {
         }
     }
 
-    @Test(expected = NBTException.class)
-    public void syntaxError() throws NBTException {
+    @Test
+    public void syntaxError() {
         String snbt = "{display:{Lore:[\"text here\"]}";
-        try(SNBTParser parser = new SNBTParser(new StringReader(snbt))) {
-            parser.parse();
-        }
-        Assert.fail("Missing bracket, should not parse");
+        assertThrows(NBTException.class, () -> {
+            try (SNBTParser parser = new SNBTParser(new StringReader(snbt))) {
+                parser.parse();
+            }
+        }, "Missing bracket, should not parse");
     }
 }

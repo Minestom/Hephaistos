@@ -18,8 +18,6 @@ class NBTShort(value: Short) : NBTNumber<Short>(value) {
         return "${value}S"
     }
 
-    override fun deepClone() = this
-
     companion object: NBTReaderCompanion<NBTShort> {
         override fun readContents(source: DataInputStream): NBTShort {
             return NBTShort(source.readShort())

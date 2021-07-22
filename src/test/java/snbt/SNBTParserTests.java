@@ -1,11 +1,11 @@
 package snbt;
 
 import org.jglrxavpok.hephaistos.nbt.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringReader;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SNBTParserTests {
 

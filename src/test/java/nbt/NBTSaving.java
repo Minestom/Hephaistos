@@ -2,20 +2,14 @@ package nbt;
 
 import kotlin.Pair;
 import org.jglrxavpok.hephaistos.nbt.*;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(Parameterized.class)
 public class NBTSaving {
@@ -124,12 +118,12 @@ public class NBTSaving {
         return new NBTWriter(baos, compressed);
     }
 
-    @Before
+    @BeforeAll
     public void init() {
         baos = new ByteArrayOutputStream();
     }
 
-    @After
+    @AfterAll
     public void clean() {
         baos = null;
     }

@@ -3,9 +3,9 @@ package mca;
 import org.jglrxavpok.hephaistos.mca.AnvilException;
 import org.jglrxavpok.hephaistos.mca.ChunkColumn;
 import org.jglrxavpok.hephaistos.mca.RegionFile;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,14 +14,14 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class MCALoading {
 
     private RandomAccessFile file;
 
-    @Before
+    @BeforeAll
     public void init() throws IOException {
         Files.copy(Paths.get("src/test/resources/r.0.0.mca"), Paths.get("tmp_r.0.0.mca"), REPLACE_EXISTING);
         file = new RandomAccessFile(new File("tmp_r.0.0.mca"), "rw");
@@ -43,7 +43,7 @@ public class MCALoading {
         }
     }
 
-    @After
+    @AfterAll
     public void clean() throws IOException {
         try {
             file.close();

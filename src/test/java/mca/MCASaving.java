@@ -4,9 +4,10 @@ import org.jglrxavpok.hephaistos.mca.AnvilException;
 import org.jglrxavpok.hephaistos.mca.BlockState;
 import org.jglrxavpok.hephaistos.mca.ChunkColumn;
 import org.jglrxavpok.hephaistos.mca.RegionFile;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,14 +16,14 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class MCASaving {
 
     private RandomAccessFile file;
 
-    @Before
+    @BeforeEach
     public void init() throws IOException {
         File target = new File("tmp_save_r.0.0.mca");
         target.createNewFile();
@@ -245,7 +246,7 @@ public class MCASaving {
         assertEquals((byte) 12, c.getSections()[0].getSkyLight(0,5,0));
     }
 
-    @After
+    @AfterAll
     public void clean() throws IOException {
         try {
             file.close();
