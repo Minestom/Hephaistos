@@ -2,9 +2,7 @@ package nbt;
 
 import kotlin.Pair;
 import org.jglrxavpok.hephaistos.nbt.*;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -121,12 +119,12 @@ public class NBTSaving {
         return new NBTWriter(baos, compressed);
     }
 
-    @BeforeAll
+    @BeforeEach
     public void init() {
         baos = new ByteArrayOutputStream();
     }
 
-    @AfterAll
+    @AfterEach
     public void clean() {
         baos = null;
     }

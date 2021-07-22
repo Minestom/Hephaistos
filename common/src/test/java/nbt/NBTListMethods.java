@@ -4,9 +4,7 @@ import org.jglrxavpok.hephaistos.nbt.NBT;
 import org.jglrxavpok.hephaistos.nbt.NBTList;
 import org.jglrxavpok.hephaistos.nbt.NBTString;
 import org.jglrxavpok.hephaistos.nbt.NBTTypes;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -14,7 +12,7 @@ public class NBTListMethods {
 
     private NBTList<NBTString> list;
 
-    @BeforeAll
+    @BeforeEach
     public void init() {
         list = new NBTList<>(NBTTypes.TAG_String);
     }
@@ -61,7 +59,7 @@ public class NBTListMethods {
         assertEquals("Some value2", list.get(1).getValue());
     }
 
-    @AfterAll
+    @AfterEach
     public void clean() {
         list.clear();
         list = null;

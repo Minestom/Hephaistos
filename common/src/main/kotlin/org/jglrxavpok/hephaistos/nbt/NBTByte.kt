@@ -6,8 +6,6 @@ import java.util.*
 
 class NBTByte(value: Byte) : NBTNumber<Byte>(value) {
 
-    constructor(boolean: Boolean): this(if(boolean) 1 else 0)
-
     override val ID = NBTTypes.TAG_Byte
 
     // help Java compiler to find the correct type (boxed vs primitive types)
@@ -22,6 +20,13 @@ class NBTByte(value: Byte) : NBTNumber<Byte>(value) {
     }
 
     companion object: NBTReaderCompanion<NBTByte> {
+
+        @JvmStatic
+        val ONE = NBTByte(1)
+
+        @JvmStatic
+        val ZERO = NBTByte(0)
+
         override fun readContents(source: DataInputStream): NBTByte {
             return NBTByte(source.readByte())
         }

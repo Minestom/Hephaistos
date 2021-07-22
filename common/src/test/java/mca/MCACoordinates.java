@@ -4,9 +4,7 @@ import org.jglrxavpok.hephaistos.mca.AnvilException;
 import org.jglrxavpok.hephaistos.mca.BlockState;
 import org.jglrxavpok.hephaistos.mca.ChunkColumn;
 import org.jglrxavpok.hephaistos.mca.RegionFile;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,11 +17,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class MCACoordinates {
 
-    private static RegionFile region;
-    private static RegionFile region2;
+    private RegionFile region;
+    private RegionFile region2;
 
-    @BeforeAll
-    static void init() throws IOException, AnvilException {
+    @BeforeEach
+    void init() throws IOException, AnvilException {
         Path target = Path.of("./tmp_coords_r.0.0.mca");
         Path target2 = Path.of("./tmp_coords_r2.0.0.mca");
         Files.createFile(target);
@@ -161,7 +159,7 @@ public class MCACoordinates {
         assertEquals(BlockState.Air, chunk.getBlockState(0, 0, 0));
     }
 
-    @AfterAll
+    @AfterEach
     public void clean() throws IOException {
         region.close();
         region2.close();

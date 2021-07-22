@@ -3,6 +3,8 @@ plugins {
 }
 
 dependencies {
+    implementation(project(":antlr"))
+
     // https://mvnrepository.com/artifact/org.antlr/antlr4-runtime
     implementation("org.antlr:antlr4-runtime:4.8-1")
 }
@@ -20,11 +22,3 @@ publishing {
         }
     }
 }
-
-sourceSets.create("antlr") {
-    java.srcDir("src/antlr/gen")
-    java.srcDir("build/generated/source/apt/antlr")
-}
-
-sourceSets.main.get().compileClasspath += sourceSets.getByName("antlr").output + sourceSets.main.get().compileClasspath
-sourceSets.main.get().runtimeClasspath += sourceSets.getByName("antlr").output + sourceSets.main.get().runtimeClasspath

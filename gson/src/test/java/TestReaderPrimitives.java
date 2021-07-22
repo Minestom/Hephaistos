@@ -1,10 +1,11 @@
 import org.jglrxavpok.hephaistos.json.NBTGsonReader;
 import org.jglrxavpok.hephaistos.nbt.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringReader;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestReaderPrimitives {
 
@@ -20,7 +21,7 @@ public class TestReaderPrimitives {
     public void guessString() {
         try(NBTGsonReader reader = new NBTGsonReader(new StringReader("\"AAA\""))) {
             NBT string = reader.readWithGuess();
-            assertTrue("Must be a NBTString", string instanceof NBTString);
+            assertTrue(string instanceof NBTString, "Must be a NBTString");
             assertEquals("AAA", ((NBTString)string).getValue());
         }
     }
@@ -45,7 +46,7 @@ public class TestReaderPrimitives {
     public void guessDouble() {
         try(NBTGsonReader reader = new NBTGsonReader(new StringReader("42.5"))) {
             NBT element = reader.readWithGuess();
-            assertTrue("Must be a NBTDouble", element instanceof NBTDouble);
+            assertTrue(element instanceof NBTDouble, "Must be a NBTDouble");
             assertEquals(42.5, ((NBTDouble)element).getValue(), 10e-6);
         }
     }
@@ -86,7 +87,7 @@ public class TestReaderPrimitives {
     public void guessLong() {
         try(NBTGsonReader reader = new NBTGsonReader(new StringReader("425"))) {
             NBT element = reader.readWithGuess();
-            assertTrue("Must be a NBTLong", element instanceof NBTLong);
+            assertTrue(element instanceof NBTLong, "Must be a NBTLong");
             assertEquals(425, ((NBTLong)element).getValue());
         }
     }
@@ -94,7 +95,7 @@ public class TestReaderPrimitives {
     public void nullShouldBeGuessedAsEmptyString() {
         try(NBTGsonReader reader = new NBTGsonReader(new StringReader("null"))) {
             NBT element = reader.readWithGuess();
-            assertTrue("Must be a NBTString", element instanceof NBTString);
+            assertTrue(element instanceof NBTString, "Must be a NBTString");
             assertEquals("", ((NBTString)element).getValue());
         }
     }

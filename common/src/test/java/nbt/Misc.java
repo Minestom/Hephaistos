@@ -4,6 +4,7 @@ import org.jglrxavpok.hephaistos.nbt.*;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class Misc {
 
@@ -23,6 +24,8 @@ public class Misc {
     public void ensureSubElementsOfListAreAllSameType() {
         NBTList<NBT> genericList = new NBTList<>(NBTTypes.TAG_String);
         genericList.add(new NBTString("Some value"));
-        genericList.add(new NBTInt(42));
+        assertThrows(NBTException.class, () ->
+            genericList.add(new NBTInt(42))
+        );
     }
 }

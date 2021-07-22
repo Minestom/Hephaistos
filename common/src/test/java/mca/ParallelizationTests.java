@@ -5,6 +5,7 @@ import org.jglrxavpok.hephaistos.mca.BlockState;
 import org.jglrxavpok.hephaistos.mca.ChunkColumn;
 import org.jglrxavpok.hephaistos.mca.RegionFile;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -30,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 public class ParallelizationTests {
 
-    @BeforeAll
+    @BeforeEach
     public void init() throws IOException {
         if(Files.deleteIfExists(Paths.get("tmp_parallel_empty_r.0.0.mca")))
             System.out.println("deleted");

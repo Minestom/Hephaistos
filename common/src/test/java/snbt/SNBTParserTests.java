@@ -1,6 +1,7 @@
 package snbt;
 
 import org.jglrxavpok.hephaistos.nbt.*;
+import org.jglrxavpok.hephaistos.parser.SNBTParser;
 import org.junit.jupiter.api.Test;
 
 import java.io.StringReader;

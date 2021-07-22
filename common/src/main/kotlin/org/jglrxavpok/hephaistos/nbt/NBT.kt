@@ -1,13 +1,12 @@
 package org.jglrxavpok.hephaistos.nbt
 
-import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
 
 /**
  * Most basic representation of a NBTag
  */
-interface NBT {
+sealed interface NBT {
 
     /**
      * ID of this tag type
@@ -42,4 +41,10 @@ interface NBT {
      * The only exception is NBTString: the String value is not copied into a new String object, as there are immutable in Java
      */
     fun deepClone(): NBT
+
+    companion object {
+
+        @JvmStatic
+        fun Byte(value: Byte) = NBTByte(value)
+    }
 }

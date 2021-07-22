@@ -1,18 +1,16 @@
 package nbt;
 
 import org.jglrxavpok.hephaistos.nbt.*;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class NBTCompoundMethods {
 
-    private static NBTCompound nbt;
+    private NBTCompound nbt;
 
-    @BeforeAll
-    static void init() {
+    @BeforeEach
+    void init() {
         nbt = new NBTCompound();
     }
 
@@ -223,7 +221,7 @@ public class NBTCompoundMethods {
         assertNull(nbt.get("a"));
     }
 
-    @AfterAll
+    @AfterEach
     public void clean() {
         nbt.clear();
         nbt = null;

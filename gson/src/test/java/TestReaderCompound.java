@@ -1,10 +1,10 @@
 import org.jglrxavpok.hephaistos.json.NBTGsonReader;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringReader;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestReaderCompound {
 

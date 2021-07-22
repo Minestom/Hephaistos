@@ -73,7 +73,7 @@ class NBTGsonReader(private val reader: Reader): AutoCloseable, Closeable {
     private fun <Tag: NBT> parse(nbtType: Int, element: JsonElement): Tag {
         try {
             val result = when (nbtType) {
-                NBTTypes.TAG_End -> NBTEnd()
+                NBTTypes.TAG_End -> NBTEnd
                 NBTTypes.TAG_Byte -> NBTByte(element.asByte)
                 NBTTypes.TAG_Short -> NBTShort(element.asShort)
                 NBTTypes.TAG_Int -> NBTInt(element.asInt)

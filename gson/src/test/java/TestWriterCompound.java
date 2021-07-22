@@ -2,16 +2,17 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.jglrxavpok.hephaistos.json.NBTGsonWriter;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 public class TestWriterCompound {
 
     private NBTGsonWriter writer;
 
-    @Before
+    @BeforeEach
     public void init() {
         writer = new NBTGsonWriter(new Gson());
     }

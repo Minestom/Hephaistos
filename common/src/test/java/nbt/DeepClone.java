@@ -1,41 +1,42 @@
 package nbt;
 
 import org.jglrxavpok.hephaistos.nbt.*;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class DeepClone {
 
-    @Test
+    @Disabled("NBTNumbers are immutable")
     public void integer() {
         NBTInt nbt = new NBTInt(42);
         assertEquals(nbt.deepClone(), new NBTInt(42));
         assertNotSame(nbt, nbt.deepClone());
     }
 
-    @Test
+    @Disabled("NBTNumbers are immutable")
     public void floatingPoint() {
         NBTFloat nbt = new NBTFloat(0.1f);
         assertEquals(nbt.deepClone(), new NBTFloat(0.1f));
         assertNotSame(nbt, nbt.deepClone());
     }
 
-    @Test
+    @Disabled("NBTNumbers are immutable")
     public void doubleFloatingPoint() {
         NBTDouble nbt = new NBTDouble(0.25);
         assertEquals(nbt.deepClone(), new NBTDouble(0.25));
         assertNotSame(nbt, nbt.deepClone());
     }
 
-    @Test
+    @Disabled("NBTNumbers are immutable")
     public void byteNBT() {
         NBTByte nbt = new NBTByte((byte) 0x42);
         assertEquals(nbt.deepClone(), new NBTByte((byte) 0x42));
         assertNotSame(nbt, nbt.deepClone());
     }
 
-    @Test
+    @Disabled("NBTNumbers are immutable")
     public void shortNBT() {
         NBTShort nbt = new NBTShort((short) 256);
         assertEquals(nbt.deepClone(), new NBTShort((short) 256));
@@ -46,7 +47,7 @@ public class DeepClone {
     public void string() {
         NBTString nbt = new NBTString("Hello there");
         assertEquals(nbt.deepClone(), new NBTString("Hello there"));
-        assertNotSame(nbt, nbt.deepClone());
+//        assertNotSame(nbt, nbt.deepClone());
         assertSame(nbt.getValue(), nbt.deepClone().getValue());
     }
 
@@ -94,8 +95,8 @@ public class DeepClone {
 
         assertEquals(list, list.deepClone());
         assertNotSame(list, list.deepClone());
-        assertNotSame(list.get(0), list.deepClone().get(0));
-        assertNotSame(list.get(1), list.deepClone().get(1));
+//        assertNotSame(list.get(0), list.deepClone().get(0));
+//        assertNotSame(list.get(1), list.deepClone().get(1));
     }
 
     @Test
@@ -112,13 +113,13 @@ public class DeepClone {
         assertEquals(nbt, nbt.deepClone());
         assertNotSame(nbt, nbt.deepClone());
 
-        assertNotSame(nbt.get("text"), nbt.deepClone().get("text"));
+//        assertNotSame(nbt.get("text"), nbt.deepClone().get("text"));
         assertEquals(nbt.get("text"), nbt.deepClone().get("text"));
 
-        assertNotSame(nbt.get("key"), nbt.deepClone().get("key"));
+//        assertNotSame(nbt.get("key"), nbt.deepClone().get("key"));
         assertEquals(nbt.get("key"), nbt.deepClone().get("key"));
 
-        assertNotSame(nbt.get("inner"), nbt.deepClone().get("inner"));
+//        assertNotSame(nbt.get("inner"), nbt.deepClone().get("inner"));
         assertEquals(nbt.get("inner"), nbt.deepClone().get("inner"));
     }
 }
