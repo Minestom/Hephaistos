@@ -23,9 +23,9 @@ public class Misc {
     @Test
     public void ensureSubElementsOfListAreAllSameType() {
         NBTList<NBT> genericList = new NBTList<>(NBTTypes.TAG_String);
-        genericList.add(new NBTString("Some value"));
+        genericList.add(NBT.String("Some value"));
         assertThrows(NBTException.class, () ->
-            genericList.add(new NBTInt(42))
+            genericList.add(NBT.Int(42))
         );
     }
 }

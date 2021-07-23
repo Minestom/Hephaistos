@@ -10,8 +10,8 @@ public class DeepClone {
     @Test
     public void list() {
         NBTList<NBTString> list = new NBTList<>(NBTTypes.TAG_String);
-        list.add(new NBTString("Some text"));
-        list.add(new NBTString("Some more text"));
+        list.add(NBT.String("Some text"));
+        list.add(NBT.String("Some more text"));
 
         assertEquals(list, list.deepClone());
         assertNotSame(list, list.deepClone());

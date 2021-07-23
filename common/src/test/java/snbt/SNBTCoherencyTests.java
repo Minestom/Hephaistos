@@ -15,7 +15,7 @@ public class SNBTCoherencyTests {
 
         NBTList<NBTString> testList = new NBTList<>(NBTTypes.TAG_String);
         for (int i = 0; i < 10; i++) {
-            testList.add(new NBTString("Test#"+i));
+            testList.add(NBT.String("Test#"+i));
         }
 
         NBTCompound c = NBT.Compound(root -> {

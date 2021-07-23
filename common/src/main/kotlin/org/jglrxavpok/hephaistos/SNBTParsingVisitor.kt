@@ -80,8 +80,8 @@ object SNBTParsingVisitor: SNBTBaseVisitor<NBT>() {
 
     override fun visitStringNBT(ctx: SNBTParser.StringNBTContext): NBT {
         return when {
-            ctx.DoubleQuoteText() != null -> NBTString(ctx.DoubleQuoteText().text.drop(1).dropLast(1))
-            ctx.SingleQuoteText() != null -> NBTString(ctx.SingleQuoteText().text.drop(1).dropLast(1))
+            ctx.DoubleQuoteText() != null -> NBT.String(ctx.DoubleQuoteText().text.drop(1).dropLast(1))
+            ctx.SingleQuoteText() != null -> NBT.String(ctx.SingleQuoteText().text.drop(1).dropLast(1))
             else -> NBT.String(ctx.text)
         }
     }

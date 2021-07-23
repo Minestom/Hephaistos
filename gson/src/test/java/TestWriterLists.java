@@ -36,10 +36,10 @@ public class TestWriterLists {
     @Test
     public void writeList() {
         NBTList<NBTString> list = new NBTList<>(NBTTypes.TAG_String);
-        list.add(new NBTString("My"));
-        list.add(new NBTString("Super"));
-        list.add(new NBTString("Awesome"));
-        list.add(new NBTString("List"));
+        list.add(NBT.String("My"));
+        list.add(NBT.String("Super"));
+        list.add(NBT.String("Awesome"));
+        list.add(NBT.String("List"));
         JsonElement element = writer.write(list);
         assertEquals("[\"My\",\"Super\",\"Awesome\",\"List\"]", element.toString());
     }

@@ -1,5 +1,6 @@
 package nbt;
 
+import org.jglrxavpok.hephaistos.nbt.NBT;
 import org.jglrxavpok.hephaistos.nbt.NBTList;
 import org.jglrxavpok.hephaistos.nbt.NBTString;
 import org.jglrxavpok.hephaistos.nbt.NBTTypes;
@@ -18,9 +19,9 @@ public class NBTListMethods {
 
     @Test
     public void indexOf() {
-        list.add(new NBTString("Some value0"));
-        list.add(new NBTString("Some value1"));
-        list.add(new NBTString("Some value2"));
+        list.add(NBT.String("Some value0"));
+        list.add(NBT.String("Some value1"));
+        list.add(NBT.String("Some value2"));
 
         for (int i = 0; i < list.getLength(); i++) {
             NBTString valueAtI = list.get(i);
@@ -28,19 +29,19 @@ public class NBTListMethods {
         }
 
         // indexOf uses equals
-        assertEquals(0, list.indexOf(new NBTString("Some value0")));
-        assertEquals(1, list.indexOf(new NBTString("Some value1")));
-        assertEquals(2, list.indexOf(new NBTString("Some value2")));
+        assertEquals(0, list.indexOf(NBT.String("Some value0")));
+        assertEquals(1, list.indexOf(NBT.String("Some value1")));
+        assertEquals(2, list.indexOf(NBT.String("Some value2")));
 
         list.removeAt(0);
-        assertEquals(1, list.indexOf(new NBTString("Some value2")));
+        assertEquals(1, list.indexOf(NBT.String("Some value2")));
     }
 
     @Test
     public void removeAt() {
-        list.add(new NBTString("Some value0"));
-        list.add(new NBTString("Some value1"));
-        list.add(new NBTString("Some value2"));
+        list.add(NBT.String("Some value0"));
+        list.add(NBT.String("Some value1"));
+        list.add(NBT.String("Some value2"));
 
         list.removeAt(0);
         assertEquals(2, list.getLength());
@@ -49,11 +50,11 @@ public class NBTListMethods {
 
     @Test
     public void remove() {
-        list.add(new NBTString("Some value0"));
-        list.add(new NBTString("Some value1"));
-        list.add(new NBTString("Some value2"));
+        list.add(NBT.String("Some value0"));
+        list.add(NBT.String("Some value1"));
+        list.add(NBT.String("Some value2"));
 
-        list.remove(new NBTString("Some value0"));
+        list.remove(NBT.String("Some value0"));
         assertEquals(2, list.getLength());
         assertEquals("Some value2", list.get(1).getValue());
     }
