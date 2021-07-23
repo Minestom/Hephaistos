@@ -34,9 +34,6 @@ class NBTString internal constructor(val value: String): NBT {
         return Objects.hash(value)
     }
 
-    @Deprecated("NBTString is immutable", replaceWith = ReplaceWith("this"))
-    override fun deepClone() = this
-
     companion object: NBTReaderCompanion<NBTString> {
         override fun readContents(source: DataInputStream): NBTString {
             return NBTString(source.readUTF())

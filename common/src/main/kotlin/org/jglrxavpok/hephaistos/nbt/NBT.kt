@@ -36,15 +36,6 @@ sealed interface NBT {
      */
     override fun toString(): String
 
-    /**
-     * Creates a deep clone of this NBT element.
-     * For list, this clones the list elements too via deepClone.
-     * Same goes for NBTCompound entries.
-     *
-     * The only exception is NBTString: the String value is not copied into a new String object, as there are immutable in Java
-     */
-    fun deepClone(): NBT
-
     companion object {
 
         @JvmStatic
@@ -63,9 +54,9 @@ sealed interface NBT {
         fun ByteArray(array: ImmutableByteArray) = NBTByteArray(array)
 
         @JvmStatic
-        fun Compound(lambda: CompoundBuilder) = NBTCompound.compound(lambda)
+        fun Compound(lambda: CompoundBuilder) = NBTCompound(mutableMapOf<String, NBT>().also { lambda.run(it) })
 
-        inline fun Kompound(crossinline lambda: CompoundMap.() -> Unit) = NBTCompound.kompound(lambda)
+        inline fun Kompound(crossinline lambda: CompoundMap.() -> Unit) = Compound { lambda(it) }
 
         @JvmStatic
         fun Double(value: Double) = NBTDouble(value)
@@ -87,6 +78,19 @@ sealed interface NBT {
 
         @JvmStatic
         fun IntArray(array: ImmutableIntArray) = NBTIntArray(array)
+
+        @JvmStatic
+        fun <Tag : NBT> List(subtagType: Int, tags: List<Tag> = listOf()) = NBTList(subtagType, tags)
+
+        @JvmStatic
+        fun <Tag : NBT> List(subtagType: Int, vararg tags: Tag) = NBTList(subtagType, tags.toList())
+
+        @JvmStatic
+        fun <Tag : NBT> List(subtagType: Int, length: Int, generator: NBTListGenerator<Tag>) = NBTList(subtagType, ArrayList<Tag>(length).apply {
+            repeat(length) {
+                this[it] = generator.run(it)
+            }
+        })
 
         @JvmStatic
         fun Long(value: Long) = NBTLong(value)

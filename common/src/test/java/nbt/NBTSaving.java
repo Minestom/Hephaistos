@@ -68,11 +68,11 @@ public class NBTSaving {
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
     public void saveList(boolean compressed) throws IOException, NBTException {
-        NBTList<NBTString> nbt = new NBTList<>(NBTTypes.TAG_String);
-        nbt.add(NBT.String("A"));
-        nbt.add(NBT.String("B"));
-        nbt.add(NBT.String("C"));
-        nbt.add(NBT.String("D"));
+        NBTList<NBTString> nbt = NBT.List(
+                NBTTypes.TAG_String,
+                NBT.String("A"), NBT.String("B"), NBT.String("C"), NBT.String("D")
+        );
+
         test(nbt, compressed);
     }
 

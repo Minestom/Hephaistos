@@ -204,9 +204,6 @@ class NBTCompound internal constructor(val tags: Map<String, NBT> = mapOf()): NB
 
     fun modify(lambda: CompoundBuilder) = NBTCompound(tags.toMutableMap().also { lambda.run(it) })
 
-    @Deprecated("NBTCompound is immutable", replaceWith = ReplaceWith("this"))
-    override fun deepClone() = this
-
     companion object : NBTReaderCompanion<NBTCompound> {
 
         @JvmStatic
@@ -214,8 +211,6 @@ class NBTCompound internal constructor(val tags: Map<String, NBT> = mapOf()): NB
 
         @JvmStatic
         fun compound(lambda: CompoundBuilder) = NBTCompound(mutableMapOf<String, NBT>().also { lambda.run(it) })
-
-        inline fun kompound(crossinline lambda: CompoundMap.() -> Unit) = compound { lambda(it) }
 
         override fun readContents(source: DataInputStream) = compound {
             do {

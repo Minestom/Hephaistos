@@ -3,7 +3,10 @@ package org.jglrxavpok.hephaistos.json
 import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
-import org.jglrxavpok.hephaistos.nbt.*
+import org.jglrxavpok.hephaistos.nbt.NBT
+import org.jglrxavpok.hephaistos.nbt.NBTEnd
+import org.jglrxavpok.hephaistos.nbt.NBTException
+import org.jglrxavpok.hephaistos.nbt.NBTTypes
 import java.io.Closeable
 import java.io.Reader
 
@@ -92,13 +95,10 @@ class NBTGsonReader(private val reader: Reader): AutoCloseable, Closeable {
                     val elements = element.asJsonArray
 
                     if (elements.size() == 0) { // guess strings
-                        NBTList(NBTTypes.TAG_String)
+                        NBT.List(NBTTypes.TAG_String)
                     } else {
                         val firstElement = parse<NBT>(guessType(elements[0]), elements[0])
-                        val list = NBTList<NBT>(firstElement.ID)
-                        for (elem in elements) {
-                            list += parse(list.subtagType, elem)
-                        }
+                        val list = NBT.List(firstElement.ID, elements.map { parse(firstElement.ID, it) })
                         list
                     }
                 }

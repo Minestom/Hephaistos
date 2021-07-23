@@ -19,13 +19,4 @@ public class Misc {
         array = NBT.LongArray(1, 2, 3);
         assertEquals("[L;1L,2L,3L]", array.toSNBT());
     }
-
-    @Test
-    public void ensureSubElementsOfListAreAllSameType() {
-        NBTList<NBT> genericList = new NBTList<>(NBTTypes.TAG_String);
-        genericList.add(NBT.String("Some value"));
-        assertThrows(NBTException.class, () ->
-            genericList.add(NBT.Int(42))
-        );
-    }
 }

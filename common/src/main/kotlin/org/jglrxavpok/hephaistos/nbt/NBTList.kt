@@ -4,13 +4,11 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
 import java.util.*
-import kotlin.collections.ArrayList
 
-class NBTList<Tag: NBT>(val subtagType: Int): Iterable<Tag>, NBT {
+class NBTList<Tag: NBT> internal constructor(val subtagType: Int, private val tags: List<Tag> = listOf()): Iterable<Tag>, NBT {
 
     override val ID = NBTTypes.TAG_List
 
-    private val tags = mutableListOf<Tag>()
     val length get() = tags.size
 
     /**
@@ -32,54 +30,9 @@ class NBTList<Tag: NBT>(val subtagType: Int): Iterable<Tag>, NBT {
     override fun toString() = toSNBT()
 
     /**
-     * Removes all tags from this list
-     */
-    fun clear() {
-        tags.clear()
-    }
-
-    /**
      * Returns the tag at the given index
      */
     operator fun get(index: Int) = tags[index]
-
-    /**
-     * Changes the tag at the given index
-     */
-    operator fun set(index: Int, tag: Tag) {
-        tags[index] = tag
-    }
-
-    operator fun plusAssign(tag: Tag) {
-        add(tag)
-    }
-
-    /**
-     * Appends a tag of the end of this list
-     */
-    fun add(tag: Tag) {
-        if(tag.ID != subtagType)
-            throw NBTException("Element to add is not of type ${NBTTypes.name(subtagType)} but of type ${NBTTypes.name(tag.ID)}")
-        tags += tag
-    }
-
-    /**
-     * From ArrayList#removeAt:
-     * > Removes the element at the specified position in this list. Shifts any subsequent elements to the left (subtracts one from their indices).
-     */
-    fun removeAt(index: Int): NBTList<Tag>  {
-        tags.removeAt(index)
-        return this
-    }
-
-    /**
-     * From ArrayList#remove:
-     * > Removes the first occurrence of the specified element from this list, if it is present. If the list does not contain the element, it is unchanged. More formally, removes the element with the lowest index i such that Objects.equals(o, get(i)) (if such an element exists). Returns true if this list contained the specified element (or equivalently, if this list changed as a result of the call).
-     */
-    fun remove(tag: Tag): NBTList<Tag> {
-        tags.remove(tag)
-        return this
-    }
 
     /**
      * From ArrayList#indexOf:
@@ -132,13 +85,13 @@ class NBTList<Tag: NBT>(val subtagType: Int): Iterable<Tag>, NBT {
         @Throws(IOException::class)
         override fun readContents(source: DataInputStream): NBTList<NBT> {
             val subtagType = source.readByte().toInt()
-            val list = NBTList<NBT>(subtagType)
             val length = source.readInt()
-            for (i in 0 until length) {
-                @Suppress("UNCHECKED_CAST") // Due to the specs and the way Hephaistos is made, this cast should not fail.
-                val tag = source.readTag(subtagType)
-                list.tags.add(tag)
-            }
+
+            val list = NBT.List(subtagType, ArrayList<NBT>(length).apply {
+                for (i in 0 until length) {
+                    this[i] = source.readTag(subtagType)
+                }
+            })
 
             return list
         }
@@ -147,11 +100,8 @@ class NBTList<Tag: NBT>(val subtagType: Int): Iterable<Tag>, NBT {
     override fun iterator(): Iterator<Tag> {
         return tags.iterator()
     }
+}
 
-    override fun deepClone() = NBTList<Tag>(subtagType).let {
-        tags.map { element ->
-            element.deepClone() as Tag
-        }.forEach(it::add)
-        it
-    }
+fun interface NBTListGenerator<T: NBT> {
+    fun run(index: Int): T
 }

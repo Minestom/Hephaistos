@@ -43,9 +43,6 @@ class NBTLongArray internal constructor(val value: ImmutableLongArray) : NBT, It
 
     override fun hashCode() = value.hashCode()
 
-    @Deprecated("NBT Arrays are immutable", replaceWith = ReplaceWith("this"))
-    override fun deepClone() = this
-
     override fun iterator() = value.iterator()
 
     companion object : NBTReaderCompanion<NBTLongArray> {

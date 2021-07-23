@@ -20,7 +20,4 @@ abstract class NBTNumber<Type: Number>(open val value: Type): NBT {
         return true
     }
 
-    @Deprecated("NBTNumbers are immutable", ReplaceWith("this"))
-    final override fun deepClone() = this
-
 }

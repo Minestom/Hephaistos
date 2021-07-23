@@ -13,6 +13,4 @@ object NBTEnd: NBT, NBTReaderCompanion<NBTEnd> {
     override fun toSNBT() = ""
 
     override fun toString() = "<TAG_End>"
-
-    override fun deepClone() = this
 }

@@ -13,7 +13,7 @@ public class NBTCompoundMethods {
     @Test
     public void setString() {
 
-        var nbt = NBTCompound.compound((map) -> {
+        var nbt = NBT.Compound((map) -> {
             map.put("a", NBT.String("hi"));
         });
 
@@ -25,7 +25,7 @@ public class NBTCompoundMethods {
     @Test
     public void setShort() {
 
-        var nbt = NBTCompound.compound((map) -> {
+        var nbt = NBT.Compound((map) -> {
             map.put("a", NBT.Short((short) 42));
         });
 
@@ -37,7 +37,7 @@ public class NBTCompoundMethods {
     @Test
     public void setByte() {
 
-        var nbt = NBTCompound.compound((map) -> {
+        var nbt = NBT.Compound((map) -> {
             map.put("a", NBT.Byte((byte) 0xCA));
         });
 
@@ -49,7 +49,7 @@ public class NBTCompoundMethods {
     @Test
     public void setInt() {
 
-        var nbt = NBTCompound.compound((map) -> {
+        var nbt = NBT.Compound((map) -> {
             map.put("a", NBT.Int(0xBABE));
         });
 
@@ -61,7 +61,7 @@ public class NBTCompoundMethods {
     @Test
     public void setLong() {
 
-        var nbt = NBTCompound.compound((map) -> {
+        var nbt = NBT.Compound((map) -> {
             map.put("a", NBT.Long(0xCAFEBABEL));
         });
 
@@ -73,7 +73,7 @@ public class NBTCompoundMethods {
     @Test
     public void setFloat() {
 
-        var nbt = NBTCompound.compound((map) -> {
+        var nbt = NBT.Compound((map) -> {
             map.put("a", NBT.Float(0.5f));
         });
 
@@ -85,7 +85,7 @@ public class NBTCompoundMethods {
     @Test
     public void setDouble() {
 
-        var nbt = NBTCompound.compound((map) -> {
+        var nbt = NBT.Compound((map) -> {
             map.put("a", NBT.Double(.25));
         });
 
@@ -97,7 +97,7 @@ public class NBTCompoundMethods {
     @Test
     public void setByteArray() {
 
-        var nbt = NBTCompound.compound((map) -> {
+        var nbt = NBT.Compound((map) -> {
             map.put("a", NBT.ByteArray(1, 2, 3));
         });
 
@@ -109,7 +109,7 @@ public class NBTCompoundMethods {
     @Test
     public void setIntArray() {
 
-        var nbt = NBTCompound.compound((map) -> {
+        var nbt = NBT.Compound((map) -> {
             map.put("a", NBT.IntArray(1, 2, 3));
         });
 
@@ -121,7 +121,7 @@ public class NBTCompoundMethods {
     @Test
     public void setLongArray() {
 
-        var nbt = NBTCompound.compound((map) -> {
+        var nbt = NBT.Compound((map) -> {
             map.put("a", NBT.LongArray(1, 2, 3));
         });
 
@@ -133,7 +133,7 @@ public class NBTCompoundMethods {
     @Test
     public void getAsLong() {
 
-        var nbt = NBTCompound.compound((map) -> {
+        var nbt = NBT.Compound((map) -> {
             map.put("a", NBT.Int(42));
         });
 
@@ -145,7 +145,7 @@ public class NBTCompoundMethods {
     @Test
     public void getAsByte() {
 
-        var nbt = NBTCompound.compound((map) -> {
+        var nbt = NBT.Compound((map) -> {
             map.put("a", NBT.Int(42));
         });
 
@@ -157,7 +157,7 @@ public class NBTCompoundMethods {
     @Test
     public void getAsDouble() {
 
-        var nbt = NBTCompound.compound((map) -> {
+        var nbt = NBT.Compound((map) -> {
             map.put("a", NBT.Int(42));
         });
 
@@ -169,7 +169,7 @@ public class NBTCompoundMethods {
     @Test
     public void getAsFloat() {
 
-        var nbt = NBTCompound.compound((map) -> {
+        var nbt = NBT.Compound((map) -> {
             map.put("a", NBT.Int(42));
         });
 
@@ -181,7 +181,7 @@ public class NBTCompoundMethods {
     @Test
     public void getAsInt() {
 
-        var nbt = NBTCompound.compound((map) -> {
+        var nbt = NBT.Compound((map) -> {
             map.put("a", NBT.Long(42));
         });
 
@@ -193,7 +193,7 @@ public class NBTCompoundMethods {
     @Test
     public void getAsShort() {
 
-        var nbt = NBTCompound.compound((map) -> {
+        var nbt = NBT.Compound((map) -> {
             map.put("a", NBT.Long(42));
         });
 
@@ -204,7 +204,7 @@ public class NBTCompoundMethods {
 
     @Test
     public void removeTag() {
-        var nbt = NBTCompound.compound((map) -> {
+        var nbt = NBT.Compound((map) -> {
             map.put("a", NBT.String("value"));
         });
         assertEquals(1, nbt.getSize());

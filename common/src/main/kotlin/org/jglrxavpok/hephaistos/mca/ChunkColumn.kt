@@ -35,10 +35,10 @@ class ChunkColumn(val x: Int, val z: Int) {
     var worldSurfaceWorldGenHeightMap: Heightmap? = null
     var oceanFloorHeightMap: Heightmap? = null
     var oceanFloorWorldGenHeightMap: Heightmap? = null
-    var entities: NBTList<NBTCompound> = NBTList(NBTTypes.TAG_Compound)
-    var tileEntities: NBTList<NBTCompound> = NBTList(NBTTypes.TAG_Compound)
-    var tileTicks: NBTList<NBTCompound> = NBTList(NBTTypes.TAG_Compound)
-    var liquidTicks: NBTList<NBTCompound> = NBTList(NBTTypes.TAG_Compound)
+    var entities: NBTList<NBTCompound> = NBT.List(NBTTypes.TAG_Compound)
+    var tileEntities: NBTList<NBTCompound> = NBT.List(NBTTypes.TAG_Compound)
+    var tileTicks: NBTList<NBTCompound> = NBT.List(NBTTypes.TAG_Compound)
+    var liquidTicks: NBTList<NBTCompound> = NBT.List(NBTTypes.TAG_Compound)
     var structures: NBTCompound? = null
     var lights: NBTList<NBTList<NBTShort>>? = null
     var liquidsToBeTicked: NBTList<NBTList<NBTShort>>? = null
@@ -80,10 +80,10 @@ class ChunkColumn(val x: Int, val z: Int) {
         }
 
         // we allow empty lists for these
-        entities = level.getList("Entities") ?: NBTList(NBTTypes.TAG_Compound)
-        tileEntities = level.getList("TileEntities") ?: NBTList(NBTTypes.TAG_Compound)
-        tileTicks = level.getList("TileTicks") ?: NBTList(NBTTypes.TAG_Compound)
-        liquidTicks = level.getList("LiquidTicks") ?: NBTList(NBTTypes.TAG_Compound)
+        entities = level.getList("Entities") ?: NBT.List(NBTTypes.TAG_Compound)
+        tileEntities = level.getList("TileEntities") ?: NBT.List(NBTTypes.TAG_Compound)
+        tileTicks = level.getList("TileTicks") ?: NBT.List(NBTTypes.TAG_Compound)
+        liquidTicks = level.getList("LiquidTicks") ?: NBT.List(NBTTypes.TAG_Compound)
         structures = level.getCompound("Structures")
 
         val carvingMasks = level.getCompound("CarvingMasks")
@@ -190,12 +190,13 @@ class ChunkColumn(val x: Int, val z: Int) {
                 heightMapMap["WORLD_SURFACE"] = NBT.LongArray(worldSurfaceHeightMap.compact(version))
                 worldSurfaceWorldGenHeightMap?.let { heightMapMap["WORLD_SURFACE_WG"] = NBT.LongArray(it.compact(version)) }
             }
-            val sections = NBTList<NBTCompound>(NBTTypes.TAG_Compound)
-            for (section in this@ChunkColumn.sections) {
-                if(!section.empty) {
-                    sections += section.toNBT(version)
-                }
-            }
+            val sections = NBT.List(
+                NBTTypes.TAG_Compound,
+                this@ChunkColumn.sections
+                    .filter { !it.empty }
+                    .map { it.toNBT(version) }
+            )
+
             levelMap["Sections"] = sections
             levelMap["Entities"] = entities
             levelMap["TileEntities"] = tileEntities

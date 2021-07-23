@@ -1,10 +1,10 @@
 package org.jglrxavpok.hephaistos.mca
 
 import org.jglrxavpok.hephaistos.collections.ImmutableLongArray
+import org.jglrxavpok.hephaistos.nbt.NBT
 import org.jglrxavpok.hephaistos.nbt.NBTCompound
 import org.jglrxavpok.hephaistos.nbt.NBTList
 import org.jglrxavpok.hephaistos.nbt.NBTTypes
-import java.lang.IllegalArgumentException
 import kotlin.math.ceil
 import kotlin.math.log2
 
@@ -66,13 +66,9 @@ class Palette() {
     /**
      * Converts this Palette into its NBT representation
      */
-    fun toNBT(): NBTList<NBTCompound> {
-        val list = NBTList<NBTCompound>(NBTTypes.TAG_Compound)
-        for(b in blocks) {
-            list += b.toNBT()
-        }
-        return list
-    }
+    fun toNBT(): NBTList<NBTCompound> =
+        NBT.List(NBTTypes.TAG_Compound, blocks.map { it.toNBT() })
+
 
     /**
      * Produces a long array with the compacted IDs based on this palette.

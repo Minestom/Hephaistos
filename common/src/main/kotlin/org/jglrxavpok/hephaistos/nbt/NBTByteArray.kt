@@ -37,9 +37,6 @@ class NBTByteArray internal constructor(val value: ImmutableByteArray) : NBT, It
 
     override fun hashCode() = value.hashCode()
 
-    @Deprecated("NBT Arrays are immutable", replaceWith = ReplaceWith("this"))
-    override fun deepClone() = this
-
     override fun iterator() = value.iterator()
 
     companion object : NBTReaderCompanion<NBTByteArray> {
