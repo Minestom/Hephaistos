@@ -65,6 +65,8 @@ sealed interface NBT {
         @JvmStatic
         fun Compound(lambda: CompoundBuilder) = NBTCompound.compound(lambda)
 
+        inline fun Kompound(crossinline lambda: CompoundMap.() -> Unit) = NBTCompound.kompound(lambda)
+
         @JvmStatic
         fun Double(value: Double) = NBTDouble(value)
 

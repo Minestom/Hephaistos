@@ -3,7 +3,7 @@ package org.jglrxavpok.hephaistos.collections
 /**
  * Immutable alternative of [IntArray]
  */
-class ImmutableIntArray(private vararg val numbers: Int) {
+class ImmutableIntArray(private vararg val numbers: Int): Iterable<Int> {
 
     constructor(size: Int, generator: (Int) -> Int) : this(*IntArray(size).apply {
         repeat(size) {
@@ -37,6 +37,15 @@ class ImmutableIntArray(private vararg val numbers: Int) {
         if (!numbers.contentEquals(other.numbers)) return false
 
         return true
+    }
+
+    override fun iterator(): Iterator<Int> = object : Iterator<Int> {
+
+        var index = 0
+
+        override fun hasNext() = index < numbers.size
+
+        override fun next() = numbers[index.also { index++ }]
     }
 
 }

@@ -1,12 +1,10 @@
 package org.jglrxavpok.hephaistos.nbt
 
-import org.jglrxavpok.hephaistos.collections.ImmutableByteArray
 import org.jglrxavpok.hephaistos.collections.ImmutableIntArray
 import java.io.DataInputStream
 import java.io.DataOutputStream
-import java.util.*
 
-class NBTIntArray(val value: ImmutableIntArray) : NBT {
+class NBTIntArray(val value: ImmutableIntArray) : NBT, Iterable<Int> {
 
     val length get() = value.size
 
@@ -48,7 +46,13 @@ class NBTIntArray(val value: ImmutableIntArray) : NBT {
     @Deprecated("NBT Arrays are immutable", replaceWith = ReplaceWith("this"))
     override fun deepClone() = this
 
+    override fun iterator() = value.iterator()
+
     companion object : NBTReaderCompanion<NBTIntArray> {
+
+        @JvmStatic
+        fun fromArray(value: IntArray) = NBTIntArray(ImmutableIntArray(*value))
+
         override fun readContents(source: DataInputStream): NBTIntArray {
             val length = source.readInt()
             val value = ImmutableIntArray(length) { source.readInt() }

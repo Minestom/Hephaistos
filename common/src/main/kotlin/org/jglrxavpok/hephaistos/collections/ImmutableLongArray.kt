@@ -3,7 +3,7 @@ package org.jglrxavpok.hephaistos.collections
 /**
  * Immutable alternative of [ByteArray]
  */
-class ImmutableLongArray(private vararg val numbers: Long) {
+class ImmutableLongArray(private vararg val numbers: Long): Iterable<Long> {
 
     constructor(length: Int, generator: (Int) -> Long) : this(*LongArray(length).apply {
         repeat(length) {
@@ -39,6 +39,15 @@ class ImmutableLongArray(private vararg val numbers: Long) {
         if (!numbers.contentEquals(other.numbers)) return false
 
         return true
+    }
+
+    override fun iterator(): Iterator<Long> = object : Iterator<Long> {
+
+        var index = 0
+
+        override fun hasNext() = index < numbers.size
+
+        override fun next() = numbers[index.also { index++ }]
     }
 
 }

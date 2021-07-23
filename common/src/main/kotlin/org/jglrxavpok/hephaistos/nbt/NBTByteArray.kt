@@ -6,7 +6,7 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.util.*
 
-class NBTByteArray(val value: ImmutableByteArray) : NBT {
+class NBTByteArray(val value: ImmutableByteArray) : NBT, Iterable<Byte> {
 
     val length get() = value.size
 
@@ -46,7 +46,13 @@ class NBTByteArray(val value: ImmutableByteArray) : NBT {
     @Deprecated("NBT Arrays are immutable", replaceWith = ReplaceWith("this"))
     override fun deepClone() = this
 
+    override fun iterator() = value.iterator()
+
     companion object : NBTReaderCompanion<NBTByteArray> {
+
+        @JvmStatic
+        fun fromArray(value: ByteArray) = NBTByteArray(ImmutableByteArray(*value))
+
         override fun readContents(source: DataInputStream): NBTByteArray {
             val length = source.readInt()
             val value = ImmutableByteArray(length) { source.readByte() }

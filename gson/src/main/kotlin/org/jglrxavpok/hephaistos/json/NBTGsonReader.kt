@@ -80,13 +80,13 @@ class NBTGsonReader(private val reader: Reader): AutoCloseable, Closeable {
                 NBTTypes.TAG_Long -> NBTLong(element.asLong)
                 NBTTypes.TAG_Float -> NBTFloat(element.asFloat)
                 NBTTypes.TAG_Double -> NBTDouble(element.asDouble)
-                NBTTypes.TAG_Byte_Array -> NBTByteArray(element.asJsonArray.map { it.asByte }.toByteArray())
+                NBTTypes.TAG_Byte_Array -> NBTByteArray.fromArray(element.asJsonArray.map { it.asByte }.toByteArray())
                 NBTTypes.TAG_String -> if(element.isJsonNull) NBTString("") else NBTString(element.asString)
 
                 NBTTypes.TAG_Compound -> toCompound(element.asJsonObject)
 
-                NBTTypes.TAG_Int_Array -> NBTIntArray(element.asJsonArray.map { it.asInt }.toIntArray())
-                NBTTypes.TAG_Long_Array -> NBTLongArray(element.asJsonArray.map { it.asLong }.toLongArray())
+                NBTTypes.TAG_Int_Array -> NBTIntArray.fromArray(element.asJsonArray.map { it.asInt }.toIntArray())
+                NBTTypes.TAG_Long_Array -> NBTLongArray.fromArray(element.asJsonArray.map { it.asLong }.toLongArray())
 
                 NBTTypes.TAG_List -> {
                     if (!element.isJsonArray)
@@ -122,13 +122,11 @@ class NBTGsonReader(private val reader: Reader): AutoCloseable, Closeable {
         return parse(guessType(element), element)
     }
 
-    private fun toCompound(jsonObject: JsonObject): NBTCompound {
-        val compound = NBTCompound()
+    private fun toCompound(jsonObject: JsonObject) = NBT.Kompound {
         for((key, value) in jsonObject.entrySet()) {
             val nbt = parse<NBT>(guessType(value), value)
-            compound[key] = nbt
+            this[key] = nbt
         }
-        return compound
     }
 
     override fun close() {

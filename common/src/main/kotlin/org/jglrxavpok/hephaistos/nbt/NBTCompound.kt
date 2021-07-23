@@ -215,6 +215,8 @@ class NBTCompound(val tags: Map<String, NBT> = mapOf()): NBT {
         @JvmStatic
         fun compound(lambda: CompoundBuilder) = NBTCompound(mutableMapOf<String, NBT>().also { lambda.run(it) })
 
+        inline fun kompound(crossinline lambda: CompoundMap.() -> Unit) = compound { lambda(it) }
+
         override fun readContents(source: DataInputStream) = compound {
             do {
                 val tag = source.readFullyFormedTag()
@@ -227,6 +229,8 @@ class NBTCompound(val tags: Map<String, NBT> = mapOf()): NBT {
 
 }
 
+typealias CompoundMap = MutableMap<String, NBT>
+
 fun interface CompoundBuilder {
-    fun run(map: MutableMap<String, NBT>)
+    fun run(map: CompoundMap)
 }
