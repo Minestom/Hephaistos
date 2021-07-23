@@ -18,9 +18,7 @@ class NBTByteArray(val value: ImmutableByteArray) : NBT {
 
     override fun writeContents(destination: DataOutputStream) {
         destination.writeInt(length)
-        for(i in 0 until length) {
-            destination.write(value[i].toInt())
-        }
+        destination.write(value.copyArray())
     }
 
     operator fun get(index: Int) = value[index]

@@ -28,6 +28,8 @@ class ImmutableLongArray(private vararg val numbers: Long) {
         return numbers.joinTo(StringBuilder(), separator, prefix, postfix, limit, truncated, transform).toString()
     }
 
+    override fun toString() = "[${joinToString(", ")}]"
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

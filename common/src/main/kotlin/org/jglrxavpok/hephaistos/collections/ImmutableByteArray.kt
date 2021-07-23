@@ -16,6 +16,8 @@ class ImmutableByteArray constructor(private vararg val numbers: Byte) {
         return destination
     }
 
+    fun copyArray(): ByteArray = ByteArray(numbers.size).also { copyInto(it) }
+
     val size get() = numbers.size
 
     operator fun get(index: Int): Byte = numbers[index]
@@ -27,6 +29,8 @@ class ImmutableByteArray constructor(private vararg val numbers: Byte) {
     fun joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = -1, truncated: CharSequence = "...", transform: ((Byte) -> CharSequence)? = null): String {
         return numbers.joinTo(StringBuilder(), separator, prefix, postfix, limit, truncated, transform).toString()
     }
+
+    override fun toString() = "[${joinToString(", ")}]"
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
