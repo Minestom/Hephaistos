@@ -39,7 +39,7 @@ public class TestReaderCompound {
             NBTCompound compound = reader.read(NBTCompound.class);
             assertEquals(4, compound.getSize());
             assertEquals(45, compound.getAsInt("anInt"));
-            assertEquals(45.5f, compound, 10e-6);
+            assertEquals(45.5f, compound.getAsFloat("a float"));
             assertEquals("hello it is me, example text!", compound.getString("text"));
 
             NBTCompound innerObject = compound.getCompound("testObject");
