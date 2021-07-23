@@ -2,9 +2,8 @@ package org.jglrxavpok.hephaistos.nbt
 
 import java.io.DataInputStream
 import java.io.DataOutputStream
-import java.util.*
 
-class NBTByte(value: Byte) : NBTNumber<Byte>(value) {
+class NBTByte internal constructor(value: Byte) : NBTNumber<Byte>(value) {
 
     override val ID = NBTTypes.TAG_Byte
 

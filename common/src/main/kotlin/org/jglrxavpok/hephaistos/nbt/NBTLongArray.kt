@@ -4,7 +4,7 @@ import org.jglrxavpok.hephaistos.collections.ImmutableLongArray
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
-class NBTLongArray(val value: ImmutableLongArray) : NBT, Iterable<Long> {
+class NBTLongArray internal constructor(val value: ImmutableLongArray) : NBT, Iterable<Long> {
 
     val length get() = value.size
 
@@ -49,10 +49,6 @@ class NBTLongArray(val value: ImmutableLongArray) : NBT, Iterable<Long> {
     override fun iterator() = value.iterator()
 
     companion object : NBTReaderCompanion<NBTLongArray> {
-
-        @JvmStatic
-        fun fromArray(value: LongArray) = NBTLongArray(ImmutableLongArray(*value))
-
         override fun readContents(source: DataInputStream): NBTLongArray {
             val length = source.readInt()
             val value = ImmutableLongArray(length) { source.readLong() }

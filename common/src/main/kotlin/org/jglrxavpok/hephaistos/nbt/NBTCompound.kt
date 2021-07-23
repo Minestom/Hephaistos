@@ -3,7 +3,7 @@ package org.jglrxavpok.hephaistos.nbt
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
-class NBTCompound(val tags: Map<String, NBT> = mapOf()): NBT {
+class NBTCompound internal constructor(val tags: Map<String, NBT> = mapOf()): NBT {
 
     override val ID = NBTTypes.TAG_Compound
 
@@ -38,7 +38,7 @@ class NBTCompound(val tags: Map<String, NBT> = mapOf()): NBT {
     /**
      * Creates a list with the current available keys
      */
-    fun getKeys(): List<String> = tags.keys.toList()
+    fun getKeys(): Set<String> = tags.keys
 
     override fun toSNBT(): String {
         val tagStr = tags.map { entry ->

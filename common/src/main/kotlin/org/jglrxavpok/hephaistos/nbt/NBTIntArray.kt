@@ -4,15 +4,11 @@ import org.jglrxavpok.hephaistos.collections.ImmutableIntArray
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
-class NBTIntArray(val value: ImmutableIntArray) : NBT, Iterable<Int> {
+class NBTIntArray internal constructor(val value: ImmutableIntArray) : NBT, Iterable<Int> {
 
     val length get() = value.size
 
     override val ID = NBTTypes.TAG_Int_Array
-
-    constructor(): this(ImmutableIntArray())
-
-    constructor(vararg numbers: Int): this(ImmutableIntArray(*numbers))
 
     override fun writeContents(destination: DataOutputStream) {
         destination.writeInt(length)

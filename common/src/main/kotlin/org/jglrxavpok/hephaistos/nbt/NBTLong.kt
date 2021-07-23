@@ -4,7 +4,7 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.util.*
 
-class NBTLong(value: Long) : NBTNumber<Long>(value) {
+class NBTLong internal constructor(value: Long) : NBTNumber<Long>(value) {
     override val ID = NBTTypes.TAG_Long
 
     constructor(): this(0)

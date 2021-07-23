@@ -10,13 +10,13 @@ public class Misc {
 
     @Test
     public void snbtArrays() {
-        NBT array = new NBTByteArray((byte) 1, (byte) 2, (byte) 3);
+        NBT array = NBT.ByteArray(1, 2, 3);
         assertEquals("[B;1B,2B,3B]", array.toSNBT());
 
-        array = new NBTIntArray(1, 2, 3);
+        array = NBT.IntArray(1, 2, 3);
         assertEquals("[I;1,2,3]", array.toSNBT());
 
-        array = new NBTLongArray(1, 2, 3);
+        array = NBT.LongArray(1, 2, 3);
         assertEquals("[L;1L,2L,3L]", array.toSNBT());
     }
 

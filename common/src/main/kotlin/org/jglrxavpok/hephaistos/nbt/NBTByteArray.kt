@@ -4,15 +4,11 @@ import org.jglrxavpok.hephaistos.collections.ImmutableByteArray
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
-class NBTByteArray(val value: ImmutableByteArray) : NBT, Iterable<Byte> {
+class NBTByteArray internal constructor(val value: ImmutableByteArray) : NBT, Iterable<Byte> {
 
     val length get() = value.size
 
     override val ID = NBTTypes.TAG_Int_Array
-
-    constructor(): this(ImmutableByteArray.EMPTY)
-
-    constructor(vararg numbers: Byte): this(ImmutableByteArray(*numbers))
 
     override fun writeContents(destination: DataOutputStream) {
         destination.writeInt(length)
@@ -48,11 +44,7 @@ class NBTByteArray(val value: ImmutableByteArray) : NBT, Iterable<Byte> {
 
     companion object : NBTReaderCompanion<NBTByteArray> {
 
-        @JvmStatic
-        fun fromArray(value: ByteArray) = NBTByteArray(ImmutableByteArray(*value))
-
-        @JvmStatic
-        fun from(vararg values: Int) = NBTByteArray(*values.map { it.toByte() }.toByteArray())
+        val EMPTY = NBTByteArray(ImmutableByteArray.EMPTY)
 
         override fun readContents(source: DataInputStream): NBTByteArray {
             val length = source.readInt()

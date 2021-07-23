@@ -78,7 +78,7 @@ class NBTGsonReader(private val reader: Reader): AutoCloseable, Closeable {
                 NBTTypes.TAG_Long -> NBTLong(element.asLong)
                 NBTTypes.TAG_Float -> NBTFloat(element.asFloat)
                 NBTTypes.TAG_Double -> NBTDouble(element.asDouble)
-                NBTTypes.TAG_Byte_Array -> NBTByteArray.fromArray(element.asJsonArray.map { it.asByte }.toByteArray())
+                NBTTypes.TAG_Byte_Array -> NBT.ByteArrayFromArray(element.asJsonArray.map { it.asByte }.toByteArray())
                 NBTTypes.TAG_String -> if(element.isJsonNull) NBTString("") else NBTString(element.asString)
 
                 NBTTypes.TAG_Compound -> toCompound(element.asJsonObject)
