@@ -1,6 +1,7 @@
 package org.jglrxavpok.hephaistos.nbt
 
 import java.lang.IllegalArgumentException
+import kotlin.reflect.KClass
 
 object NBTTypes {
     const val TAG_End = 0
@@ -24,18 +25,18 @@ object NBTTypes {
     @JvmStatic
     fun readerCompanionFromID(id: Int): NBTReaderCompanion<out NBT> = when(id) {
         TAG_End -> NBTEnd
-        TAG_Byte -> NBTByte.Companion
-        TAG_Short -> NBTShort.Companion
-        TAG_Int -> NBTInt.Companion
-        TAG_Long -> NBTLong.Companion
-        TAG_Float -> NBTFloat.Companion
-        TAG_Double -> NBTDouble.Companion
-        TAG_Byte_Array -> NBTByteArray.Companion
-        TAG_String -> NBTString.Companion
-        TAG_Compound -> NBTCompound.Companion
-        TAG_Int_Array -> NBTIntArray.Companion
-        TAG_Long_Array -> NBTLongArray.Companion
-        TAG_List -> NBTList.Companion
+        TAG_Byte -> NBTByte
+        TAG_Short -> NBTShort
+        TAG_Int -> NBTInt
+        TAG_Long -> NBTLong
+        TAG_Float -> NBTFloat
+        TAG_Double -> NBTDouble
+        TAG_Byte_Array -> NBTByteArray
+        TAG_String -> NBTString
+        TAG_Compound -> NBTCompound
+        TAG_Int_Array -> NBTIntArray
+        TAG_Long_Array -> NBTLongArray
+        TAG_List -> NBTList
 
         else -> throw IllegalArgumentException("$id is not a valid NBT type ID! Must be in 0-12")
     }
@@ -59,6 +60,24 @@ object NBTTypes {
     }
 
     inline fun <reified Tag: NBT> getID() = getID(Tag::class.java)
+
+    fun getClass(id: Int): KClass<out NBT> = when(id) {
+        TAG_End -> NBTEnd::class
+        TAG_Byte -> NBTByte::class
+        TAG_Short -> NBTShort::class
+        TAG_Int -> NBTInt::class
+        TAG_Long -> NBTLong::class
+        TAG_Float -> NBTFloat::class
+        TAG_Double -> NBTDouble::class
+        TAG_Byte_Array -> NBTByteArray::class
+        TAG_String -> NBTString::class
+        TAG_Compound -> NBTCompound::class
+        TAG_Int_Array -> NBTIntArray::class
+        TAG_Long_Array -> NBTLongArray::class
+        TAG_List -> NBTList::class
+
+        else -> throw IllegalArgumentException("$id is not a valid NBT type ID! Must be in 0-12")
+    }
 
     fun name(type: Int): String = when(type) {
         TAG_End -> "TAG_End"

@@ -10,8 +10,8 @@ class NBTList<Tag: NBT>(val subtagType: Int): Iterable<Tag>, NBT {
 
     override val ID = NBTTypes.TAG_List
 
-    private val tags = ArrayList<Tag>()
-    val length get()= tags.size
+    private val tags = mutableListOf<Tag>()
+    val length get() = tags.size
 
     /**
      * Writes the contents of the list, WITH for the subtag ID
@@ -114,7 +114,13 @@ class NBTList<Tag: NBT>(val subtagType: Int): Iterable<Tag>, NBT {
 
     override fun hashCode(): Int {
         var result = subtagType
-        result = 31 * result + Objects.hash(*tags.toArray())
+        result = 31 * result + run {
+            var hashCodeResult = 1
+
+            tags.forEach { hashCodeResult = 31 * hashCodeResult + it.hashCode() }
+
+            return@run hashCodeResult
+        }
         return result
     }
 

@@ -1,6 +1,8 @@
 package org.jglrxavpok.hephaistos.mca
 
+import org.jglrxavpok.hephaistos.collections.ImmutableByteArray
 import org.jglrxavpok.hephaistos.mca.AnvilException.Companion.missing
+import org.jglrxavpok.hephaistos.nbt.NBT
 import org.jglrxavpok.hephaistos.nbt.NBTCompound
 import java.lang.IllegalArgumentException
 import kotlin.experimental.and
@@ -213,16 +215,15 @@ class ChunkSection(val y: Byte) {
      * Converts this ChunkSection into its NBT representation
      */
     @JvmOverloads
-    fun toNBT(version: SupportedVersion = SupportedVersion.Latest): NBTCompound {
-        return NBTCompound().apply {
-            setByte("Y", y)
-            setByteArray("BlockLight", blockLights)
-            setByteArray("SkyLight", skyLights)
-            if(!empty) {
-                set("Palette", palette!!.toNBT())
-                setLongArray("BlockStates", palette!!.compactIDs(blockStates, version))
-            }
+    fun toNBT(version: SupportedVersion = SupportedVersion.Latest): NBTCompound = NBT.Compound {
+        it["Y"] = NBT.Byte(y)
+        it["BlockLight"] = NBT.ByteArray(*blockLights)
+        it["SkyLight"] = NBT.ByteArray(*skyLights)
+        if(!empty) {
+            it["Palette"] = palette!!.toNBT()
+            it["BlockStates"] = NBT.LongArray(palette!!.compactIDs(blockStates, version))
         }
     }
+
 
 }

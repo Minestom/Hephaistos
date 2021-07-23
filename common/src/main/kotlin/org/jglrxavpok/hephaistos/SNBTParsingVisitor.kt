@@ -3,6 +3,9 @@ package org.jglrxavpok.hephaistos
 import org.jglrxavpok.hephaistos.antlr.SNBTBaseVisitor
 import org.jglrxavpok.hephaistos.nbt.*
 import org.jglrxavpok.hephaistos.antlr.SNBTParser
+import org.jglrxavpok.hephaistos.collections.ImmutableByteArray
+import org.jglrxavpok.hephaistos.collections.ImmutableIntArray
+import org.jglrxavpok.hephaistos.collections.ImmutableLongArray
 
 object SNBTParsingVisitor: SNBTBaseVisitor<NBT>() {
 
@@ -15,13 +18,12 @@ object SNBTParsingVisitor: SNBTBaseVisitor<NBT>() {
         }
     }
 
-    override fun visitCompound(ctx: SNBTParser.CompoundContext): NBT {
-        val compound = NBTCompound()
+    override fun visitCompound(ctx: SNBTParser.CompoundContext): NBT = NBTCompound.compound { map ->
         ctx.namedElement().forEach {
-            compound[(visit(it.name) as NBTString).value] = visit(it.value)
+            map[(visit(it.name) as NBTString).value] = visit(it.value)
         }
-        return compound
     }
+
 
     override fun visitList(ctx: SNBTParser.ListContext): NBT {
         val elements = ctx.element().map { visit(it) }
@@ -34,17 +36,17 @@ object SNBTParsingVisitor: SNBTBaseVisitor<NBT>() {
     }
 
     override fun visitByteArray(ctx: SNBTParser.ByteArrayContext): NBT? {
-        val array = ctx.byteNBT().map { (visitByteNBT(it) as NBTByte).value }.toByteArray()
+        val array = ImmutableByteArray(*ctx.byteNBT().map { (visitByteNBT(it) as NBTByte).value }.toByteArray())
         return NBTByteArray(array)
     }
 
     override fun visitIntArray(ctx: SNBTParser.IntArrayContext): NBT {
-        val array = ctx.intNBT().map { (visitIntNBT(it) as NBTInt).value }.toIntArray()
+        val array = ImmutableIntArray(*ctx.intNBT().map { (visitIntNBT(it) as NBTInt).value }.toIntArray())
         return NBTIntArray(array)
     }
 
     override fun visitLongArray(ctx: SNBTParser.LongArrayContext): NBT {
-        val array = ctx.longNBT().map { (visitLongNBT(it) as NBTLong).value }.toLongArray()
+        val array = ImmutableLongArray(*ctx.longNBT().map { (visitLongNBT(it) as NBTLong).value }.toLongArray())
         return NBTLongArray(array)
     }
 
@@ -61,14 +63,14 @@ object SNBTParsingVisitor: SNBTBaseVisitor<NBT>() {
     }
 
     override fun visitLongNBT(ctx: SNBTParser.LongNBTContext): NBT {
-        var value = ctx.LONG().text.dropLast(1).toLong()
+        val value = ctx.LONG().text.dropLast(1).toLong()
         return NBTLong(value)
     }
 
     override fun visitByteNBT(ctx: SNBTParser.ByteNBTContext): NBT {
         ctx.BOOLEAN()?.let {
             val booleanValue = ctx.BOOLEAN().text == "true"
-            return NBTByte(booleanValue)
+            return NBTByte.Boolean(booleanValue)
         }
         val value = ctx.BYTE().text.dropLast(1).toByte()
         return NBTByte(value)

@@ -1,6 +1,7 @@
 package org.jglrxavpok.hephaistos.mca
 
 import org.jglrxavpok.hephaistos.mca.AnvilException.Companion.missing
+import org.jglrxavpok.hephaistos.nbt.NBT
 import org.jglrxavpok.hephaistos.nbt.NBTCompound
 import org.jglrxavpok.hephaistos.nbt.NBTString
 
@@ -10,7 +11,10 @@ import org.jglrxavpok.hephaistos.nbt.NBTString
 data class BlockState @JvmOverloads constructor(val name: String, val properties: Map<String, String> = HashMap()) {
     companion object {
         @JvmField
-        val Air = BlockState(NBTCompound().setString("Name", "minecraft:air").set("Properties", NBTCompound()))
+        val Air = BlockState(NBTCompound.compound {
+            it["Name"] = NBT.String("minecraft:air");
+            it["Properties"] = NBTCompound()
+        })
     }
 
     /**
@@ -23,12 +27,13 @@ data class BlockState @JvmOverloads constructor(val name: String, val properties
     /**
      * Converts this BlockState to a TAG_Compound
      */
-    fun toNBT(): NBTCompound {
-        val propertiesNBT = NBTCompound()
-        for((name, value) in properties) {
-            propertiesNBT[name] = NBTString(value)
+    fun toNBT(): NBTCompound = NBTCompound.compound { map ->
+        map["Name"] = NBT.String(name)
+        map["Properties"] = NBTCompound.compound { internalMap ->
+            for((name, value) in properties) {
+                internalMap[name] = NBTString(value)
+            }
         }
-        return NBTCompound().setString("Name", name).set("Properties", propertiesNBT)
     }
 }
 

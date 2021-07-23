@@ -1,5 +1,6 @@
 package org.jglrxavpok.hephaistos.mca
 
+import org.jglrxavpok.hephaistos.collections.ImmutableLongArray
 import kotlin.math.ceil
 
 /**
@@ -13,7 +14,7 @@ class Heightmap() {
      * Constructs the heightmap from a compressed heightmap (36 longs long)
      */
     @JvmOverloads
-    constructor(compactVersion: LongArray, version: SupportedVersion = SupportedVersion.Latest): this() {
+    constructor(compactVersion: ImmutableLongArray, version: SupportedVersion = SupportedVersion.Latest): this() {
         when(version) {
             SupportedVersion.MC_1_15 -> {
                 if(compactVersion.size != 36) { // 16x16
@@ -60,7 +61,7 @@ class Heightmap() {
      * (9bit heights saved in longs, resulting in a long array of 36 longs)
      */
     @JvmOverloads
-    fun compact(version: SupportedVersion = SupportedVersion.Latest): LongArray {
+    fun compact(version: SupportedVersion = SupportedVersion.Latest): ImmutableLongArray {
         return when(version) {
             SupportedVersion.MC_1_15 -> compress(heights, 9)
             SupportedVersion.MC_1_16 -> pack(heights, 9)

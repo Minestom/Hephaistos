@@ -1,10 +1,9 @@
 package org.jglrxavpok.hephaistos.mca
 
+import org.jglrxavpok.hephaistos.collections.ImmutableByteArray
+import org.jglrxavpok.hephaistos.collections.ImmutableIntArray
 import org.jglrxavpok.hephaistos.mca.AnvilException.Companion.missing
-import org.jglrxavpok.hephaistos.nbt.NBTCompound
-import org.jglrxavpok.hephaistos.nbt.NBTList
-import org.jglrxavpok.hephaistos.nbt.NBTShort
-import org.jglrxavpok.hephaistos.nbt.NBTTypes
+import org.jglrxavpok.hephaistos.nbt.*
 
 /**
  * 16x256x16 (XYZ) area of the world. Consists of 16 ChunkSections vertically stacked.
@@ -30,7 +29,7 @@ class ChunkColumn(val x: Int, val z: Int) {
      * to the biome for a cube of 4x4x4 blocks).
      * Arranged by X, Z and then Y.
      */
-    var biomes: IntArray? = null
+    var biomes: ImmutableIntArray? = null
     var motionBlockingHeightMap = Heightmap()
     var worldSurfaceHeightMap = Heightmap()
     var motionBlockingNoLeavesHeightMap: Heightmap? = null
@@ -51,9 +50,9 @@ class ChunkColumn(val x: Int, val z: Int) {
      * Chunk sections of this chunk. Empty sections are non-null but have their 'empty' field set to true.
      * @see ChunkSection
      */
-    val sections = Array<ChunkSection>(16) { y -> ChunkSection(y.toByte()) }
-    var airCarvingMask: ByteArray? = null
-    var liquidCarvingMask: ByteArray? = null
+    val sections = Array(16) { y -> ChunkSection(y.toByte()) }
+    var airCarvingMask: ImmutableByteArray? = null
+    var liquidCarvingMask: ImmutableByteArray? = null
 
     @Throws(AnvilException::class)
     constructor(chunkData: NBTCompound): this(
@@ -150,10 +149,8 @@ class ChunkColumn(val x: Int, val z: Int) {
     fun setBiome(x: Int, y: Int, z: Int, biomeID: Int) {
         checkBounds(x, y, z)
         if(biomes == null) {
-            biomes = IntArray(1024) { UnknownBiome }
+            biomes = ImmutableIntArray(1024) { if (it == x/4+(z/4)*16+(y/4)*16) biomeID else UnknownBiome }
         }
-        val index = x/4+(z/4)*16+(y/4)*16
-        biomes!![index] = biomeID
     }
 
     /**
@@ -172,65 +169,61 @@ class ChunkColumn(val x: Int, val z: Int) {
     /**
      * Converts this ChunkColumn into its NBT representation
      */
-    fun toNBT(): NBTCompound {
-        return NBTCompound()
-                .setInt("DataVersion", dataVersion)
-                .set("Level",
-                        NBTCompound().apply {
-                            setInt("xPos", x)
-                            setInt("zPos", z)
-                            setLong("LastUpdate", lastUpdate)
-                            setLong("InhabitedTime", inhabitedTime)
-                            setString("Status", generationStatus.id)
-                            if(biomes != null) {
-                                setIntArray("Biomes", biomes!!)
-                            }
-                            set("Heightmaps", NBTCompound().apply {
-                                setLongArray("MOTION_BLOCKING", motionBlockingHeightMap.compact(version))
-                                motionBlockingNoLeavesHeightMap?.let { setLongArray("MOTION_BLOCKING_NO_LEAVES", it.compact(version)) }
-                                oceanFloorHeightMap?.let { setLongArray("OCEAN_FLOOR", it.compact(version)) }
-                                oceanFloorWorldGenHeightMap?.let { setLongArray("OCEAN_FLOOR_WG", it.compact(version)) }
-                                setLongArray("WORLD_SURFACE", worldSurfaceHeightMap.compact(version))
-                                worldSurfaceWorldGenHeightMap?.let { setLongArray("WORLD_SURFACE_WG", it.compact(version)) }
-                            })
-                            val sections = NBTList<NBTCompound>(NBTTypes.TAG_Compound)
-                            for (section in this@ChunkColumn.sections) {
-                                if(!section.empty) {
-                                    sections += section.toNBT(version)
-                                }
-                            }
-                            set("Sections", sections)
-                            set("Entities", entities)
-                            set("TileEntities", tileEntities)
-                            set("TileTicks", tileTicks)
-                            set("LiquidTicks", liquidTicks)
-                            if(structures != null) {
-                                set("Structures", structures!!)
-                            }
-                            if(airCarvingMask != null || liquidCarvingMask != null) {
-                                set("CarvingMasks", NBTCompound()
-                                        .apply {
-                                            if(airCarvingMask != null)
-                                                setByteArray("AIR", airCarvingMask!!)
-                                            if(liquidCarvingMask != null)
-                                                setByteArray("LIQUID", liquidCarvingMask!!)
-                                        }
-                                )
-                            }
-                            if(lights != null) {
-                                set("Lights", lights!!)
-                            }
-                            if(liquidsToBeTicked != null) {
-                                set("LiquidsToBeTicked", liquidsToBeTicked!!)
-                            }
-                            if(toBeTicked != null) {
-                                set("ToBeTicked", toBeTicked!!)
-                            }
-                            if(postProcessing != null) {
-                                set("PostProcessing", postProcessing!!)
-                            }
-                        }
-                )
+    fun toNBT(): NBTCompound = NBT.Compound { rootMap ->
+        rootMap["DataVersion"] = NBT.Int(dataVersion)
+        rootMap["Level"] = NBT.Compound { levelMap ->
+            levelMap["xPos"] = NBT.Int(x)
+            levelMap["zPos"] = NBT.Int(z)
+
+            levelMap["LastUpdate"] = NBT.Long(lastUpdate)
+            levelMap["InhabitedTime"] = NBT.Long(inhabitedTime)
+            levelMap["Status"] = NBT.String(generationStatus.id)
+
+            if(biomes != null) {
+                levelMap["Biomes"] = NBT.IntArray(biomes!!)
+            }
+
+            levelMap["Heightmaps"] = NBT.Compound { heightMapMap ->
+                heightMapMap["MOTION_BLOCKING"] = NBT.LongArray(motionBlockingHeightMap.compact(version))
+                motionBlockingNoLeavesHeightMap?.let { heightMapMap["MOTION_BLOCKING_NO_LEAVES"] = NBT.LongArray(it.compact(version)) }
+                oceanFloorHeightMap?.let { heightMapMap["OCEAN_FLOOR"] = NBT.LongArray(it.compact(version)) }
+                oceanFloorWorldGenHeightMap?.let { heightMapMap["OCEAN_FLOOR_WG"] = NBT.LongArray(it.compact(version)) }
+                heightMapMap["WORLD_SURFACE"] = NBT.LongArray(worldSurfaceHeightMap.compact(version))
+                worldSurfaceWorldGenHeightMap?.let { heightMapMap["WORLD_SURFACE_WG"] = NBT.LongArray(it.compact(version)) }
+            }
+            val sections = NBTList<NBTCompound>(NBTTypes.TAG_Compound)
+            for (section in this@ChunkColumn.sections) {
+                if(!section.empty) {
+                    sections += section.toNBT(version)
+                }
+            }
+            levelMap["Sections"] = sections
+            levelMap["Entities"] = entities
+            levelMap["TileEntities"] = tileEntities
+            levelMap["TileTicks"] = tileTicks
+            levelMap["LiquidTicks"] = liquidTicks
+            if(structures != null) {
+                levelMap["Structures"] = structures!!
+            }
+            if(airCarvingMask != null || liquidCarvingMask != null) {
+                levelMap["CarvingMasks"] = NBT.Compound { carvingMaskMap ->
+                    airCarvingMask?.let { carvingMaskMap["AIR"] = NBT.ByteArray(it) }
+                    liquidCarvingMask?.let { carvingMaskMap["LIQUID"] = NBT.ByteArray(it) }
+                }
+            }
+            if(lights != null) {
+                levelMap["Lights"] = lights!!
+            }
+            if(liquidsToBeTicked != null) {
+                levelMap["LiquidsToBeTicked"] = liquidsToBeTicked!!
+            }
+            if(toBeTicked != null) {
+                levelMap["ToBeTicked"] = toBeTicked!!
+            }
+            if(postProcessing != null) {
+                levelMap["PostProcessing"] = postProcessing!!
+            }
+        }
     }
 
     enum class GenerationStatus(val id: String) {
@@ -251,7 +244,7 @@ class ChunkColumn(val x: Int, val z: Int) {
         companion object {
             @JvmStatic
             fun fromID(id: String): GenerationStatus {
-                return values().firstOrNull() { it.id == id } ?: throw IllegalArgumentException("Invalid id: $id")
+                return values().firstOrNull { it.id == id } ?: throw IllegalArgumentException("Invalid id: $id")
             }
         }
     }

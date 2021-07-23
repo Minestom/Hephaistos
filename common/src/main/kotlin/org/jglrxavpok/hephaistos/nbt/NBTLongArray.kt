@@ -1,15 +1,19 @@
 package org.jglrxavpok.hephaistos.nbt
 
+import org.jglrxavpok.hephaistos.collections.ImmutableIntArray
+import org.jglrxavpok.hephaistos.collections.ImmutableLongArray
 import java.io.DataInputStream
 import java.io.DataOutputStream
-import java.util.*
 
-class NBTLongArray(var value: LongArray) : NBT {
-    val length get()= value.size
+class NBTLongArray(val value: ImmutableLongArray) : NBT {
 
-    override val ID = NBTTypes.TAG_Long_Array
+    val length get() = value.size
 
-    constructor(): this(LongArray(0))
+    override val ID = NBTTypes.TAG_Int_Array
+
+    constructor(): this(ImmutableLongArray())
+
+    constructor(vararg numbers: Long): this(ImmutableLongArray(*numbers))
 
     override fun writeContents(destination: DataOutputStream) {
         destination.writeInt(length)
@@ -20,14 +24,9 @@ class NBTLongArray(var value: LongArray) : NBT {
 
     operator fun get(index: Int) = value[index]
 
-    operator fun set(index: Int, v: Long): NBTLongArray {
-        value[index] = v
-        return this
-    }
-
     override fun toSNBT(): String {
-        val list = value.joinToString(",") { "${it}L" }
-        return "[L;$list]"
+        val list = value.joinToString(",") { "$it" }
+        return "[I;$list]"
     }
 
     override fun toString() = toSNBT()
@@ -38,25 +37,20 @@ class NBTLongArray(var value: LongArray) : NBT {
 
         other as NBTLongArray
 
-        if (!value.contentEquals(other.value)) return false
+        if (value contentEquals other.value) return false
 
         return true
     }
 
-    override fun hashCode(): Int {
-        return Objects.hash(*value.toTypedArray())
-    }
+    override fun hashCode() = value.hashCode()
 
-    override fun deepClone() = NBTLongArray(value.copyOf())
+    @Deprecated("NBT Arrays are immutable", replaceWith = ReplaceWith("this"))
+    override fun deepClone() = this
 
     companion object : NBTReaderCompanion<NBTLongArray> {
         override fun readContents(source: DataInputStream): NBTLongArray {
             val length = source.readInt()
-            val value = LongArray(length)
-            for(i in 0 until length) {
-                value[i] = source.readLong()
-            }
-
+            val value = ImmutableLongArray(length) { source.readLong() }
             return NBTLongArray(value)
         }
     }

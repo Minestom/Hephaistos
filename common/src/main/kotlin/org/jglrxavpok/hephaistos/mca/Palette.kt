@@ -1,5 +1,6 @@
 package org.jglrxavpok.hephaistos.mca
 
+import org.jglrxavpok.hephaistos.collections.ImmutableLongArray
 import org.jglrxavpok.hephaistos.nbt.NBTCompound
 import org.jglrxavpok.hephaistos.nbt.NBTList
 import org.jglrxavpok.hephaistos.nbt.NBTTypes
@@ -78,7 +79,7 @@ class Palette() {
      * Bit length is selected on the size of this palette (`ceil(log2(size))`), ID correspond to the index inside this palette
      */
     @JvmOverloads
-    fun compactIDs(states: Array<BlockState>, version: SupportedVersion = SupportedVersion.Latest): LongArray {
+    fun compactIDs(states: Array<BlockState>, version: SupportedVersion = SupportedVersion.Latest): ImmutableLongArray {
         // convert state list into uncompressed data
         val indices = states.map(blocks::indexOf).toIntArray()
         val bitLength = ceil(log2(blocks.size.toFloat())).toInt().coerceAtLeast(1) // at least one bit

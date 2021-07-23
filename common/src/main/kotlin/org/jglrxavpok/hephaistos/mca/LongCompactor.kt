@@ -1,5 +1,6 @@
 package org.jglrxavpok.hephaistos.mca
 
+import org.jglrxavpok.hephaistos.collections.ImmutableLongArray
 import kotlin.math.ceil
 import kotlin.math.floor
 
@@ -8,7 +9,7 @@ import kotlin.math.floor
  *
  * lengthInBits must be at least 1
  */
-fun compress(data: IntArray, lengthInBits: Int): LongArray {
+fun compress(data: IntArray, lengthInBits: Int): ImmutableLongArray {
     val compacted = LongArray(ceil(data.size*lengthInBits/64.0).toInt())
     var bitIndex = 0
     val maxMask = (1L shl lengthInBits) -1
@@ -23,20 +24,20 @@ fun compress(data: IntArray, lengthInBits: Int): LongArray {
             val overshoot = (bitIndex+lengthInBits) % 64
             val highMask = (1 shl overshoot) -1
             val mask = ((1 shl lengthInBits-overshoot)-1).toLong()
-            compacted[beginLongIndex] = compacted[beginLongIndex] and (maxMask shl bitIndex%64).inv().toLong() or (value.toLong() and mask shl (bitIndex%64))
+            compacted[beginLongIndex] = compacted[beginLongIndex] and (maxMask shl bitIndex%64).inv() or (value.toLong() and mask shl (bitIndex%64))
             compacted[endLongIndex] = compacted[endLongIndex] or ((value.toLong() and maxMask shr (64-(bitIndex%64))) and highMask.toLong())
         } else {
             compacted[beginLongIndex] = compacted[beginLongIndex] and (maxMask shl bitIndex%64).inv() or (value.toLong() and maxMask shl (bitIndex%64))
         }
         bitIndex += lengthInBits
     }
-    return compacted
+    return ImmutableLongArray(*compacted)
 }
 
 /**
  * Decompresses compressed 'data' into a int array, with lengthInBits bits per int.
  */
-fun decompress(data: LongArray, lengthInBits: Int): IntArray {
+fun decompress(data: ImmutableLongArray, lengthInBits: Int): IntArray {
     var bitIndex = 0
     val count = (data.size.toLong()*64 / lengthInBits).toInt()
     val result = IntArray(count)
@@ -71,7 +72,7 @@ fun decompress(data: LongArray, lengthInBits: Int): IntArray {
  *
  * (ie 2 >32 bit long values will produce two longs, but the highest bits of each long will be unused)
  */
-fun unpack(longs: LongArray, lengthInBits: Int): IntArray {
+fun unpack(longs: ImmutableLongArray, lengthInBits: Int): IntArray {
     val intPerLong = floor(64.0 / lengthInBits)
     val intCount = ceil(longs.size * intPerLong).toInt()
     val ints = IntArray(intCount)
@@ -89,7 +90,7 @@ fun unpack(longs: LongArray, lengthInBits: Int): IntArray {
 /**
  * Packs ints into a long array. Produces unused bits and does not partially overflow to next long on boundaries.
  */
-fun pack(ints: IntArray, lengthInBits: Int): LongArray {
+fun pack(ints: IntArray, lengthInBits: Int): ImmutableLongArray {
     val intPerLong = floor(64.0 / lengthInBits).toInt()
     val longCount = ceil(ints.size / intPerLong.toDouble()).toInt()
     val longs = LongArray(longCount)
@@ -106,5 +107,5 @@ fun pack(ints: IntArray, lengthInBits: Int): LongArray {
         }
         longs[i] = long
     }
-    return longs
+    return ImmutableLongArray(*longs)
 }

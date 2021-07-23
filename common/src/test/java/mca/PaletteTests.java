@@ -1,5 +1,6 @@
 package mca;
 
+import org.jglrxavpok.hephaistos.collections.ImmutableLongArray;
 import org.jglrxavpok.hephaistos.mca.BlockState;
 import org.jglrxavpok.hephaistos.mca.LongCompactorKt;
 import org.jglrxavpok.hephaistos.mca.Palette;
@@ -73,8 +74,8 @@ public class PaletteTests {
         // 64 bits / 16 entries = 4 bits required per entry.
         // But we only have 2 blocks, so a single bit is enough.
         // Finally, a long has 64 bits, which is enough to store 16 entries at 1 bit/entry
-        long[] expected = LongCompactorKt.compress(ids, 1);
-        assertArrayEquals(expected, palette.compactIDs(states, SupportedVersion.MC_1_15));
+        ImmutableLongArray expected = LongCompactorKt.compress(ids, 1);
+        assertEquals(expected, palette.compactIDs(states, SupportedVersion.MC_1_15));
     }
 
     @Test
@@ -98,8 +99,8 @@ public class PaletteTests {
         // 64 bits / 16 entries = 4 bits required per entry.
         // But we only have 2 blocks, so a single bit is enough.
         // Finally, a long has 64 bits, which is enough to store 16 entries at 1 bit/entry
-        long[] expected = LongCompactorKt.pack(ids, 1);
-        assertArrayEquals(expected, palette.compactIDs(states, SupportedVersion.MC_1_16));
+        ImmutableLongArray expected = LongCompactorKt.pack(ids, 1);
+        assertEquals(expected, palette.compactIDs(states, SupportedVersion.MC_1_16));
     }
 
     @AfterEach

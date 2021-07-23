@@ -80,15 +80,15 @@ public class NBTSaving {
     @ValueSource(booleans = { true, false })
     public void saveCompound(boolean compressed) throws IOException, NBTException {
         NBTCompound nbt = new NBTCompound();
-        nbt.setByteArray("bytearray", new byte[]{1,2,3});
+        nbt.setByteArray("bytearray", 1,2,3);
         nbt.setByte("byte", (byte) 0x42);
         nbt.setDouble("double", 0.5);
         nbt.setString("string", "ABC");
         nbt.setFloat("float", 0.25f);
         nbt.setInt("int", 4657);
-        nbt.setIntArray("intarray", new int[] { 42, 42, 25464, 454, -10 });
+        nbt.setIntArray("intarray", 42, 42, 25464, 454, -10 );
         nbt.setLong("long", 30000000000L);
-        nbt.setLongArray("longarray", new long[]{30000000000L, -30000000000L, 130000000000L});
+        nbt.setLongArray("longarray", 30000000000L, -30000000000L, 130000000000L);
         nbt.setShort("short", (short) -10);
         test(nbt, compressed);
     }

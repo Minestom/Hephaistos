@@ -2,12 +2,10 @@ package org.jglrxavpok.hephaistos.nbt
 
 import java.io.DataInputStream
 import java.io.DataOutputStream
-import java.util.concurrent.ConcurrentHashMap
 
-class NBTCompound: NBT {
+class NBTCompound(val tags: Map<String, NBT> = mapOf()): NBT {
+
     override val ID = NBTTypes.TAG_Compound
-
-    private val tags = ConcurrentHashMap<String, NBT>()
 
     /**
      * Number of tags inside this compound
@@ -24,13 +22,6 @@ class NBTCompound: NBT {
     }
 
     /**
-     * Removes all tags from this compound
-     */
-    fun clear() {
-        tags.clear()
-    }
-
-    /**
      * Does a tag exist inside this compound with the given key?
      */
     fun containsKey(key: String): Boolean {
@@ -42,14 +33,6 @@ class NBTCompound: NBT {
      */
     operator fun get(key: String): NBT? {
         return tags[key]
-    }
-
-    /**
-     * Sets (and overwrites previous) tag associated to the given key
-     */
-    operator fun set(key: String, tag: NBT): NBTCompound {
-        tags[key] = tag
-        return this
     }
 
     /**
@@ -68,56 +51,6 @@ class NBTCompound: NBT {
 
 
     // Convenience methods
-
-    /**
-     * Sets (and overwrites previous) tag associated to the given key (shorthand method that in turn calls `set`)
-     */
-    fun setByte(key: String, value: Byte) = set(key, NBTByte(value))
-
-    /**
-     * Sets (and overwrites previous) tag associated to the given key (shorthand method that in turn calls `set`)
-     */
-    fun setByteArray(key: String, value: ByteArray) = set(key, NBTByteArray(value))
-
-    /**
-     * Sets (and overwrites previous) tag associated to the given key (shorthand method that in turn calls `set`)
-     */
-    fun setDouble(key: String, value: Double) = set(key, NBTDouble(value))
-
-    /**
-     * Sets (and overwrites previous) tag associated to the given key (shorthand method that in turn calls `set`)
-     */
-    fun setFloat(key: String, value: Float) = set(key, NBTFloat(value))
-
-    /**
-     * Sets (and overwrites previous) tag associated to the given key (shorthand method that in turn calls `set`)
-     */
-    fun setInt(key: String, value: Int) = set(key, NBTInt(value))
-
-    /**
-     * Sets (and overwrites previous) tag associated to the given key (shorthand method that in turn calls `set`)
-     */
-    fun setIntArray(key: String, value: IntArray) = set(key, NBTIntArray(value))
-
-    /**
-     * Sets (and overwrites previous) tag associated to the given key (shorthand method that in turn calls `set`)
-     */
-    fun setLong(key: String, value: Long) = set(key, NBTLong(value))
-
-    /**
-     * Sets (and overwrites previous) tag associated to the given key (shorthand method that in turn calls `set`)
-     */
-    fun setLongArray(key: String, value: LongArray) = set(key, NBTLongArray(value))
-
-    /**
-     * Sets (and overwrites previous) tag associated to the given key (shorthand method that in turn calls `set`)
-     */
-    fun setShort(key: String, value: Short) = set(key, NBTShort(value))
-
-    /**
-     * Sets (and overwrites previous) tag associated to the given key (shorthand method that in turn calls `set`)
-     */
-    fun setString(key: String, value: String) = set(key, NBTString(value))
 
     /**
      * Returns the value associated to the given key, if any. Returns 'null' otherwise.
@@ -239,17 +172,6 @@ class NBTCompound: NBT {
      */
     fun <T: NBT> getList(key: String): NBTList<T>? = get(key) as? NBTList<T>
 
-    /**
-     * Removes the tag with the given key.
-     * If no such key exists, no changes are made to this compound.
-     *
-     * @return 'this' for chaining
-     */
-    fun removeTag(key: String): NBTCompound {
-        tags.remove(key)
-        return this
-    }
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -280,24 +202,28 @@ class NBTCompound: NBT {
         }
     }
 
-    override fun deepClone() = NBTCompound().let {
-        for((key, value) in tags) {
-            it[key] = value.deepClone()
-        }
-        it
-    }
+    fun modify(lambda: CompoundBuilder) = NBTCompound(tags.toMutableMap().also { lambda.run(it) })
+
+    @Deprecated("NBTCompound is immutable", replaceWith = ReplaceWith("this"))
+    override fun deepClone() = this
 
     companion object : NBTReaderCompanion<NBTCompound> {
-        override fun readContents(source: DataInputStream) = with(NBTCompound()) {
+
+        @JvmStatic
+        fun compound(lambda: CompoundBuilder) = NBTCompound(mutableMapOf<String, NBT>().also { lambda.run(it) })
+
+        override fun readContents(source: DataInputStream) = compound {
             do {
                 val tag = source.readFullyFormedTag()
                 if(tag.second !is NBTEnd) {
-                    tags[tag.first] = tag.second
+                    it[tag.first] = tag.second
                 }
             } while(tag.second !is NBTEnd)
-
-            return@with this
         }
     }
 
+}
+
+fun interface CompoundBuilder {
+    fun run(map: MutableMap<String, NBT>)
 }

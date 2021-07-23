@@ -1,5 +1,8 @@
 package org.jglrxavpok.hephaistos.nbt
 
+import org.jglrxavpok.hephaistos.collections.ImmutableByteArray
+import org.jglrxavpok.hephaistos.collections.ImmutableIntArray
+import org.jglrxavpok.hephaistos.collections.ImmutableLongArray
 import java.io.DataOutputStream
 import java.io.IOException
 
@@ -46,5 +49,44 @@ sealed interface NBT {
 
         @JvmStatic
         fun Byte(value: Byte) = NBTByte(value)
+
+        @JvmStatic
+        fun ByteArray(vararg value: Byte) = NBTByteArray(*value)
+
+        @JvmStatic
+        fun ByteArray(array: ImmutableByteArray) = NBTByteArray(array)
+
+        @JvmStatic
+        fun Compound(lambda: CompoundBuilder) = NBTCompound.compound(lambda)
+
+        @JvmStatic
+        fun Double(value: Double) = NBTDouble(value)
+
+        @JvmStatic
+        fun Float(value: Float) = NBTFloat(value)
+
+        @JvmStatic
+        fun Short(value: Short) = NBTShort(value)
+
+        @JvmStatic
+        fun Int(value: Int) = NBTInt(value)
+
+        @JvmStatic
+        fun IntArray(vararg value: Int) = NBTIntArray(*value)
+
+        @JvmStatic
+        fun IntArray(array: ImmutableIntArray) = NBTIntArray(array)
+
+        @JvmStatic
+        fun Long(value: Long) = NBTLong(value)
+
+        @JvmStatic
+        fun LongArray(vararg value: Long) = NBTLongArray(*value)
+
+        @JvmStatic
+        fun LongArray(array: ImmutableLongArray) = NBTLongArray(array)
+
+        @JvmStatic
+        fun String(value: String) = NBTString(value)
     }
 }

@@ -1,15 +1,20 @@
 package org.jglrxavpok.hephaistos.nbt
 
+import org.jglrxavpok.hephaistos.collections.ImmutableByteArray
+import org.jglrxavpok.hephaistos.collections.ImmutableIntArray
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.util.*
 
-class NBTIntArray(var value: IntArray) : NBT {
-    val length get()= value.size
+class NBTIntArray(val value: ImmutableIntArray) : NBT {
+
+    val length get() = value.size
 
     override val ID = NBTTypes.TAG_Int_Array
 
-    constructor(): this(IntArray(0))
+    constructor(): this(ImmutableIntArray())
+
+    constructor(vararg numbers: Int): this(ImmutableIntArray(*numbers))
 
     override fun writeContents(destination: DataOutputStream) {
         destination.writeInt(length)
@@ -19,11 +24,6 @@ class NBTIntArray(var value: IntArray) : NBT {
     }
 
     operator fun get(index: Int) = value[index]
-
-    operator fun set(index: Int, v: Int): NBTIntArray {
-        value[index] = v
-        return this
-    }
 
     override fun toSNBT(): String {
         val list = value.joinToString(",") { "$it" }
@@ -38,25 +38,20 @@ class NBTIntArray(var value: IntArray) : NBT {
 
         other as NBTIntArray
 
-        if (!value.contentEquals(other.value)) return false
+        if (value contentEquals other.value) return false
 
         return true
     }
 
-    override fun hashCode(): Int {
-        return Objects.hash(*value.toTypedArray())
-    }
+    override fun hashCode() = value.hashCode()
 
-    override fun deepClone() = NBTIntArray(value.copyOf())
+    @Deprecated("NBT Arrays are immutable", replaceWith = ReplaceWith("this"))
+    override fun deepClone() = this
 
     companion object : NBTReaderCompanion<NBTIntArray> {
         override fun readContents(source: DataInputStream): NBTIntArray {
             val length = source.readInt()
-            val value = IntArray(length)
-            for(i in 0 until length) {
-                value[i] = source.readInt()
-            }
-
+            val value = ImmutableIntArray(length) { source.readInt() }
             return NBTIntArray(value)
         }
     }

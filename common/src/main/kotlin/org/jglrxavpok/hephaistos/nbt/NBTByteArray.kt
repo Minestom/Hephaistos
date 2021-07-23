@@ -1,31 +1,33 @@
 package org.jglrxavpok.hephaistos.nbt
 
+import org.jglrxavpok.hephaistos.collections.ImmutableByteArray
+import org.jglrxavpok.hephaistos.collections.ImmutableIntArray
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.util.*
 
-class NBTByteArray(var value: ByteArray) : NBT {
-    val length get()= value.size
+class NBTByteArray(val value: ImmutableByteArray) : NBT {
 
-    override val ID = NBTTypes.TAG_Byte_Array
+    val length get() = value.size
 
-    constructor(): this(ByteArray(0))
+    override val ID = NBTTypes.TAG_Int_Array
+
+    constructor(): this(ImmutableByteArray())
+
+    constructor(vararg numbers: Byte): this(ImmutableByteArray(*numbers))
 
     override fun writeContents(destination: DataOutputStream) {
         destination.writeInt(length)
-        destination.write(value)
-    }
-
-    override fun toSNBT(): String {
-        val list = value.joinToString(",") { "${it}B" }
-        return "[B;$list]"
+        for(i in 0 until length) {
+            destination.writeByte(value[i].toInt())
+        }
     }
 
     operator fun get(index: Int) = value[index]
 
-    operator fun set(index: Int, v: Byte): NBTByteArray {
-        value[index] = v
-        return this
+    override fun toSNBT(): String {
+        val list = value.joinToString(",") { "$it" }
+        return "[B;$list]"
     }
 
     override fun toString() = toSNBT()
@@ -36,24 +38,21 @@ class NBTByteArray(var value: ByteArray) : NBT {
 
         other as NBTByteArray
 
-        if (!value.contentEquals(other.value)) return false
+        if (value contentEquals other.value) return false
 
         return true
     }
 
-    override fun hashCode(): Int {
-        return Objects.hash(*value.toTypedArray())
-    }
+    override fun hashCode() = value.hashCode()
 
-    override fun deepClone() = NBTByteArray(value.copyOf())
+    @Deprecated("NBT Arrays are immutable", replaceWith = ReplaceWith("this"))
+    override fun deepClone() = this
 
     companion object : NBTReaderCompanion<NBTByteArray> {
         override fun readContents(source: DataInputStream): NBTByteArray {
             val length = source.readInt()
-            val value = ByteArray(length)
-            source.readFully(value)
+            val value = ImmutableByteArray(length) { source.readByte() }
             return NBTByteArray(value)
         }
     }
-
 }
