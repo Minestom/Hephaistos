@@ -63,9 +63,6 @@ sealed interface NBT {
         fun ByteArray(array: ImmutableByteArray) = NBTByteArray(array)
 
         @JvmStatic
-        fun ByteArrayFromArray(value: ByteArray) = NBTByteArray(ImmutableByteArray(*value))
-
-        @JvmStatic
         fun Compound(lambda: CompoundBuilder) = NBTCompound.compound(lambda)
 
         inline fun Kompound(crossinline lambda: CompoundMap.() -> Unit) = NBTCompound.kompound(lambda)
@@ -96,9 +93,6 @@ sealed interface NBT {
 
         @JvmStatic
         fun LongArray(vararg value: Long) = NBTLongArray(*value)
-
-        @JvmStatic
-        fun LongArrayFromArray(value: LongArray) = NBTLongArray(ImmutableLongArray(*value))
 
         @JvmStatic
         fun LongArray(array: ImmutableLongArray) = NBTLongArray(array)

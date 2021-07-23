@@ -1,7 +1,9 @@
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.jglrxavpok.hephaistos.json.NBTGsonWriter;
+import org.jglrxavpok.hephaistos.nbt.NBT;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -19,16 +21,23 @@ public class TestWriterCompound {
 
     @Test
     public void innerCompound() {
-        NBTCompound nbt = new NBTCompound();
-        nbt.setLong("timestamp", 1564864468L);
-        nbt.setByte("458", (byte) 0x0F);
+        NBTCompound nbt = NBT.Compound(root -> {
+            root.put("timestamp", NBT.Long(1564864468L));
+            root.put("458", NBT.Byte(0x0F));
 
-        NBTCompound inside = new NBTCompound();
-        inside.setDouble("doubledouble", 0.5);
-        nbt.set("inside", inside);
-        nbt.setByteArray("aaa", new byte[] { 1, 2 });
+            root.put("inside", NBT.Compound(inside -> {
+                inside.put("doubledouble", NBT.Double(0.5));
+            }));
+
+            root.put("aaa", NBT.ByteArray(1, 2));
+        });
 
         assertEquals(new Gson().fromJson("{\"timestamp\":1564864468,\"458\":15,\"inside\":{\"doubledouble\":0.5},\"aaa\":[1,2]}", JsonObject.class), writer.write(nbt));
+    }
+
+    @AfterEach
+    public void clean() {
+        writer = null;
     }
 
 }

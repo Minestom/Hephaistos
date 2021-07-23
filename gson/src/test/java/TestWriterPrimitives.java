@@ -17,37 +17,37 @@ public class TestWriterPrimitives {
 
     @Test
     public void writeByte() {
-        JsonElement element = writer.write(NBT.Byte((byte) 42));
+        JsonElement element = writer.write(NBT.Byte(42));
         assertEquals("42", element.toString());
     }
 
     @Test
     public void writeShort() {
-        JsonElement element = writer.write(new NBTShort((short) -40));
+        JsonElement element = writer.write(NBT.Short(-40));
         assertEquals("-40", element.toString());
     }
 
     @Test
     public void writeLong() {
-        JsonElement element = writer.write(new NBTLong(9876543210L));
+        JsonElement element = writer.write(NBT.Long(9876543210L));
         assertEquals("9876543210", element.toString());
     }
 
     @Test
     public void writeString() {
-        JsonElement element = writer.write(new NBTString("Some text"));
+        JsonElement element = writer.write(NBT.String("Some text"));
         assertEquals("\"Some text\"", element.toString());
     }
 
     @Test
     public void writeFloat() {
-        JsonElement element = writer.write(new NBTFloat(0.5f));
+        JsonElement element = writer.write(NBT.Float(0.5f));
         assertEquals("0.5", element.toString());
     }
 
     @Test
     public void writeDouble() {
-        JsonElement element = writer.write(new NBTDouble(-0.25));
+        JsonElement element = writer.write(NBT.Double(-0.25));
         assertEquals("-0.25", element.toString());
     }
 

@@ -72,19 +72,19 @@ class NBTGsonReader(private val reader: Reader): AutoCloseable, Closeable {
         try {
             val result = when (nbtType) {
                 NBTTypes.TAG_End -> NBTEnd
-                NBTTypes.TAG_Byte -> NBTByte(element.asByte)
-                NBTTypes.TAG_Short -> NBTShort(element.asShort)
-                NBTTypes.TAG_Int -> NBTInt(element.asInt)
-                NBTTypes.TAG_Long -> NBTLong(element.asLong)
-                NBTTypes.TAG_Float -> NBTFloat(element.asFloat)
-                NBTTypes.TAG_Double -> NBTDouble(element.asDouble)
-                NBTTypes.TAG_Byte_Array -> NBT.ByteArrayFromArray(element.asJsonArray.map { it.asByte }.toByteArray())
-                NBTTypes.TAG_String -> if(element.isJsonNull) NBTString("") else NBTString(element.asString)
+                NBTTypes.TAG_Byte -> NBT.Byte(element.asByte)
+                NBTTypes.TAG_Short -> NBT.Short(element.asShort)
+                NBTTypes.TAG_Int -> NBT.Int(element.asInt)
+                NBTTypes.TAG_Long -> NBT.Long(element.asLong)
+                NBTTypes.TAG_Float -> NBT.Float(element.asFloat)
+                NBTTypes.TAG_Double -> NBT.Double(element.asDouble)
+                NBTTypes.TAG_Byte_Array -> NBT.ByteArray(*element.asJsonArray.map { it.asByte }.toByteArray())
+                NBTTypes.TAG_String -> if(element.isJsonNull) NBT.String("") else NBT.String(element.asString)
 
                 NBTTypes.TAG_Compound -> toCompound(element.asJsonObject)
 
-                NBTTypes.TAG_Int_Array -> NBTIntArray.fromArray(element.asJsonArray.map { it.asInt }.toIntArray())
-                NBTTypes.TAG_Long_Array -> NBTLongArray.fromArray(element.asJsonArray.map { it.asLong }.toLongArray())
+                NBTTypes.TAG_Int_Array -> NBT.IntArray(*element.asJsonArray.map { it.asInt }.toIntArray())
+                NBTTypes.TAG_Long_Array -> NBT.LongArray(*element.asJsonArray.map { it.asLong }.toLongArray())
 
                 NBTTypes.TAG_List -> {
                     if (!element.isJsonArray)

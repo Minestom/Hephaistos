@@ -2,9 +2,6 @@ package org.jglrxavpok.hephaistos
 
 import org.jglrxavpok.hephaistos.antlr.SNBTBaseVisitor
 import org.jglrxavpok.hephaistos.antlr.SNBTParser
-import org.jglrxavpok.hephaistos.collections.ImmutableByteArray
-import org.jglrxavpok.hephaistos.collections.ImmutableIntArray
-import org.jglrxavpok.hephaistos.collections.ImmutableLongArray
 import org.jglrxavpok.hephaistos.nbt.*
 
 object SNBTParsingVisitor: SNBTBaseVisitor<NBT>() {
@@ -36,18 +33,18 @@ object SNBTParsingVisitor: SNBTBaseVisitor<NBT>() {
     }
 
     override fun visitByteArray(ctx: SNBTParser.ByteArrayContext): NBT {
-        val array = ImmutableByteArray(*ctx.byteNBT().map { (visitByteNBT(it) as NBTByte).value }.toByteArray())
-        return NBTByteArray(array)
+        val array = ctx.byteNBT().map { (visitByteNBT(it) as NBTByte).value }.toByteArray()
+        return NBT.ByteArray(*array)
     }
 
     override fun visitIntArray(ctx: SNBTParser.IntArrayContext): NBT {
-        val array = ImmutableIntArray(*ctx.intNBT().map { (visitIntNBT(it) as NBTInt).value }.toIntArray())
-        return NBTIntArray(array)
+        val array = ctx.intNBT().map { (visitIntNBT(it) as NBTInt).value }.toIntArray()
+        return NBT.IntArray(*array)
     }
 
     override fun visitLongArray(ctx: SNBTParser.LongArrayContext): NBT {
-        val array = ImmutableLongArray(*ctx.longNBT().map { (visitLongNBT(it) as NBTLong).value }.toLongArray())
-        return NBTLongArray(array)
+        val array = ctx.longNBT().map { (visitLongNBT(it) as NBTLong).value }.toLongArray()
+        return NBT.LongArray(*array)
     }
 
     override fun visitDoubleNBT(ctx: SNBTParser.DoubleNBTContext): NBT {
@@ -55,16 +52,16 @@ object SNBTParsingVisitor: SNBTBaseVisitor<NBT>() {
         if(text.endsWith('d') || text.endsWith('D')) {
             text = text.dropLast(1)
         }
-        return NBTDouble(text.toDouble())
+        return NBT.Double(text.toDouble())
     }
 
     override fun visitFloatNBT(ctx: SNBTParser.FloatNBTContext): NBT {
-        return NBTFloat(ctx.text.dropLast(1).toFloat())
+        return NBT.Float(ctx.text.dropLast(1).toFloat())
     }
 
     override fun visitLongNBT(ctx: SNBTParser.LongNBTContext): NBT {
         val value = ctx.LONG().text.dropLast(1).toLong()
-        return NBTLong(value)
+        return NBT.Long(value)
     }
 
     override fun visitByteNBT(ctx: SNBTParser.ByteNBTContext): NBT {
@@ -73,24 +70,24 @@ object SNBTParsingVisitor: SNBTBaseVisitor<NBT>() {
             return NBTByte.Boolean(booleanValue)
         }
         val value = ctx.BYTE().text.dropLast(1).toByte()
-        return NBTByte(value)
+        return NBT.Byte(value)
     }
 
     override fun visitShortNBT(ctx: SNBTParser.ShortNBTContext): NBT {
         val value = ctx.SHORT().text.dropLast(1).toShort()
-        return NBTShort(value)
+        return NBT.Short(value)
     }
 
     override fun visitStringNBT(ctx: SNBTParser.StringNBTContext): NBT {
         return when {
             ctx.DoubleQuoteText() != null -> NBTString(ctx.DoubleQuoteText().text.drop(1).dropLast(1))
             ctx.SingleQuoteText() != null -> NBTString(ctx.SingleQuoteText().text.drop(1).dropLast(1))
-            else -> NBTString(ctx.text)
+            else -> NBT.String(ctx.text)
         }
     }
 
     override fun visitIntNBT(ctx: SNBTParser.IntNBTContext): NBT {
-        return NBTInt(ctx.INTEGER().text.toInt())
+        return NBT.Int(ctx.INTEGER().text.toInt())
     }
 
     override fun visitIdentifier(ctx: SNBTParser.IdentifierContext?): NBT? {

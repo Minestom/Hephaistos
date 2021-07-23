@@ -14,54 +14,54 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class NBTSaving {
 
-    private ByteArrayOutputStream baos;
+    private ByteArrayOutputStream byteArrayOutputStream;
 
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
     public void saveByte(boolean compressed) throws IOException, NBTException {
-        NBTByte nbt = new NBTByte((byte)42);
+        NBTByte nbt = NBT.Byte(42);
         test(nbt, compressed);
     }
 
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
     public void saveShort(boolean compressed) throws IOException, NBTException {
-        NBTShort nbt = new NBTShort((short)1);
+        NBTShort nbt = NBT.Short(1);
         test(nbt, compressed);
     }
 
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
     public void saveInt(boolean compressed) throws IOException, NBTException {
-        NBTInt nbt = new NBTInt(0x42);
+        NBTInt nbt = NBT.Int(0x42);
         test(nbt, compressed);
     }
 
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
     public void saveLong(boolean compressed) throws IOException, NBTException {
-        NBTLong nbt = new NBTLong(0xCAFEBABEL);
+        NBTLong nbt = NBT.Long(0xCAFEBABEL);
         test(nbt, compressed);
     }
 
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
     public void saveDouble(boolean compressed) throws IOException, NBTException {
-        NBTDouble nbt = new NBTDouble(0.25);
+        NBTDouble nbt = NBT.Double(0.25);
         test(nbt, compressed);
     }
 
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
     public void saveFloat(boolean compressed) throws IOException, NBTException {
-        NBTFloat nbt = new NBTFloat(0.5f);
+        NBTFloat nbt = NBT.Float(0.5f);
         test(nbt, compressed);
     }
 
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
     public void saveString(boolean compressed) throws IOException, NBTException {
-        NBTString nbt = new NBTString("AAA");
+        NBTString nbt = NBT.String("AAA");
         test(nbt, compressed);
     }
 
@@ -69,10 +69,10 @@ public class NBTSaving {
     @ValueSource(booleans = { true, false })
     public void saveList(boolean compressed) throws IOException, NBTException {
         NBTList<NBTString> nbt = new NBTList<>(NBTTypes.TAG_String);
-        nbt.add(new NBTString("A"));
-        nbt.add(new NBTString("B"));
-        nbt.add(new NBTString("C"));
-        nbt.add(new NBTString("D"));
+        nbt.add(NBT.String("A"));
+        nbt.add(NBT.String("B"));
+        nbt.add(NBT.String("C"));
+        nbt.add(NBT.String("D"));
         test(nbt, compressed);
     }
 
@@ -113,21 +113,21 @@ public class NBTSaving {
 
 
     private NBTReader input(boolean compressed) throws IOException {
-        return new NBTReader(new ByteArrayInputStream(baos.toByteArray()), compressed);
+        return new NBTReader(new ByteArrayInputStream(byteArrayOutputStream.toByteArray()), compressed);
     }
 
     private NBTWriter output(boolean compressed) {
-        return new NBTWriter(baos, compressed);
+        return new NBTWriter(byteArrayOutputStream, compressed);
     }
 
     @BeforeEach
     public void init() {
-        baos = new ByteArrayOutputStream();
+        byteArrayOutputStream = new ByteArrayOutputStream();
     }
 
     @AfterEach
     public void clean() {
-        baos = null;
+        byteArrayOutputStream = null;
     }
 
 
