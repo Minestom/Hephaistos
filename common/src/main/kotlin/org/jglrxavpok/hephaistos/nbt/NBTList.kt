@@ -87,13 +87,9 @@ class NBTList<Tag: NBT> internal constructor(val subtagType: Int, private val ta
             val subtagType = source.readByte().toInt()
             val length = source.readInt()
 
-            val list = NBT.List(subtagType, ArrayList<NBT>(length).apply {
-                for (i in 0 until length) {
-                    this[i] = source.readTag(subtagType)
-                }
+            return NBT.List(subtagType, List(length) {
+                source.readTag(subtagType)
             })
-
-            return list
         }
     }
 

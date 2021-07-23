@@ -38,7 +38,7 @@ class RegionFile @Throws(AnvilException::class, IOException::class) constructor(
 
     private val locations = IntArray(MaxEntryCount)
     private val timestamps = IntArray(MaxEntryCount)
-    private val freeSectors: ArrayList<Boolean>
+    private val freeSectors: MutableList<Boolean>
     private val columnCache = ConcurrentHashMap<Int, ChunkColumn>()
 
     init {

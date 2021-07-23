@@ -14,7 +14,7 @@ import kotlin.math.log2
  */
 class Palette() {
 
-    val blocks = ArrayList<BlockState>()
+    val blocks = mutableListOf<BlockState>()
     private val referenceCounts = HashMap<BlockState, Int>()
 
     internal constructor(blocks: NBTList<NBTCompound>): this() {

@@ -86,10 +86,8 @@ sealed interface NBT {
         fun <Tag : NBT> List(subtagType: Int, vararg tags: Tag) = NBTList(subtagType, tags.toList())
 
         @JvmStatic
-        fun <Tag : NBT> List(subtagType: Int, length: Int, generator: NBTListGenerator<Tag>) = NBTList(subtagType, ArrayList<Tag>(length).apply {
-            repeat(length) {
-                this[it] = generator.run(it)
-            }
+        fun <Tag : NBT> List(subtagType: Int, length: Int, generator: NBTListGenerator<Tag>) = NBTList(subtagType, List<Tag>(length) {
+            generator.run(it)
         })
 
         @JvmStatic
