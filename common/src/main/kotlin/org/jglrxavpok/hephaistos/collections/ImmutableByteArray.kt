@@ -3,7 +3,7 @@ package org.jglrxavpok.hephaistos.collections
 /**
  * Immutable alternative of [ByteArray]
  */
-class ImmutableByteArray(private vararg val numbers: Byte) {
+class ImmutableByteArray constructor(private vararg val numbers: Byte) {
 
     constructor(length: Int, generator: (Int) -> Byte) : this(*ByteArray(length).apply {
         repeat(length) {
@@ -37,6 +37,14 @@ class ImmutableByteArray(private vararg val numbers: Byte) {
         if (!numbers.contentEquals(other.numbers)) return false
 
         return true
+    }
+
+    companion object {
+        @JvmStatic
+        val EMPTY = ImmutableByteArray()
+
+        @JvmStatic
+        fun from(vararg numbers: Int) = ImmutableByteArray(*numbers.map { it.toByte() }.toByteArray())
     }
 
 }

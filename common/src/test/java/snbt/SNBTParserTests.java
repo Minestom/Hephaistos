@@ -1,5 +1,8 @@
 package snbt;
 
+import org.jglrxavpok.hephaistos.collections.ImmutableByteArray;
+import org.jglrxavpok.hephaistos.collections.ImmutableIntArray;
+import org.jglrxavpok.hephaistos.collections.ImmutableLongArray;
 import org.jglrxavpok.hephaistos.nbt.*;
 import org.jglrxavpok.hephaistos.parser.SNBTParser;
 import org.junit.jupiter.api.Test;
@@ -156,7 +159,7 @@ public class SNBTParserTests {
         try(SNBTParser parser = new SNBTParser(new StringReader(snbt))) {
             NBT element = parser.parse();
             assertTrue(element instanceof NBTIntArray);
-            assertArrayEquals(new int[] { 456, 987, 10 }, ((NBTIntArray) element).getValue());
+            assertEquals(new ImmutableIntArray(456, 987, 10), ((NBTIntArray) element).getValue());
         }
     }
 
@@ -166,7 +169,7 @@ public class SNBTParserTests {
         try(SNBTParser parser = new SNBTParser(new StringReader(snbt))) {
             NBT element = parser.parse();
             assertTrue(element instanceof NBTByteArray);
-            assertArrayEquals(new byte[] { 10, -11, 127 }, ((NBTByteArray) element).getValue());
+            assertEquals(ImmutableByteArray.from(10, -11, 127), ((NBTByteArray) element).getValue());
         }
     }
 
@@ -176,7 +179,7 @@ public class SNBTParserTests {
         try(SNBTParser parser = new SNBTParser(new StringReader(snbt))) {
             NBT element = parser.parse();
             assertTrue(element instanceof NBTLongArray);
-            assertArrayEquals(new long[] { 123456789L, -1563487L, 16354658L }, ((NBTLongArray) element).getValue());
+            assertEquals(new ImmutableLongArray(123456789L, -1563487L, 16354658L), ((NBTLongArray) element).getValue());
         }
     }
 

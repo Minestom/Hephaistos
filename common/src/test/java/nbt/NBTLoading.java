@@ -1,6 +1,7 @@
 package nbt;
 
 import kotlin.Pair;
+import org.jglrxavpok.hephaistos.collections.ImmutableByteArray;
 import org.jglrxavpok.hephaistos.nbt.*;
 import org.junit.jupiter.api.Test;
 
@@ -97,10 +98,10 @@ public class NBTLoading {
                 }
             }
 
-            byte[] bytes = Objects.requireNonNull(level.getByteArray("byteArrayTest (the first 1000 values of (n*n*255+n*7)%100, starting with n=0 (0, 62, 34, 16, 8, ...))"));
-            assertEquals(1000, bytes.length);
+            ImmutableByteArray bytes = Objects.requireNonNull(level.getByteArray("byteArrayTest (the first 1000 values of (n*n*255+n*7)%100, starting with n=0 (0, 62, 34, 16, 8, ...))"));
+            assertEquals(1000, bytes.getSize());
             for (int n = 0; n < 1000; n++) {
-                assertEquals((n*n*255+n*7) % 100, bytes[n]);
+                assertEquals((n*n*255+n*7) % 100, bytes.get(n));
             }
         }
     }

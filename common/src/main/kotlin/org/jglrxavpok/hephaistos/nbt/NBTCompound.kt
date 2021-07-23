@@ -210,6 +210,9 @@ class NBTCompound(val tags: Map<String, NBT> = mapOf()): NBT {
     companion object : NBTReaderCompanion<NBTCompound> {
 
         @JvmStatic
+        val EMPTY = NBTCompound()
+
+        @JvmStatic
         fun compound(lambda: CompoundBuilder) = NBTCompound(mutableMapOf<String, NBT>().also { lambda.run(it) })
 
         override fun readContents(source: DataInputStream) = compound {

@@ -51,7 +51,13 @@ sealed interface NBT {
         fun Byte(value: Byte) = NBTByte(value)
 
         @JvmStatic
+        fun Byte(value: Int) = NBTByte(value.toByte())
+
+        @JvmStatic
         fun ByteArray(vararg value: Byte) = NBTByteArray(*value)
+
+        @JvmStatic
+        fun ByteArray(vararg value: Int) = NBTByteArray(*value.map { it.toByte() }.toByteArray())
 
         @JvmStatic
         fun ByteArray(array: ImmutableByteArray) = NBTByteArray(array)
@@ -67,6 +73,9 @@ sealed interface NBT {
 
         @JvmStatic
         fun Short(value: Short) = NBTShort(value)
+
+        @JvmStatic
+        fun Short(value: Int) = NBTShort(value.toShort())
 
         @JvmStatic
         fun Int(value: Int) = NBTInt(value)

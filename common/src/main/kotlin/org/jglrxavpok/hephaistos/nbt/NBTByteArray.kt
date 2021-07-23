@@ -12,21 +12,21 @@ class NBTByteArray(val value: ImmutableByteArray) : NBT {
 
     override val ID = NBTTypes.TAG_Int_Array
 
-    constructor(): this(ImmutableByteArray())
+    constructor(): this(ImmutableByteArray.EMPTY)
 
     constructor(vararg numbers: Byte): this(ImmutableByteArray(*numbers))
 
     override fun writeContents(destination: DataOutputStream) {
         destination.writeInt(length)
         for(i in 0 until length) {
-            destination.writeByte(value[i].toInt())
+            destination.write(value[i].toInt())
         }
     }
 
     operator fun get(index: Int) = value[index]
 
     override fun toSNBT(): String {
-        val list = value.joinToString(",") { "$it" }
+        val list = value.joinToString(",") { "${it}B" }
         return "[B;$list]"
     }
 

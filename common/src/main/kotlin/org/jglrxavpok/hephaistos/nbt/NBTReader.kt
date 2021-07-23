@@ -1,6 +1,8 @@
 package org.jglrxavpok.hephaistos.nbt
 
 import java.io.*
+import java.nio.file.Files
+import java.nio.file.Path
 import java.util.zip.GZIPInputStream
 
 /**
@@ -19,6 +21,12 @@ class NBTReader @JvmOverloads constructor(source: InputStream, compressed: Boole
      */
     @Throws(IOException::class)
     @JvmOverloads constructor(file: File, compressed: Boolean = true): this(BufferedInputStream(FileInputStream(file)), compressed)
+
+    /**
+     * Constructs a NBTWriter from a path (convenience method, equivalent to `NBTWriter(BufferedOutputStream(Files.newOutputStream(path)))`)
+     */
+    @Throws(IOException::class)
+    @JvmOverloads constructor(path: Path, compressed: Boolean = true): this(BufferedInputStream(Files.newInputStream(path)), compressed)
 
     /**
      * Reads a single named tag from the source. 'first' will hold the name, 'second' the tag

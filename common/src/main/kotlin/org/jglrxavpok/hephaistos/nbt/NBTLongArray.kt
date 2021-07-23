@@ -25,8 +25,8 @@ class NBTLongArray(val value: ImmutableLongArray) : NBT {
     operator fun get(index: Int) = value[index]
 
     override fun toSNBT(): String {
-        val list = value.joinToString(",") { "$it" }
-        return "[I;$list]"
+        val list = value.joinToString(",") { "${it}L" }
+        return "[L;$list]"
     }
 
     override fun toString() = toSNBT()

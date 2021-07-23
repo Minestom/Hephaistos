@@ -98,12 +98,12 @@ public class NBTCompoundMethods {
     public void setByteArray() {
 
         var nbt = NBTCompound.compound((map) -> {
-            map.put("a", NBT.ByteArray((byte) 1, (byte) 2, (byte) 3));
+            map.put("a", NBT.ByteArray(1, 2, 3));
         });
 
         assertEquals(1, nbt.getSize());
         assertTrue(nbt.get("a") instanceof NBTByteArray);
-        assertEquals(new ImmutableByteArray((byte) 1, (byte) 2, (byte) 3), ((NBTByteArray)nbt.get("a")).getValue());
+        assertEquals(ImmutableByteArray.from(1, 2, 3), ((NBTByteArray)nbt.get("a")).getValue());
     }
 
     @Test
@@ -208,7 +208,7 @@ public class NBTCompoundMethods {
             map.put("a", NBT.String("value"));
         });
         assertEquals(1, nbt.getSize());
-        nbt.modify((map) -> {
+        nbt = nbt.modify((map) -> {
             map.remove("a");
         });
         assertEquals(0, nbt.getSize());

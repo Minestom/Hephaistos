@@ -1,6 +1,8 @@
 package org.jglrxavpok.hephaistos.nbt
 
 import java.io.*
+import java.nio.file.Files
+import java.nio.file.Path
 import java.util.zip.GZIPOutputStream
 
 /**
@@ -19,6 +21,12 @@ class NBTWriter @JvmOverloads constructor(destination: OutputStream, compressed:
      */
     @Throws(IOException::class)
     @JvmOverloads constructor(file: File, compressed: Boolean = true): this(BufferedOutputStream(FileOutputStream(file)), compressed)
+
+    /**
+     * Constructs a NBTWriter from a path (convenience method, equivalent to `NBTWriter(BufferedOutputStream(Files.newOutputStream(path)))`)
+     */
+    @Throws(IOException::class)
+    @JvmOverloads constructor(path: Path, compressed: Boolean = true): this(BufferedOutputStream(Files.newOutputStream(path)), compressed)
 
     /**
      * Write a tag with a name inside the destination
