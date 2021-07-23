@@ -47,8 +47,7 @@ fun decompress(data: ImmutableLongArray, lengthInBits: Int): IntArray {
         val beginLongIndex = bitIndex / 64
         val endLongIndex = (bitIndex + lengthInBits-1) / 64
 
-        var value = 0
-        value = if(beginLongIndex != endLongIndex) { // split over two longs
+        val value: Int = if(beginLongIndex != endLongIndex) { // split over two longs
             val overshoot = (bitIndex+lengthInBits) % 64
             val lowMask = (1L shl lengthInBits-overshoot) -1
             val highMask = (1L shl overshoot) -1

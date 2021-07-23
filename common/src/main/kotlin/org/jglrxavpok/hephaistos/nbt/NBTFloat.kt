@@ -2,7 +2,6 @@ package org.jglrxavpok.hephaistos.nbt
 
 import java.io.DataInputStream
 import java.io.DataOutputStream
-import java.util.*
 
 class NBTFloat(value: Float) : NBTNumber<Float>(value) {
     override val ID = NBTTypes.TAG_Float

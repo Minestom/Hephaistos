@@ -4,7 +4,6 @@ import org.jglrxavpok.hephaistos.mca.AnvilException;
 import org.jglrxavpok.hephaistos.mca.BlockState;
 import org.jglrxavpok.hephaistos.mca.ChunkColumn;
 import org.jglrxavpok.hephaistos.mca.RegionFile;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -51,9 +50,9 @@ public class ParallelizationTests {
             chunks[i] = pool.submit(() -> region.getChunk(chunkID % 32, chunkID / 32));
         }
         pool.shutdown();
-        for (int i = 0; i < chunks.length; i++) {
+        for (Future<ChunkColumn> chunk : chunks) {
             try {
-                chunks[i].get();
+                chunk.get();
             } catch (ExecutionException e) {
                 throw new AssertionError("Chunk loading failed (cause may look weird if filepointer 'corruptions' happen)", e);
             }

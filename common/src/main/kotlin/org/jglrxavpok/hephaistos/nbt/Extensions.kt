@@ -15,7 +15,7 @@ fun DataInputStream.readFullyFormedTag(): Pair<String, NBT> {
     }
     val name = readUTF()
 
-    return name to readTag(id);
+    return name to readTag(id)
 }
 
 /**

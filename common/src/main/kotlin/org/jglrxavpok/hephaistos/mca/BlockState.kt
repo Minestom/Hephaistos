@@ -12,7 +12,7 @@ data class BlockState @JvmOverloads constructor(val name: String, val properties
     companion object {
         @JvmField
         val Air = BlockState(NBTCompound.compound {
-            it["Name"] = NBT.String("minecraft:air");
+            it["Name"] = NBT.String("minecraft:air")
             it["Properties"] = NBTCompound()
         })
     }

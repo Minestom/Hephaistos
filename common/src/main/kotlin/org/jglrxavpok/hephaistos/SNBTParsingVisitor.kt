@@ -1,11 +1,11 @@
 package org.jglrxavpok.hephaistos
 
 import org.jglrxavpok.hephaistos.antlr.SNBTBaseVisitor
-import org.jglrxavpok.hephaistos.nbt.*
 import org.jglrxavpok.hephaistos.antlr.SNBTParser
 import org.jglrxavpok.hephaistos.collections.ImmutableByteArray
 import org.jglrxavpok.hephaistos.collections.ImmutableIntArray
 import org.jglrxavpok.hephaistos.collections.ImmutableLongArray
+import org.jglrxavpok.hephaistos.nbt.*
 
 object SNBTParsingVisitor: SNBTBaseVisitor<NBT>() {
 
@@ -35,7 +35,7 @@ object SNBTParsingVisitor: SNBTBaseVisitor<NBT>() {
         return list
     }
 
-    override fun visitByteArray(ctx: SNBTParser.ByteArrayContext): NBT? {
+    override fun visitByteArray(ctx: SNBTParser.ByteArrayContext): NBT {
         val array = ImmutableByteArray(*ctx.byteNBT().map { (visitByteNBT(it) as NBTByte).value }.toByteArray())
         return NBTByteArray(array)
     }

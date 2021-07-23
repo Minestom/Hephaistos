@@ -23,13 +23,13 @@ import kotlin.math.ceil
 class RegionFile @Throws(AnvilException::class, IOException::class) constructor(val file: RandomAccessFile, val regionX: Int, val regionZ: Int): Closeable {
 
     companion object {
-        private val GZipCompression: Byte = 1
-        private val ZlibCompression: Byte = 2
-        private val NoCompression: Byte = 3
-        private val MaxEntryCount = 1024
-        private val SectorSize = 4096
-        private val Sector1MB = 1024*1024 / SectorSize
-        private val HeaderLength = MaxEntryCount*2 * 4 // 2 4-byte field per entry
+        private const val GZipCompression: Byte = 1
+        private const val ZlibCompression: Byte = 2
+        private const val NoCompression: Byte = 3
+        private const val MaxEntryCount = 1024
+        private const val SectorSize = 4096
+        private const val Sector1MB = 1024*1024 / SectorSize
+        private const val HeaderLength = MaxEntryCount*2 * 4 // 2 4-byte field per entry
 
         fun createFileName(regionX: Int, regionZ: Int): String {
             return "r.$regionX.$regionZ.mca"

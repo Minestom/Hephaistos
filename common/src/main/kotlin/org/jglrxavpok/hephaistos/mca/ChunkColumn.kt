@@ -14,8 +14,7 @@ import org.jglrxavpok.hephaistos.nbt.*
 class ChunkColumn(val x: Int, val z: Int) {
 
     companion object {
-        @JvmField
-        val UnknownBiome = -1
+        const val UnknownBiome = -1
     }
 
     var version: SupportedVersion = SupportedVersion.Latest
@@ -81,10 +80,10 @@ class ChunkColumn(val x: Int, val z: Int) {
         }
 
         // we allow empty lists for these
-        entities = level.getList("Entities") ?: NBTList<NBTCompound>(NBTTypes.TAG_Compound)
-        tileEntities = level.getList("TileEntities") ?: NBTList<NBTCompound>(NBTTypes.TAG_Compound)
-        tileTicks = level.getList("TileTicks") ?: NBTList<NBTCompound>(NBTTypes.TAG_Compound)
-        liquidTicks = level.getList("LiquidTicks") ?: NBTList<NBTCompound>(NBTTypes.TAG_Compound)
+        entities = level.getList("Entities") ?: NBTList(NBTTypes.TAG_Compound)
+        tileEntities = level.getList("TileEntities") ?: NBTList(NBTTypes.TAG_Compound)
+        tileTicks = level.getList("TileTicks") ?: NBTList(NBTTypes.TAG_Compound)
+        liquidTicks = level.getList("LiquidTicks") ?: NBTList(NBTTypes.TAG_Compound)
         structures = level.getCompound("Structures")
 
         val carvingMasks = level.getCompound("CarvingMasks")

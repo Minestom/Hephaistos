@@ -163,7 +163,7 @@ public class NBTCompoundMethods {
 
         assertEquals(1, nbt.getSize());
         assertNull(nbt.getDouble("a"));
-        assertEquals(42.0, nbt.getAsDouble("a").doubleValue(), 10e-6);
+        assertEquals(42.0, nbt.getAsDouble("a"), 10e-6);
     }
 
     @Test
@@ -175,7 +175,7 @@ public class NBTCompoundMethods {
 
         assertEquals(1, nbt.getSize());
         assertNull(nbt.getFloat("a"));
-        assertEquals(42f, nbt.getAsFloat("a").floatValue(), 10e-6f);
+        assertEquals(42f, nbt.getAsFloat("a"), 10e-6f);
     }
 
     @Test

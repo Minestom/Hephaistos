@@ -62,8 +62,8 @@ public class NBTLoading {
             assertEquals(2147483647, level.getInt("intTest").intValue());
             assertEquals(127, level.getByte("byteTest").byteValue());
             assertEquals(32767, level.getShort("shortTest").shortValue());
-            assertEquals(0.49312871321823148, level.getDouble("doubleTest").doubleValue(), 10e-16);
-            assertEquals(0.49823147058486938, level.getFloat("floatTest").floatValue(), 10e-16);
+            assertEquals(0.49312871321823148, level.getDouble("doubleTest"), 10e-16);
+            assertEquals(0.49823147058486938, level.getFloat("floatTest"), 10e-16);
             assertEquals(9223372036854775807L, level.getLong("longTest").longValue());
 
             // not actually testing the individuals non-ASCII characters, we'll let the standard library handle it

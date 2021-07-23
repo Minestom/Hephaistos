@@ -1,10 +1,8 @@
 package org.jglrxavpok.hephaistos.nbt
 
 import org.jglrxavpok.hephaistos.collections.ImmutableByteArray
-import org.jglrxavpok.hephaistos.collections.ImmutableIntArray
 import java.io.DataInputStream
 import java.io.DataOutputStream
-import java.util.*
 
 class NBTByteArray(val value: ImmutableByteArray) : NBT, Iterable<Byte> {
 
@@ -52,6 +50,9 @@ class NBTByteArray(val value: ImmutableByteArray) : NBT, Iterable<Byte> {
 
         @JvmStatic
         fun fromArray(value: ByteArray) = NBTByteArray(ImmutableByteArray(*value))
+
+        @JvmStatic
+        fun from(vararg values: Int) = NBTByteArray(*values.map { it.toByte() }.toByteArray())
 
         override fun readContents(source: DataInputStream): NBTByteArray {
             val length = source.readInt()

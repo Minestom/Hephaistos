@@ -1,13 +1,11 @@
 package org.jglrxavpok.hephaistos.json
 
 import com.google.gson.Gson
-import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import org.jglrxavpok.hephaistos.nbt.*
 import java.io.Closeable
 import java.io.Reader
-import kotlin.IllegalArgumentException
 
 class NBTGsonReader(private val reader: Reader): AutoCloseable, Closeable {
 
@@ -94,7 +92,7 @@ class NBTGsonReader(private val reader: Reader): AutoCloseable, Closeable {
                     val elements = element.asJsonArray
 
                     if (elements.size() == 0) { // guess strings
-                        NBTList<NBT>(NBTTypes.TAG_String)
+                        NBTList(NBTTypes.TAG_String)
                     } else {
                         val firstElement = parse<NBT>(guessType(elements[0]), elements[0])
                         val list = NBTList<NBT>(firstElement.ID)

@@ -19,7 +19,7 @@ public class TestReaderCompound {
             NBTCompound compound = reader.read(NBTCompound.class);
             assertEquals(3, compound.getSize());
             assertEquals(45, compound.getAsInt("anInt").intValue());
-            assertEquals(45.5f, compound.getAsFloat("a float").floatValue(), 10e-6);
+            assertEquals(45.5f, compound.getAsFloat("a float"), 10e-6);
             assertEquals("hello it is me, example text!", compound.getString("text"));
         }
     }
@@ -38,15 +38,15 @@ public class TestReaderCompound {
         try(NBTGsonReader reader = new NBTGsonReader(new StringReader(json))) {
             NBTCompound compound = reader.read(NBTCompound.class);
             assertEquals(4, compound.getSize());
-            assertEquals(45, compound.getAsInt("anInt").intValue());
-            assertEquals(45.5f, compound.getAsFloat("a float").floatValue(), 10e-6);
+            assertEquals(45, compound.getAsInt("anInt"));
+            assertEquals(45.5f, compound, 10e-6);
             assertEquals("hello it is me, example text!", compound.getString("text"));
 
             NBTCompound innerObject = compound.getCompound("testObject");
             assertEquals(3, innerObject.getSize());
-            assertEquals(0, innerObject.getAsInt("a").intValue());
-            assertEquals(1, innerObject.getAsInt("b").intValue());
-            assertEquals(2, innerObject.getAsInt("c").intValue());
+            assertEquals(0, innerObject.getAsInt("a"));
+            assertEquals(1, innerObject.getAsInt("b"));
+            assertEquals(2, innerObject.getAsInt("c"));
         }
     }
 }

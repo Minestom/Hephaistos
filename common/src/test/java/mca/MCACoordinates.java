@@ -6,7 +6,6 @@ import org.jglrxavpok.hephaistos.mca.ChunkColumn;
 import org.jglrxavpok.hephaistos.mca.RegionFile;
 import org.junit.jupiter.api.*;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.file.Files;

@@ -42,7 +42,7 @@ class ChunkSection(val y: Byte) {
         palette = paletteNBT?.let { Palette(it) }
 
         if(palette == null && nbt.containsKey("BlockStates")) {
-            System.err.println("[Hephaistos] Attempted to load a ChunkSection with no palette but block states. Because Hephaistos cannot interpret global IDs, block states will be skipped");
+            System.err.println("[Hephaistos] Attempted to load a ChunkSection with no palette but block states. Because Hephaistos cannot interpret global IDs, block states will be skipped")
         } else if(palette != null) {
             val compactedBlockStates = nbt.getLongArray("BlockStates") ?: missing("BlockStates")
             val sizeInBits = compactedBlockStates.size*64 / 4096

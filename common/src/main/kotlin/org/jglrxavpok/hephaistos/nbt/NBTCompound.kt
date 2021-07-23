@@ -10,7 +10,7 @@ class NBTCompound(val tags: Map<String, NBT> = mapOf()): NBT {
     /**
      * Number of tags inside this compound
      */
-    val size get()= tags.size
+    val size get() = tags.size
 
     override fun writeContents(destination: DataOutputStream) {
         for(entry in tags.entries) {
