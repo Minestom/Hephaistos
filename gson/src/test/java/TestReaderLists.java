@@ -52,7 +52,7 @@ public class TestReaderLists {
         String json = "[\"0\",\"1\",\"2\",\"3\"]";
         try(NBTGsonReader reader = NBTGsonReader.reader(new StringReader(json))) {
             NBTList<NBTString> array = reader.read(NBTList.class);
-            assertEquals(4, array.getLength());
+            assertEquals(4, array.getSize());
             assertEquals(NBTTypes.TAG_String, array.getSubtagType());
             assertEquals("0", array.get(0).getValue());
             assertEquals("1", array.get(1).getValue());
@@ -84,7 +84,7 @@ public class TestReaderLists {
             assertTrue(guessed instanceof NBTList);
             NBTList<NBTDouble> array = (NBTList<NBTDouble>)guessed;
             assertEquals(NBTTypes.TAG_Double, array.getSubtagType());
-            assertEquals(4, array.getLength());
+            assertEquals(4, array.getSize());
             assertEquals(0.0, array.get(0).getValue(), 10e-6);
             assertEquals(1.0, array.get(1).getValue(), 10e-6);
             assertEquals(2.0, array.get(2).getValue(), 10e-6);

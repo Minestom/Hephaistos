@@ -69,7 +69,7 @@ class NBTList<Tag: NBT> internal constructor(val subtagType: Int, private val ta
     companion object : NBTReaderCompanion<NBTList<NBT>> {
         /**
          * Reads the contents of the list, except for the subtag ID, which is supposed to be already read
-         * @see NBT.readContents
+         * @see NBTReaderCompanion.readContents
          */
         @Throws(IOException::class)
         override fun readContents(source: DataInputStream): NBTList<NBT> {

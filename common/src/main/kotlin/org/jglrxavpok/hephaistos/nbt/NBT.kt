@@ -48,10 +48,10 @@ sealed interface NBT {
         val EMPTY = NBTCompound()
 
         @JvmStatic
-        val TRUE = NBT.Byte(1)
+        val TRUE = Byte(1)
 
         @JvmStatic
-        val FALSE = NBT.Byte(0)
+        val FALSE = Byte(0)
 
         @JvmStatic
         @Contract(pure = true)

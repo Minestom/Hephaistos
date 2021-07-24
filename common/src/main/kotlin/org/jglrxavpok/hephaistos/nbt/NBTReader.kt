@@ -76,6 +76,6 @@ class NBTReader @JvmOverloads constructor(source: InputStream, compressedMode: C
          */
         @JvmStatic
         @JvmOverloads
-        fun fromArray(array: ByteArray, compressedMode: CompressedMode = CompressedMode.NONE) = NBTReader(ByteArrayInputStream(array), compressedMode);
+        fun fromArray(array: ByteArray, compressedMode: CompressedMode = CompressedMode.NONE) = NBTReader(ByteArrayInputStream(array), compressedMode)
     }
 }

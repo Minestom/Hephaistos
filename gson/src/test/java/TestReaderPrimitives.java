@@ -11,7 +11,7 @@ public class TestReaderPrimitives {
 
     @Test
     public void readString() {
-        try(NBTGsonReader reader = new NBTGsonReader(new StringReader("\"AAA\""))) {
+        try(NBTGsonReader reader = NBTGsonReader.reader(new StringReader("\"AAA\""))) {
             NBTString string = reader.read(NBTString.class);
             assertEquals("AAA", string.getValue());
         }
@@ -19,7 +19,7 @@ public class TestReaderPrimitives {
 
     @Test
     public void guessString() {
-        try(NBTGsonReader reader = new NBTGsonReader(new StringReader("\"AAA\""))) {
+        try(NBTGsonReader reader = NBTGsonReader.reader(new StringReader("\"AAA\""))) {
             NBT string = reader.readWithGuess();
             assertTrue(string instanceof NBTString, "Must be a NBTString");
             assertEquals("AAA", ((NBTString)string).getValue());
@@ -28,7 +28,7 @@ public class TestReaderPrimitives {
 
     @Test
     public void readFloat() {
-        try(NBTGsonReader reader = new NBTGsonReader(new StringReader("42.5"))) {
+        try(NBTGsonReader reader = NBTGsonReader.reader(new StringReader("42.5"))) {
             NBTFloat element = reader.read(NBTFloat.class);
             assertEquals(42.5, element.getValue(), 10e-6);
         }
@@ -36,7 +36,7 @@ public class TestReaderPrimitives {
 
     @Test
     public void readDouble() {
-        try(NBTGsonReader reader = new NBTGsonReader(new StringReader("41.5"))) {
+        try(NBTGsonReader reader = NBTGsonReader.reader(new StringReader("41.5"))) {
             NBTDouble element = reader.read(NBTDouble.class);
             assertEquals(41.5, element.getValue(), 10e-6);
         }

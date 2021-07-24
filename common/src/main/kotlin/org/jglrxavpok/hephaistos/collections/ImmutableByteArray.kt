@@ -1,7 +1,9 @@
 package org.jglrxavpok.hephaistos.collections
 
 /**
- * Immutable alternative of [ByteArray]
+ * Immutable object of [ByteArray].
+ *
+ * Can not be modified -- if needed, use [copyArray] to create a mutable [ByteArray] copy.
  */
 class ImmutableByteArray constructor(private vararg val numbers: Byte): Iterable<Byte> {
 

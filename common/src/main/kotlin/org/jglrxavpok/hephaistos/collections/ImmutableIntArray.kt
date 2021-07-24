@@ -2,6 +2,8 @@ package org.jglrxavpok.hephaistos.collections
 
 /**
  * Immutable alternative of [IntArray]
+ *
+ * Can not be modified -- if needed, use [copyArray] to create a mutable [IntArray] copy.
  */
 class ImmutableIntArray(private vararg val numbers: Int): Iterable<Int> {
 
@@ -15,6 +17,8 @@ class ImmutableIntArray(private vararg val numbers: Int): Iterable<Int> {
         System.arraycopy(this.numbers, startIndex, destination, destinationOffset, endIndex - startIndex)
         return destination
     }
+
+    fun copyArray(): IntArray = IntArray(numbers.size).also { copyInto(it) }
 
     val size get() = numbers.size
 

@@ -1,7 +1,9 @@
 package org.jglrxavpok.hephaistos.collections
 
 /**
- * Immutable alternative of [ByteArray]
+ * Immutable alternative of [LongArray]
+ *
+ * Can not be modified -- if needed, use [copyArray] to create a mutable [LongArray] copy.
  */
 class ImmutableLongArray(private vararg val numbers: Long): Iterable<Long> {
 
@@ -15,6 +17,8 @@ class ImmutableLongArray(private vararg val numbers: Long): Iterable<Long> {
         System.arraycopy(this.numbers, startIndex, destination, destinationOffset, endIndex - startIndex)
         return destination
     }
+
+    fun copyArray(): LongArray = LongArray(numbers.size).also { copyInto(it) }
 
     val size get() = numbers.size
 

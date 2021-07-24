@@ -1,7 +1,6 @@
 package org.jglrxavpok.hephaistos.mca
 
 import org.jglrxavpok.hephaistos.collections.ImmutableLongArray
-import kotlin.math.ceil
 
 /**
  * Represents a heightmap for a 16x16 area. Heights are assumed to be in the range in 0..255

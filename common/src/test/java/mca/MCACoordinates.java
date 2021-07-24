@@ -69,7 +69,7 @@ public class MCACoordinates {
     }
 
     @Test
-    public void throwOnInvalidChunkLocalPositionXOverMax() throws IOException {
+    public void throwOnInvalidChunkLocalPositionXOverMax() {
         assertThrows(IllegalArgumentException.class, () -> {
             ChunkColumn column;
             column = region2.getOrCreateChunk(5*32+5, -2*32+5);
@@ -100,7 +100,7 @@ public class MCACoordinates {
     }
 
     @Test
-    public void throwOnInvalidChunkLocalPositionZNegative() throws IOException {
+    public void throwOnInvalidChunkLocalPositionZNegative() {
         assertThrows(IllegalArgumentException.class, () -> {
             ChunkColumn column;
             column = region2.getOrCreateChunk(5*32+5, -2*32+5);
@@ -129,7 +129,7 @@ public class MCACoordinates {
     }
 
     @Test
-    public void throwOnInvalidChunkLocalPositionYNegative() throws IOException {
+    public void throwOnInvalidChunkLocalPositionYNegative() {
         assertThrows(IllegalArgumentException.class, () -> {
             ChunkColumn column;
             column = region2.getOrCreateChunk(5*32+5, -2*32+5);
@@ -139,7 +139,7 @@ public class MCACoordinates {
 
 
     @Test
-    public void throwOnInvalidChunkLocalPositionYOverMax() throws IOException {
+    public void throwOnInvalidChunkLocalPositionYOverMax() {
         assertThrows(IllegalArgumentException.class, () -> {
             ChunkColumn column;
             column = region2.getOrCreateChunk(5*32+5, -2*32+5);
