@@ -15,16 +15,22 @@ class NBTReader @JvmOverloads constructor(source: InputStream, compressedMode: C
     )
 
     /**
-     * Constructs a NBTReader from a file (convenience method, equivalent to `NBTReader(BufferedInputStream(FileInputStream(file)))`)
+     * Constructs a [NBTReader] from a file (convenience method, equivalent to `NBTReader(BufferedInputStream(FileInputStream(file)), compressedMode)`)
      */
     @Throws(IOException::class)
-    @JvmOverloads constructor(file: File, compressed: CompressedMode = CompressedMode.NONE): this(BufferedInputStream(FileInputStream(file)), compressed)
+    @JvmOverloads constructor(file: File, compressedMode: CompressedMode = CompressedMode.NONE): this(BufferedInputStream(FileInputStream(file)), compressedMode)
 
     /**
-     * Constructs a NBTWriter from a path (convenience method, equivalent to `NBTWriter(BufferedOutputStream(Files.newOutputStream(path)))`)
+     * Constructs a [NBTReader] from a path (convenience method, equivalent to `NBTReader(BufferedOutputStream(Files.newOutputStream(path)), compressedMode)`)
      */
     @Throws(IOException::class)
-    @JvmOverloads constructor(path: Path, compressed: CompressedMode = CompressedMode.NONE): this(BufferedInputStream(Files.newInputStream(path)), compressed)
+    @JvmOverloads constructor(path: Path, compressedMode: CompressedMode = CompressedMode.NONE): this(BufferedInputStream(Files.newInputStream(path)), compressedMode)
+
+    /**
+     * Constructs a [NBTReader] from a byte array (convenience method, equivalent to `NBTReader(ByteArrayInputStream(array), compressedMode)`)
+     */
+    @Throws(IOException::class)
+    @JvmOverloads constructor(array: ByteArray, compressedMode: CompressedMode = CompressedMode.NONE): this(ByteArrayInputStream(array), compressedMode)
 
     /**
      * Reads a single named tag from the source. 'first' will hold the name, 'second' the tag

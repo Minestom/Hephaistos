@@ -4,6 +4,7 @@ import org.jetbrains.annotations.Contract
 import org.jglrxavpok.hephaistos.collections.ImmutableByteArray
 import org.jglrxavpok.hephaistos.collections.ImmutableIntArray
 import org.jglrxavpok.hephaistos.collections.ImmutableLongArray
+import org.jglrxavpok.hephaistos.nbt.mutable.MutableNBTCompound
 import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream
 import java.io.IOException
@@ -72,10 +73,14 @@ sealed interface NBT {
 
         @JvmStatic
         @Contract(pure = true)
-        fun Compound(lambda: CompoundBuilder) = NBTCompound(mutableMapOf<String, NBT>().also { lambda.run(it) })
+        fun Compound(lambda: CompoundBuilder) = NBTCompound(MutableNBTCompound().also { lambda.run(it) })
+
+        @JvmStatic
+        @Contract(pure = true)
+        fun Compound(tags: Map<String, NBT> = mapOf()) = NBTCompound(tags)
 
         @Contract(pure = true)
-        inline fun Kompound(crossinline lambda: CompoundMap.() -> Unit) = Compound { lambda(it) }
+        inline fun Kompound(crossinline lambda: MutableNBTCompound.() -> Unit) = Compound { lambda(it) }
 
         @JvmStatic
         @Contract(pure = true)

@@ -1,5 +1,6 @@
 package org.jglrxavpok.hephaistos.nbt
 
+import org.jglrxavpok.hephaistos.nbt.mutable.MutableNBTCompound
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
@@ -202,7 +203,7 @@ class NBTCompound internal constructor(val tags: Map<String, NBT> = mapOf()): NB
         }
     }
 
-    fun modify(lambda: CompoundBuilder) = NBTCompound(tags.toMutableMap().also { lambda.run(it) })
+    fun modify(lambda: CompoundBuilder) = NBTCompound(MutableNBTCompound(tags.toMutableMap()).also { lambda.run(it) })
 
     companion object : NBTReaderCompanion<NBTCompound> {
 
@@ -218,8 +219,6 @@ class NBTCompound internal constructor(val tags: Map<String, NBT> = mapOf()): NB
 
 }
 
-typealias CompoundMap = MutableMap<String, NBT>
-
 fun interface CompoundBuilder {
-    fun run(map: CompoundMap)
+    fun run(map: MutableNBTCompound)
 }

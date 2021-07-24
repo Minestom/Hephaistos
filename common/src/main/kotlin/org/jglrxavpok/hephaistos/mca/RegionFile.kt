@@ -1,14 +1,15 @@
 package org.jglrxavpok.hephaistos.mca
 
+import org.jglrxavpok.hephaistos.nbt.CompressedMode
 import org.jglrxavpok.hephaistos.nbt.NBTCompound
 import org.jglrxavpok.hephaistos.nbt.NBTReader
 import org.jglrxavpok.hephaistos.nbt.NBTWriter
-import java.io.*
+import java.io.ByteArrayOutputStream
+import java.io.Closeable
+import java.io.IOException
+import java.io.RandomAccessFile
 import java.nio.ByteBuffer
 import java.util.concurrent.ConcurrentHashMap
-import java.util.zip.DeflaterOutputStream
-import java.util.zip.GZIPInputStream
-import java.util.zip.InflaterInputStream
 import kotlin.math.ceil
 
 /**
@@ -135,12 +136,12 @@ class RegionFile @Throws(AnvilException::class, IOException::class) constructor(
         val rawData = ByteArray(length-1)
         readBytes(offset+5L, rawData)
 
-        val reader = NBTReader(when(compressionType) {
-            GZipCompression -> BufferedInputStream(GZIPInputStream(ByteArrayInputStream(rawData)))
-            ZlibCompression -> BufferedInputStream(InflaterInputStream(ByteArrayInputStream(rawData)))
-            NoCompression -> BufferedInputStream(ByteArrayInputStream(rawData))
+        val reader = NBTReader(rawData, when(compressionType) {
+            GZipCompression -> CompressedMode.GZIP
+            ZlibCompression -> CompressedMode.ZLIB
+            NoCompression -> CompressedMode.NONE
             else -> throw AnvilException("Invalid compression type: $compressionType (only 1 and 2 known)")
-        }, false /* decompression performed by GZIPInputStream or InflaterInputStream */)
+        })
 
         val chunkData = reader.read()
         reader.close()
@@ -165,7 +166,7 @@ class RegionFile @Throws(AnvilException::class, IOException::class) constructor(
 
         val nbt = column.toNBT()
         val dataOut = ByteArrayOutputStream()
-        NBTWriter(DeflaterOutputStream(dataOut), compressed = false /* compressed by the DeflaterOutputStream */).use {
+        NBTWriter(dataOut, CompressedMode.ZLIB).use {
             it.writeNamed("", nbt)
         }
         val dataSize = dataOut.size()
