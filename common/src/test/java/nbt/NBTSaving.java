@@ -4,6 +4,7 @@ import kotlin.Pair;
 import org.jglrxavpok.hephaistos.nbt.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.ByteArrayInputStream;
@@ -17,68 +18,68 @@ public class NBTSaving {
     private ByteArrayOutputStream byteArrayOutputStream;
 
     @ParameterizedTest
-    @ValueSource(booleans = { true, false })
-    public void saveByte(boolean compressed) throws IOException, NBTException {
+    @ArgumentsSource(CompressedModeProvider.class)
+    public void saveByte(CompressedMode compressedMode) throws IOException, NBTException {
         NBTByte nbt = NBT.Byte(42);
-        test(nbt, compressed);
+        test(nbt, compressedMode);
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = { true, false })
-    public void saveShort(boolean compressed) throws IOException, NBTException {
+    @ArgumentsSource(CompressedModeProvider.class)
+    public void saveShort(CompressedMode compressedMode) throws IOException, NBTException {
         NBTShort nbt = NBT.Short(1);
-        test(nbt, compressed);
+        test(nbt, compressedMode);
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = { true, false })
-    public void saveInt(boolean compressed) throws IOException, NBTException {
+    @ArgumentsSource(CompressedModeProvider.class)
+    public void saveInt(CompressedMode compressedMode) throws IOException, NBTException {
         NBTInt nbt = NBT.Int(0x42);
-        test(nbt, compressed);
+        test(nbt, compressedMode);
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = { true, false })
-    public void saveLong(boolean compressed) throws IOException, NBTException {
+    @ArgumentsSource(CompressedModeProvider.class)
+    public void saveLong(CompressedMode compressedMode) throws IOException, NBTException {
         NBTLong nbt = NBT.Long(0xCAFEBABEL);
-        test(nbt, compressed);
+        test(nbt, compressedMode);
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = { true, false })
-    public void saveDouble(boolean compressed) throws IOException, NBTException {
+    @ArgumentsSource(CompressedModeProvider.class)
+    public void saveDouble(CompressedMode compressedMode) throws IOException, NBTException {
         NBTDouble nbt = NBT.Double(0.25);
-        test(nbt, compressed);
+        test(nbt, compressedMode);
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = { true, false })
-    public void saveFloat(boolean compressed) throws IOException, NBTException {
+    @ArgumentsSource(CompressedModeProvider.class)
+    public void saveFloat(CompressedMode compressedMode) throws IOException, NBTException {
         NBTFloat nbt = NBT.Float(0.5f);
-        test(nbt, compressed);
+        test(nbt, compressedMode);
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = { true, false })
-    public void saveString(boolean compressed) throws IOException, NBTException {
+    @ArgumentsSource(CompressedModeProvider.class)
+    public void saveString(CompressedMode compressedMode) throws IOException, NBTException {
         NBTString nbt = NBT.String("AAA");
-        test(nbt, compressed);
+        test(nbt, compressedMode);
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = { true, false })
-    public void saveList(boolean compressed) throws IOException, NBTException {
+    @ArgumentsSource(CompressedModeProvider.class)
+    public void saveList(CompressedMode compressedMode) throws IOException, NBTException {
         NBTList<NBTString> nbt = NBT.List(
                 NBTTypes.TAG_String,
                 NBT.String("A"), NBT.String("B"), NBT.String("C"), NBT.String("D")
         );
 
-        test(nbt, compressed);
+        test(nbt, compressedMode);
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = { true, false })
-    public void saveCompound(boolean compressed) throws IOException, NBTException {
+    @ArgumentsSource(CompressedModeProvider.class)
+    public void saveCompound(CompressedMode compressedMode) throws IOException, NBTException {
         var compound = NBT.Compound((root) -> {
             root.put("byteArray", NBT.ByteArray(1, 2, 3));
             root.put("byte", NBT.Byte(0x42));
@@ -92,32 +93,32 @@ public class NBTSaving {
             root.put("short", NBT.Short(-10));
         });
 
-        test(compound, compressed);
+        test(compound, compressedMode);
     }
 
-    private <T extends NBT> void test(T nbt, boolean compressed) throws IOException, NBTException {
-        T saved = saveAndRead(nbt, compressed);
+    private <T extends NBT> void test(T nbt, CompressedMode compressedMode) throws IOException, NBTException {
+        T saved = saveAndRead(nbt, compressedMode);
         assertEquals(nbt, saved);
     }
 
 
-    private <T extends NBT> T saveAndRead(NBT tag, boolean compressed) throws IOException, NBTException {
-        NBTWriter output = output(compressed);
+    private <T extends NBT> T saveAndRead(NBT tag, CompressedMode compressedMode) throws IOException, NBTException {
+        NBTWriter output = output(compressedMode);
         output.writeNamed("a", tag);
         output.close();
-        Pair<String, NBT> namedTag = input(compressed).readNamed();
+        Pair<String, NBT> namedTag = input(compressedMode).readNamed();
         assertEquals("a", namedTag.getFirst());
         assertEquals(tag.getClass(), namedTag.getSecond().getClass());
         return (T) namedTag.getSecond();
     }
 
 
-    private NBTReader input(boolean compressed) {
-        return NBTReader.fromArray(byteArrayOutputStream.toByteArray(), compressed);
+    private NBTReader input(CompressedMode compressedMode) {
+        return NBTReader.fromArray(byteArrayOutputStream.toByteArray(), compressedMode);
     }
 
-    private NBTWriter output(boolean compressed) {
-        return new NBTWriter(byteArrayOutputStream, compressed);
+    private NBTWriter output(CompressedMode compressedMode) {
+        return new NBTWriter(byteArrayOutputStream, compressedMode);
     }
 
     @BeforeEach

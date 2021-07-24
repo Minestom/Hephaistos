@@ -22,6 +22,7 @@ open class CompressedMode {
             override fun generateOutputStream(originalOutputStream: OutputStream) = GZIPOutputStream(originalOutputStream)
         }
 
+        @JvmField
         val ZLIB = object : CompressedMode() {
             override fun generateInputStream(originalInputStream: InputStream) = InflaterInputStream(originalInputStream)
             override fun generateOutputStream(originalOutputStream: OutputStream) = DeflaterOutputStream(originalOutputStream)
