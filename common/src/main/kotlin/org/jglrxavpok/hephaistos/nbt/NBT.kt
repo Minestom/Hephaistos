@@ -45,11 +45,17 @@ sealed interface NBT {
     companion object {
 
         @JvmStatic
-        val Constants = NBTConstants
+        val EMPTY = NBTCompound()
+
+        @JvmStatic
+        val TRUE = NBT.Byte(1)
+
+        @JvmStatic
+        val FALSE = NBT.Byte(0)
 
         @JvmStatic
         @Contract(pure = true)
-        fun Boolean(flag: Boolean): NBTByte = if (flag) Constants.TRUE else Constants.FALSE
+        fun Boolean(flag: Boolean): NBTByte = if (flag) TRUE else FALSE
 
         @JvmStatic
         @Contract(pure = true)

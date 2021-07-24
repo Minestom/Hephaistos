@@ -13,7 +13,7 @@ data class BlockState @JvmOverloads constructor(val name: String, val properties
         @JvmField
         val AIR = BlockState(NBT.Kompound {
             this["Name"] = NBT.String("minecraft:air")
-            this["Properties"] = NBT.Constants.EMPTY
+            this["Properties"] = NBT.EMPTY
         })
     }
 
@@ -22,7 +22,7 @@ data class BlockState @JvmOverloads constructor(val name: String, val properties
      * @throws AnvilException if the NBT is malformed
      */
     @Throws(AnvilException::class)
-    constructor(nbt: NBTCompound): this(nbt.getString("Name") ?: missing("Name"), loadProperties(nbt.getCompound("Properties") ?: NBT.Constants.EMPTY))
+    constructor(nbt: NBTCompound): this(nbt.getString("Name") ?: missing("Name"), loadProperties(nbt.getCompound("Properties") ?: NBT.EMPTY))
 
     /**
      * Converts this BlockState to a TAG_Compound
