@@ -79,9 +79,9 @@ class Palette() {
         // convert state list into uncompressed data
         val indices = states.map(blocks::indexOf).toIntArray()
         val bitLength = ceil(log2(blocks.size.toFloat())).toInt().coerceAtLeast(1) // at least one bit
-        return when(version) {
-            SupportedVersion.MC_1_15 -> compress(indices, bitLength)
-            SupportedVersion.MC_1_16 -> pack(indices, bitLength)
+        return when {
+            version == SupportedVersion.MC_1_15 -> compress(indices, bitLength)
+            version >= SupportedVersion.MC_1_16 -> pack(indices, bitLength)
 
             else -> throw AnvilException("Unsupported version for compacting palette: $version")
         }

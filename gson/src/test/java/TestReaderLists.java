@@ -130,11 +130,11 @@ public class TestReaderLists {
             assertEquals(list.getSubtagType(), NBTTypes.TAG_List, "Guessed NBT must be a list of lists");
 
             NBTList<NBTString> firstList = list.get(0);
-            assertEquals(1, firstList.getLength());
+            assertEquals(1, firstList.getSize());
             assertEquals("aaa", firstList.get(0).getValue());
 
             NBTList<NBTString> secondList = list.get(1);
-            assertEquals(2, secondList.getLength());
+            assertEquals(2, secondList.getSize());
             assertEquals("bbb", secondList.get(0).getValue());
             assertEquals("ccc", secondList.get(1).getValue());
         }
@@ -159,7 +159,7 @@ public class TestReaderLists {
             assertTrue(array instanceof NBTList, "Guessed NBT must be a list");
             NBTList<NBTString> list = (NBTList<NBTString>) array;
             assertEquals(list.getSubtagType(), NBTTypes.TAG_String, "Guessed NBT must be a list of strings");
-            assertEquals(0, list.getLength());
+            assertEquals(0, list.getSize());
         }
     }
 

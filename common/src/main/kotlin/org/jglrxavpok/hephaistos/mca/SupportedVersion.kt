@@ -3,11 +3,13 @@ package org.jglrxavpok.hephaistos.mca
 enum class SupportedVersion(val lowestDataVersion: Int) {
 
     MC_1_15(2225),
-    MC_1_16(2504);
+    MC_1_16(2504),
+    MC_1_17_0(2724),
+    ;
 
     companion object {
 
-        val Latest: SupportedVersion = MC_1_16
+        val Latest: SupportedVersion = MC_1_17_0
 
         /**
          * Returns the highest version known for the given data version

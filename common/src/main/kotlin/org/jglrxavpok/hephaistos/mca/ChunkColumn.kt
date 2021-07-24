@@ -4,6 +4,7 @@ import org.jglrxavpok.hephaistos.collections.ImmutableByteArray
 import org.jglrxavpok.hephaistos.collections.ImmutableIntArray
 import org.jglrxavpok.hephaistos.mca.AnvilException.Companion.missing
 import org.jglrxavpok.hephaistos.nbt.*
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * 16x256x16 (XYZ) area of the world. Consists of 16 ChunkSections vertically stacked.
@@ -11,14 +12,22 @@ import org.jglrxavpok.hephaistos.nbt.*
  * @param x: chunk coordinate on X axis (world absolute)
  * @param z: chunk coordinate on Z axis (world absolute)
  */
-class ChunkColumn(val x: Int, val z: Int) {
+class ChunkColumn @JvmOverloads constructor(val x: Int, val z: Int, val minY: Int = 0, val maxY: Int = 255) {
 
     companion object {
         const val UnknownBiome = -1
     }
 
+    /**
+     * Minecraft Version this chunk comes from. You can modify it, but you should make sure your data is compatible!
+     */
     var version: SupportedVersion = SupportedVersion.Latest
+
+    /**
+     * Data version this chunk is in. You can modify it, but you should make sure your data is compatible!
+     */
     var dataVersion = version.lowestDataVersion
+
     var generationStatus: GenerationStatus = GenerationStatus.Empty
     var lastUpdate: Long = 0L
     var inhabitedTime: Long = 0L
@@ -49,15 +58,23 @@ class ChunkColumn(val x: Int, val z: Int) {
      * Chunk sections of this chunk. Empty sections are non-null but have their 'empty' field set to true.
      * @see ChunkSection
      */
-    val sections = Array(16) { y -> ChunkSection(y.toByte()) }
+    val sections = ConcurrentHashMap<Byte, ChunkSection>()
     var airCarvingMask: ImmutableByteArray? = null
     var liquidCarvingMask: ImmutableByteArray? = null
 
+    val logicalHeight = maxY - minY +1
+
+    private val biomeArraySize = logicalHeight.blockToSection() * 4*4*4
+
     @Throws(AnvilException::class)
-    constructor(chunkData: NBTCompound): this(
+    constructor(chunkData: NBTCompound, minY: Int = 0, maxY: Int = 255): this(
         (chunkData.getCompound("Level") ?: missing("Level")).getInt("xPos") ?: missing("xPos"),
-        (chunkData.getCompound("Level") ?: missing("Level")).getInt("zPos") ?: missing("zPos")
+        (chunkData.getCompound("Level") ?: missing("Level")).getInt("zPos") ?: missing("zPos"),
+        minY, maxY
     ) {
+        if(minY > maxY)
+            throw AnvilException("minY must be <= maxY")
+
         dataVersion = chunkData.getInt("DataVersion") ?: missing("DataVersion")
         version = SupportedVersion.closest(dataVersion)
         val level = chunkData.getCompound("Level") ?: missing("Level")
@@ -99,23 +116,33 @@ class ChunkColumn(val x: Int, val z: Int) {
         val sectionsNBT = level.getList<NBTCompound>("Sections") ?: missing("Sections")
         for(nbt in sectionsNBT) {
             val sectionY = nbt.getByte("Y") ?: missing("Y")
-            if(sectionY in 0..15) { // otherwise invalid Y value for section, ignore others. valid mca files from vanilla Minecraft can have Y below 0 or above 15
-                sections[sectionY.toInt()] = ChunkSection(nbt, version)
+            if(version < SupportedVersion.MC_1_17_0) {
+                if(sectionY !in 0..15)
+                    continue
             }
+            sections[sectionY] = ChunkSection(nbt, version)
         }
     }
 
     /**
+     * Gets the section at the given section Y (basically blockY / 16) value.
+     * If no section is present in the column at this position, a new one is created and added
+     */
+    fun getSection(sectionY: Byte): ChunkSection {
+        return sections.computeIfAbsent(sectionY, ::ChunkSection)
+    }
+
+    /**
      * Sets the block state at the given position in the chunk.
-     * X,Y,Z must be in chunk coordinates (ie x&z in 0..15, y in 0..255)
+     * X,Y,Z must be in chunk coordinates (ie x&z in 0..15, y in minY..maxY)
      *
      * If y lands in an empty section, the section is created and considered to be filled with air
      */
     fun setBlockState(x: Int, y: Int, z: Int, state: BlockState) {
         checkBounds(x, y, z)
-        val sectionY = y / 16
-        val section = sections[sectionY]
-        section[x, y % 16, z] = state
+        val sectionY = y.blockToSection()
+        val section = getSection(sectionY)
+        section[x, y.blockInsideSection(), z] = state
     }
 
     /**
@@ -124,12 +151,12 @@ class ChunkColumn(val x: Int, val z: Int) {
      */
     fun getBlockState(x: Int, y: Int, z: Int): BlockState {
         checkBounds(x, y, z)
-        val sectionY = y / 16
-        val section = sections[sectionY]
+        val sectionY = y.blockToSection()
+        val section = getSection(sectionY)
         if(section.empty) {
             return BlockState.AIR
         }
-        return section[x, y % 16, z]
+        return section[x, y.blockInsideSection(), z]
     }
 
     private fun checkBounds(x: Int, y: Int, z: Int) {
@@ -137,7 +164,7 @@ class ChunkColumn(val x: Int, val z: Int) {
             throw IllegalArgumentException("x ($x) is not in 0..15")
         if(z !in 0..15)
             throw IllegalArgumentException("z ($z) is not in 0..15")
-        if(y !in 0..255)
+        if(y !in minY..maxY)
             throw IllegalArgumentException("y ($y) is not in 0..255")
     }
 
@@ -148,7 +175,7 @@ class ChunkColumn(val x: Int, val z: Int) {
     fun setBiome(x: Int, y: Int, z: Int, biomeID: Int) {
         checkBounds(x, y, z)
         if(biomes == null) {
-            biomes = ImmutableIntArray(1024) { if (it == x/4+(z/4)*16+(y/4)*16) biomeID else UnknownBiome }
+            biomes = ImmutableIntArray(biomeArraySize) { if (it == x/4+(z/4)*16+(y/4)*16) biomeID else UnknownBiome }
         }
     }
 
@@ -192,7 +219,7 @@ class ChunkColumn(val x: Int, val z: Int) {
             }
             val sections = NBT.List(
                 NBTTypes.TAG_Compound,
-                this@ChunkColumn.sections
+                this@ChunkColumn.sections.values
                     .filter { !it.empty }
                     .map { it.toNBT(version) }
             )

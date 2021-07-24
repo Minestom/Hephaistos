@@ -12,8 +12,8 @@ Hephaistos can read NBT from SNBT, binary format or (with additional dependencie
 See more in the "parsing" section below for more information.
 
 ## NBT
-Based on the up-to-date specs present at [Wiki.vg](https://wiki.vg/NBT) 
-and on the [Minecraft Wiki](https://minecraft.gamepedia.com/NBT_format#TAG_definition). 
+Based on the up-to-date specs present at [Wiki.vg](https://wiki.vg/NBT)
+and on the [Minecraft Wiki](https://minecraft.gamepedia.com/NBT_format#TAG_definition).
 
 ### Examples
 While the tests in `src/test/java/nbt` can help comprehension, here are a few more examples to show the philosophy:
@@ -22,22 +22,22 @@ While the tests in `src/test/java/nbt` can help comprehension, here are a few mo
 ```java
 // false represents the uncompressed status of the file
 try (NBTReader reader = new NBTReader(new File("servers.dat"), false)) {
-    NBTCompound tag = (NBTCompound) reader.read();
-    NBTList<NBTCompound> servers = tag.getList("servers");
-    for(NBTCompound server : servers) {
-        String id = server.getString("ip");
-        String name = server.getString("name");
+NBTCompound tag = (NBTCompound) reader.read();
+NBTList<NBTCompound> servers = tag.getList("servers");
+for(NBTCompound server : servers) {
+String id = server.getString("ip");
+String name = server.getString("name");
 
-        if(server.containsKey("acceptTextures")) {
-            // ...
-        }
-        if(server.containsKey("icon")) {
-            // ...
-        }
-        // Do something with the information
-    }
+if(server.containsKey("acceptTextures")) {
+// ...
+}
+if(server.containsKey("icon")) {
+// ...
+}
+// Do something with the information
+}
 } catch (IOException | NBTException e) {
-    e.printStackTrace();
+e.printStackTrace();
 }
 ```
 
@@ -53,9 +53,9 @@ data.setInt("SpawnZ", 0);
 level.set("Data", data);
 
 try(NBTWriter writer = new NBTWriter(new File("level.dat"), true /*compressed*/)) {
-    writer.writeNamed("", level);
+writer.writeNamed("", level);
 } catch (IOException e) {
-    e.printStackTrace();
+e.printStackTrace();
 }
 ```
 
@@ -90,8 +90,10 @@ dependencies {
 ## Anvil format
 Built upon the NBT library part, the `mca` package allows loading and saving MCA (Minecraft Anvil) files.
 
-Contrary to `NBTReader` and `NBTWriter`, `RegionFile` requires a `RandomAccessFile` instead of a InputStream/OutputStream.
-The reasoning is that `RandomAccessFile` allows both reads and writes to happen at the same time on the same file.
+Contrary to `NBTReader` and `NBTWriter`, `RegionFile` requires a `DataSource` instead of a InputStream/OutputStream.
+The reasoning is that `DataSource` allows both reads and writes to happen at the same time on the same file.
+`RegionFile` has a constructor to directly use a `RandomAccessFile` to read from disk.
+If you want to work in memory, you can use `GrowableSource`
 
 One must be careful of OutOfMemory errors when reading lots of chunks from a RegionFile. Use `RegionFile#forget` to unload a chunk column from the internal chunk cache to relieve memory.
 
@@ -106,8 +108,8 @@ Here comes the part you are all waiting for, examples!
 
 It is possible to set blocks directly from `RegionFile`:
 ```java
-            // create the region from a given RandomAccessFile. 0,0 is the region coordinates (a region is 32x32 chunks)
-            RegionFile region = new RegionFile(file, 0, 0);
+            // create the region from a given DataSource. 0,0 is the region coordinates (a region is 32x32 chunks)
+            RegionFile region = new RegionFile(dataSource, 0, 0);
             BlockState stone = new BlockState("minecraft:stone");
             for (int x = 0; x < 16; x++) {
                 for (int z = 0; z < 16; z++) {
@@ -125,7 +127,7 @@ It is possible to set blocks directly from `RegionFile`:
 
 It is also possible to create chunks on-demand:
 ```java
-            RegionFile region = new RegionFile(file, 0, 0);
+            RegionFile region = new RegionFile(dataSource, 0, 0);
             ChunkColumn chunk0 = region.getOrCreateChunk(0, 0);
             ChunkColumn chunk1 = region.getOrCreateChunk(1, 0);
             // just 3 for-loops over the entire chunk to set the blocks via ChunkColumn#setBlockState
@@ -140,7 +142,7 @@ It is also possible to create chunks on-demand:
 #### Reading from a pre-existing RegionFile/MCAFile
 ```java
         // Load your region
-        RegionFile region = new RegionFile(file, 0, 0);
+        RegionFile region = new RegionFile(dataSource, 0, 0);
         // Get your chunk. May return null if the chunk is not present in the file 
         // (ie not generated yet)
         ChunkColumn column0_0 = region.getChunk(0, 0);

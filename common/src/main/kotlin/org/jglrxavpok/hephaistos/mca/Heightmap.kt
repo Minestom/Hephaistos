@@ -14,23 +14,19 @@ class Heightmap() {
      */
     @JvmOverloads
     constructor(compactVersion: ImmutableLongArray, version: SupportedVersion = SupportedVersion.Latest): this() {
-        when(version) {
-            SupportedVersion.MC_1_15 -> {
+        when {
+            version == SupportedVersion.MC_1_15 -> {
                 if(compactVersion.size != 36) { // 16x16
                     throw AnvilException("Wrong length for 1.15 compacted heightmap (found ${compactVersion.size}, expected 36)")
                 }
                 heights = decompress(compactVersion, 9)
             }
 
-            SupportedVersion.MC_1_16 -> {
+            version >= SupportedVersion.MC_1_16 -> {
                 if(compactVersion.size != 37) { // 16x16
                     throw AnvilException("Wrong length for 1.16 compacted heightmap (found ${compactVersion.size}, expected 37)")
                 }
                 heights = unpack(compactVersion, 9)
-            }
-
-            else -> {
-                throw AnvilException("Unsupported data version for compressed heightmap: $version")
             }
         }
     }
@@ -61,9 +57,9 @@ class Heightmap() {
      */
     @JvmOverloads
     fun compact(version: SupportedVersion = SupportedVersion.Latest): ImmutableLongArray {
-        return when(version) {
-            SupportedVersion.MC_1_15 -> compress(heights, 9)
-            SupportedVersion.MC_1_16 -> pack(heights, 9)
+        return when {
+            version == SupportedVersion.MC_1_15 -> compress(heights, 9)
+            version >= SupportedVersion.MC_1_16 -> pack(heights, 9)
 
             else -> throw AnvilException("Unsupported data version for heightmap: $version")
         }

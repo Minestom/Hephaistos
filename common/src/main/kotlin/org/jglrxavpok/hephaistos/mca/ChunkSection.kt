@@ -3,7 +3,6 @@ package org.jglrxavpok.hephaistos.mca
 import org.jglrxavpok.hephaistos.mca.AnvilException.Companion.missing
 import org.jglrxavpok.hephaistos.nbt.NBT
 import org.jglrxavpok.hephaistos.nbt.NBTCompound
-import java.lang.IllegalArgumentException
 import kotlin.experimental.and
 import kotlin.experimental.or
 import kotlin.math.ceil
@@ -19,13 +18,8 @@ class ChunkSection(val y: Byte) {
     private var palette: Palette? = null
     val empty get()= palette == null
     private val blockStates: Array<BlockState> = Array(16*16*16) { BlockState.AIR }
-    val blockLights = ByteArray(2048)
-    val skyLights = ByteArray(2048)
-
-    init {
-        if(y !in 0..15)
-            throw AnvilException("Invalid section Y: $y. Must be in 0..15")
-    }
+    var blockLights = ByteArray(0)
+    var skyLights = ByteArray(0)
 
     /**
      * Constructs a ChunkSection from a TAG_Compound.
@@ -34,6 +28,11 @@ class ChunkSection(val y: Byte) {
     @Throws(AnvilException::class)
     @JvmOverloads
     constructor(nbt: NBTCompound, version: SupportedVersion = SupportedVersion.Latest): this(nbt.getByte("Y") ?: missing("Y")) {
+        if(version < SupportedVersion.MC_1_17_0) {
+            if(y !in 0..15)
+                throw AnvilException("Invalid section Y: $y. Must be in 0..15 for pre-1.17 sections")
+        }
+
         // empty palette can happen if the section exist but requires more than 8 bits to save the block IDs (in that case, the global ID is directly used)
         val paletteNBT = nbt.getList<NBTCompound>("Palette")
 
@@ -46,15 +45,15 @@ class ChunkSection(val y: Byte) {
             val compactedBlockStates = nbt.getLongArray("BlockStates") ?: missing("BlockStates")
             val sizeInBits = compactedBlockStates.size*64 / 4096
             val ids: IntArray
-            when(version) {
-                SupportedVersion.MC_1_15 -> {
+            when {
+                version == SupportedVersion.MC_1_15 -> {
                     ids = decompress(compactedBlockStates, sizeInBits)
                     if(ids.size != 16*16*16) {
                         throw AnvilException("Invalid decompressed BlockStates length (${ids.size}). Must be 4096 (16x16x16)")
                     }
                 }
 
-                SupportedVersion.MC_1_16 -> {
+                version >= SupportedVersion.MC_1_16 -> {
                     val intPerLong = 64 / sizeInBits
                     val expectedCompressedLength = ceil(4096.0 / intPerLong).toInt()
                     if(compactedBlockStates.size != expectedCompressedLength) {
@@ -72,8 +71,14 @@ class ChunkSection(val y: Byte) {
 
             palette!!.loadReferences(blockStates.asIterable())
 
-            nbt.getByteArray("BlockLight")?.copyInto(blockLights)
-            nbt.getByteArray("SkyLight")?.copyInto(skyLights)
+            nbt.getByteArray("BlockLight")?.let {
+                blockLights = ByteArray(it.size)
+                it.copyInto(blockLights)
+            }
+            nbt.getByteArray("SkyLight")?.let {
+                skyLights = ByteArray(it.size)
+                it.copyInto(skyLights)
+            }
         }
     }
 
@@ -159,6 +164,9 @@ class ChunkSection(val y: Byte) {
     fun setSkyLight(x: Int, y: Int, z: Int, light: Byte) {
         checkBounds(x, y, z)
         fillInIfEmpty()
+        if(skyLights.isEmpty()) {
+            skyLights = ByteArray(2048)
+        }
         val index = index(x,y,z)
         if(index % 2 == 0) {
             skyLights[index/2] = (skyLights[index/2] and 0xF0.toByte()) or (light and 0x0F)
@@ -175,6 +183,9 @@ class ChunkSection(val y: Byte) {
     fun setBlockLight(x: Int, y: Int, z: Int, light: Byte) {
         checkBounds(x, y, z)
         fillInIfEmpty()
+        if(blockLights.isEmpty()) {
+            blockLights = ByteArray(2048)
+        }
         val index = index(x,y,z)
         if(index % 2 == 0) {
             blockLights[index/2] = (blockLights[index/2] and 0xF0.toByte()) or (light and 0x0F)

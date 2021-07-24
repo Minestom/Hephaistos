@@ -1,5 +1,6 @@
 package org.jglrxavpok.hephaistos.mca
 
+import org.jglrxavpok.hephaistos.data.DataSource
 import org.jglrxavpok.hephaistos.nbt.CompressedMode
 import org.jglrxavpok.hephaistos.nbt.NBTCompound
 import org.jglrxavpok.hephaistos.nbt.NBTReader
@@ -21,7 +22,7 @@ import kotlin.math.ceil
  * [Code based on Mojang source code](https://www.mojang.com/2012/02/new-minecraft-map-format-anvil/)
  * [also based on the Minecraft Wiki "Region File format page"](https://minecraft.gamepedia.com/Region_file_format)
  */
-class RegionFile @Throws(AnvilException::class, IOException::class) constructor(val file: RandomAccessFile, val regionX: Int, val regionZ: Int): Closeable {
+class RegionFile @Throws(AnvilException::class, IOException::class) @JvmOverloads constructor(val dataSource: DataSource, val regionX: Int, val regionZ: Int, val minY: Int = 0, val maxY: Int = 255): Closeable {
 
     companion object {
         private const val GZipCompression: Byte = 1
@@ -42,19 +43,27 @@ class RegionFile @Throws(AnvilException::class, IOException::class) constructor(
     private val freeSectors: MutableList<Boolean>
     private val columnCache = ConcurrentHashMap<Int, ChunkColumn>()
 
+    val logicalHeight = maxY - minY +1
+
+    @JvmOverloads constructor(file: RandomAccessFile, regionX: Int, regionZ: Int, minY: Int = 0, maxY: Int = 255):
+            this(RandomAccessFileSource(file), regionX, regionZ, minY, maxY)
+
     init {
-        file.seek(0L)
-        if(file.length() < HeaderLength) { // new file, fill in data
+        if(minY > maxY)
+            throw AnvilException("minY must be <= maxY")
+
+        dataSource.seek(0L)
+        if(dataSource.length() < HeaderLength) { // new file, fill in data
             // fill with 8kib of data
             repeat(HeaderLength) {
-                file.writeByte(0)
+                dataSource.writeByte(0)
             }
         }
 
         addPadding()
 
         // prepare sectors
-        val availableSectors = file.length() / SectorSize
+        val availableSectors = dataSource.length() / SectorSize
 
         // fill array with trues
         freeSectors = MutableList(availableSectors.toInt()) { true }.also {
@@ -62,10 +71,10 @@ class RegionFile @Throws(AnvilException::class, IOException::class) constructor(
             it[1] = false // timestamp table
         }
 
-        file.seek(0)
+        dataSource.seek(0)
         // read chunk locations
         for(i in 0 until MaxEntryCount) {
-            val location = file.readInt()
+            val location = dataSource.readInt()
             locations[i] = location
 
             // mark already allocated sectors as taken.
@@ -78,7 +87,7 @@ class RegionFile @Throws(AnvilException::class, IOException::class) constructor(
         }
         // read chunk timestamps
         for(i in 0 until MaxEntryCount) {
-            timestamps[i] = file.readInt()
+            timestamps[i] = dataSource.readInt()
         }
     }
 
@@ -98,6 +107,23 @@ class RegionFile @Throws(AnvilException::class, IOException::class) constructor(
         if(!hasLoadedChunk(x, z)) return null
 
         return columnCache.computeIfAbsent(index(x.chunkInsideRegion(), z.chunkInsideRegion())) { readColumn(x.chunkInsideRegion(), z.chunkInsideRegion()) }
+    }
+
+    /**
+     * Gets the NBT representation of the chunk inside this RegionFile. Coordinates are absolute.
+     * Values are NOT cached (contrary to getChunk)
+     *
+     * @see RegionFile.getOrCreateChunk
+     * @throws AnvilException if the given coordinates are not inside the region
+     * @return Can return null if the requested chunk is not present in the file
+     */
+    @Throws(AnvilException::class, IOException::class)
+    fun getChunkData(x: Int, z: Int): NBTCompound? {
+        if(out(x, z)) throw AnvilException("Out of RegionFile: $x,$z (chunk)")
+
+        if(!hasLoadedChunk(x, z)) return null
+
+        return readColumnData(x.chunkInsideRegion(), z.chunkInsideRegion())
     }
 
     /**
@@ -123,13 +149,13 @@ class RegionFile @Throws(AnvilException::class, IOException::class) constructor(
         }
 
         // neither in file nor memory, create a new column
-        val column = ChunkColumn(x, z)
+        val column = ChunkColumn(x, z, minY, maxY)
         columnCache[index] = column
         return column
     }
 
     @Throws(AnvilException::class, IOException::class)
-    private fun readColumn(x: Int, z: Int): ChunkColumn {
+    private fun readColumnData(x: Int, z: Int): NBTCompound {
         val offset = fileOffset(x, z)
         val length = readInt(offset.toLong())
         val compressionType = readByte(offset+4L)
@@ -149,7 +175,12 @@ class RegionFile @Throws(AnvilException::class, IOException::class) constructor(
             throw AnvilException("Chunk root tag must be TAG_Compound")
         }
 
-        return ChunkColumn(chunkData)
+        return chunkData
+    }
+
+    @Throws(AnvilException::class, IOException::class)
+    private fun readColumn(x: Int, z: Int): ChunkColumn {
+        return ChunkColumn(readColumnData(x, z), minY, maxY)
     }
 
     /**
@@ -160,6 +191,10 @@ class RegionFile @Throws(AnvilException::class, IOException::class) constructor(
      */
     @Throws(IOException::class)
     fun writeColumn(column: ChunkColumn) {
+        if(column.minY < minY)
+            throw AnvilException("ChunkColumn minY must be >= to RegionFile minY")
+        if(column.maxY > maxY)
+            throw AnvilException("ChunkColumn maxY must be <= to RegionFile maxY")
         val x = column.x
         val z = column.z
         if(out(x, z)) throw AnvilException("Out of RegionFile: $x,$z (chunk)")
@@ -183,10 +218,10 @@ class RegionFile @Throws(AnvilException::class, IOException::class) constructor(
         var position: Long
         var sectorStart: Int
 
-        synchronized(file) {
+        synchronized(dataSource) {
             sectorStart = findAvailableSectors(sectorCount)
             if (sectorStart == -1) { // we need to allocate sectors
-                val eof = file.length()
+                val eof = dataSource.length()
                 position = eof
                 sectorStart = (eof / SectorSize).toInt()
                 // fill up sectors
@@ -226,11 +261,11 @@ class RegionFile @Throws(AnvilException::class, IOException::class) constructor(
     }
 
     private fun addPadding() {
-        synchronized(file) {
-            val missingPadding = file.length() % SectorSize
+        synchronized(dataSource) {
+            val missingPadding = dataSource.length() % SectorSize
             // file is not a multiple of 4kib, add padding
             if(missingPadding > 0) {
-                file.setLength(file.length()+ (SectorSize-missingPadding))
+                dataSource.setLength(dataSource.length()+ (SectorSize-missingPadding))
             }
         }
     }
@@ -243,33 +278,27 @@ class RegionFile @Throws(AnvilException::class, IOException::class) constructor(
     }
 
     private fun writeByte(pos: Long, b: Byte) {
-        file.channel.write(ByteBuffer.allocateDirect(1).put(0, b), pos)
+        dataSource.writeByte(pos, b)
     }
 
     private fun writeBytes(pos: Long, bytes: ByteArray) {
-        file.channel.write(ByteBuffer.wrap(bytes), pos)
+        dataSource.writeBytes(pos, bytes)
     }
 
     private fun writeInt(pos: Long, int: Int) {
-        file.channel.write(ByteBuffer.allocateDirect(4).putInt(0, int), pos)
+        dataSource.writeInt(pos, int)
     }
 
     private fun readBytes(pos: Long, destination: ByteArray) {
-        val buf = ByteBuffer.allocateDirect(destination.size)
-        file.channel.read(buf, pos)
-        for (i in destination.indices) destination[i] = buf[i]
+        return dataSource.readBytes(pos, destination)
     }
 
     private fun readByte(pos: Long): Byte {
-        val buf = ByteBuffer.allocateDirect(1)
-        file.channel.read(buf, pos)
-        return buf[0]
+        return dataSource.readByte(pos)
     }
 
     private fun readInt(pos: Long): Int {
-        val buf = ByteBuffer.allocateDirect(4)
-        file.channel.read(buf, pos)
-        return buf.getInt(0)
+        return dataSource.readInt(pos)
     }
 
     /**
@@ -436,7 +465,7 @@ class RegionFile @Throws(AnvilException::class, IOException::class) constructor(
         synchronized(columnCache) {
             columnCache.clear()
         }
-        file.close()
+        dataSource.close()
     }
 
     /**
