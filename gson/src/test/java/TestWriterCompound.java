@@ -16,7 +16,7 @@ public class TestWriterCompound {
 
     @BeforeEach
     public void init() {
-        writer = NBTGsonWriter.writer(new Gson());
+        writer = NBTGsonWriter.writer();
     }
 
     @Test

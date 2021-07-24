@@ -63,7 +63,7 @@ object SNBTParsingVisitor: SNBTBaseVisitor<NBT>() {
     override fun visitByteNBT(ctx: SNBTParser.ByteNBTContext): NBT {
         ctx.BOOLEAN()?.let {
             val booleanValue = ctx.BOOLEAN().text == "true"
-            return NBTByte.Boolean(booleanValue)
+            return NBT.Boolean(booleanValue)
         }
         val value = ctx.BYTE().text.dropLast(1).toByte()
         return NBT.Byte(value)
