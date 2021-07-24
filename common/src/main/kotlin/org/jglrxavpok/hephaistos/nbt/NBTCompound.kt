@@ -4,14 +4,9 @@ import org.jglrxavpok.hephaistos.nbt.mutable.MutableNBTCompound
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
-class NBTCompound internal constructor(val tags: Map<String, NBT> = mapOf()): NBT {
+class NBTCompound internal constructor(val tags: Map<String, NBT> = mapOf()): NBT, Map<String, NBT> by tags {
 
     override val ID = NBTTypes.TAG_Compound
-
-    /**
-     * Number of tags inside this compound
-     */
-    val size get() = tags.size
 
     override fun writeContents(destination: DataOutputStream) {
         for(entry in tags.entries) {
@@ -21,25 +16,6 @@ class NBTCompound internal constructor(val tags: Map<String, NBT> = mapOf()): NB
         }
         destination.writeEndTag()
     }
-
-    /**
-     * Does a tag exist inside this compound with the given key?
-     */
-    fun containsKey(key: String): Boolean {
-        return tags.containsKey(key)
-    }
-
-    /**
-     * Returns the tag associated to the given key, if any. Returns 'null' otherwise
-     */
-    operator fun get(key: String): NBT? {
-        return tags[key]
-    }
-
-    /**
-     * Creates a list with the current available keys
-     */
-    fun getKeys(): Set<String> = tags.keys
 
     override fun toSNBT(): String {
         val tagStr = tags.map { entry ->
