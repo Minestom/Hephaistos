@@ -3,30 +3,28 @@ package org.jglrxavpok.hephaistos.nbt
 import java.io.*
 import java.nio.file.Files
 import java.nio.file.Path
-import java.util.zip.GZIPInputStream
 
 /**
  * Reads NBT Data from a given input stream.
  * Once the input stream is passed to a NBTReader, use NBTReader#close to close the stream.
  */
-class NBTReader @JvmOverloads constructor(source: InputStream, compressed: Boolean = true): AutoCloseable, Closeable {
+class NBTReader @JvmOverloads constructor(source: InputStream, compressedMode: CompressedMode = CompressedMode.NONE): AutoCloseable, Closeable {
 
     private val reader = DataInputStream(
-        if(compressed) GZIPInputStream(source)
-        else source
+        compressedMode.generateInputStream(source)
     )
 
     /**
      * Constructs a NBTReader from a file (convenience method, equivalent to `NBTReader(BufferedInputStream(FileInputStream(file)))`)
      */
     @Throws(IOException::class)
-    @JvmOverloads constructor(file: File, compressed: Boolean = true): this(BufferedInputStream(FileInputStream(file)), compressed)
+    @JvmOverloads constructor(file: File, compressed: CompressedMode = CompressedMode.NONE): this(BufferedInputStream(FileInputStream(file)), compressed)
 
     /**
      * Constructs a NBTWriter from a path (convenience method, equivalent to `NBTWriter(BufferedOutputStream(Files.newOutputStream(path)))`)
      */
     @Throws(IOException::class)
-    @JvmOverloads constructor(path: Path, compressed: Boolean = true): this(BufferedInputStream(Files.newInputStream(path)), compressed)
+    @JvmOverloads constructor(path: Path, compressed: CompressedMode = CompressedMode.NONE): this(BufferedInputStream(Files.newInputStream(path)), compressed)
 
     /**
      * Reads a single named tag from the source. 'first' will hold the name, 'second' the tag
@@ -60,5 +58,18 @@ class NBTReader @JvmOverloads constructor(source: InputStream, compressed: Boole
 
     override fun close() {
         reader.close()
+    }
+
+    companion object {
+        /**
+         * Creates an [NBTReader] from a [ByteArray]
+         *
+         * @param array The byte array to create it from.
+         *
+         * @return The created [NBTReader] from the [ByteArray].
+         */
+        @JvmStatic
+        @JvmOverloads
+        fun fromArray(array: ByteArray, compressedMode: CompressedMode = CompressedMode.NONE) = NBTReader(ByteArrayInputStream(array), compressedMode);
     }
 }

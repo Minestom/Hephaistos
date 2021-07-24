@@ -112,8 +112,8 @@ public class NBTSaving {
     }
 
 
-    private NBTReader input(boolean compressed) throws IOException {
-        return new NBTReader(new ByteArrayInputStream(byteArrayOutputStream.toByteArray()), compressed);
+    private NBTReader input(boolean compressed) {
+        return NBTReader.fromArray(byteArrayOutputStream.toByteArray(), compressed);
     }
 
     private NBTWriter output(boolean compressed) {

@@ -4,11 +4,12 @@ import org.jetbrains.annotations.Contract
 import org.jglrxavpok.hephaistos.collections.ImmutableByteArray
 import org.jglrxavpok.hephaistos.collections.ImmutableIntArray
 import org.jglrxavpok.hephaistos.collections.ImmutableLongArray
+import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream
 import java.io.IOException
 
 /**
- * Most basic representation of a NBTag
+ * Most basic representation of a NBTTag
  */
 sealed interface NBT {
 
@@ -23,6 +24,9 @@ sealed interface NBT {
      */
     @Throws(IOException::class)
     fun writeContents(destination: DataOutputStream)
+
+    @Throws(IOException::class)
+    fun toByteArray(): ByteArray = ByteArrayOutputStream().also { writeContents(DataOutputStream(it)) }.toByteArray()
 
     /**
      * Produces the stringified version of this NBT (or SNBT version). Is empty for TAG_End

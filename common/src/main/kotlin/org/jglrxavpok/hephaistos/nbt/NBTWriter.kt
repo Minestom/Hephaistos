@@ -3,30 +3,28 @@ package org.jglrxavpok.hephaistos.nbt
 import java.io.*
 import java.nio.file.Files
 import java.nio.file.Path
-import java.util.zip.GZIPOutputStream
 
 /**
  * Writes NBT data to a given destination
  * Once the output stream is passed to a NBTWriter, use NBTWriter#close to close the stream.
  */
-class NBTWriter @JvmOverloads constructor(destination: OutputStream, compressed: Boolean = true): AutoCloseable, Closeable {
+class NBTWriter @JvmOverloads constructor(destination: OutputStream, compressedMode: CompressedMode = CompressedMode.NONE): AutoCloseable, Closeable {
 
     private val writer = DataOutputStream(
-        if(compressed) GZIPOutputStream(destination)
-        else destination
+        compressedMode.generateOutputStream(destination)
     )
 
     /**
      * Constructs a NBTWriter from a file (convenience method, equivalent to `NBTWriter(BufferedOutputStream(FileOutputStream(file)))`)
      */
     @Throws(IOException::class)
-    @JvmOverloads constructor(file: File, compressed: Boolean = true): this(BufferedOutputStream(FileOutputStream(file)), compressed)
+    @JvmOverloads constructor(file: File, compressedMode: CompressedMode = CompressedMode.NONE): this(BufferedOutputStream(FileOutputStream(file)), compressedMode)
 
     /**
      * Constructs a NBTWriter from a path (convenience method, equivalent to `NBTWriter(BufferedOutputStream(Files.newOutputStream(path)))`)
      */
     @Throws(IOException::class)
-    @JvmOverloads constructor(path: Path, compressed: Boolean = true): this(BufferedOutputStream(Files.newOutputStream(path)), compressed)
+    @JvmOverloads constructor(path: Path, compressedMode: CompressedMode = CompressedMode.NONE): this(BufferedOutputStream(Files.newOutputStream(path)), compressedMode)
 
     /**
      * Write a tag with a name inside the destination
