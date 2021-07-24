@@ -126,7 +126,7 @@ sealed interface NBT {
 
         @JvmStatic
         @Contract(pure = true)
-        fun <Tag : NBT> List(subtagType: Int, length: Int, generator: NBTListGenerator<Tag>) = NBTList(subtagType, List<Tag>(length) {
+        fun <Tag : NBT> List(subtagType: Int, length: Int, generator: NBTListGenerator<Tag>) = NBTList(subtagType, List(length) {
             generator.run(it)
         })
 

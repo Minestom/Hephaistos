@@ -72,7 +72,7 @@ public class NBTLoading {
 
             NBTList<NBTLong> listTestLong = level.getList("listTest (long)").asListOf();
             {
-                assertEquals(5, listTestLong.getLength());
+                assertEquals(5, listTestLong.getSize());
                 assertEquals(11, listTestLong.get(0).getValue());
                 assertEquals(12, listTestLong.get(1).getValue());
                 assertEquals(13, listTestLong.get(2).getValue());
@@ -82,7 +82,7 @@ public class NBTLoading {
 
             NBTList<NBTCompound> listTestCompound = level.getList("listTest (compound)").asListOf();
             {
-                assertEquals(2, listTestCompound.getLength());
+                assertEquals(2, listTestCompound.getSize());
                 NBTCompound compound0 = Objects.requireNonNull(listTestCompound.get(0));
                 {
                     assertEquals(2, compound0.getSize());

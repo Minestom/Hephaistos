@@ -5,11 +5,9 @@ import java.io.DataOutputStream
 import java.io.IOException
 import java.util.*
 
-class NBTList<Tag: NBT> internal constructor(val subtagType: Int, private val tags: List<Tag> = listOf()): Iterable<Tag>, NBT {
+class NBTList<Tag: NBT> internal constructor(val subtagType: Int, private val tags: List<Tag> = listOf()): List<Tag> by tags, NBT {
 
     override val ID = NBTTypes.TAG_List
-
-    val length get() = tags.size
 
     /**
      * Writes the contents of the list, WITH for the subtag ID
@@ -17,7 +15,7 @@ class NBTList<Tag: NBT> internal constructor(val subtagType: Int, private val ta
      */
     override fun writeContents(destination: DataOutputStream) {
         destination.writeByte(subtagType)
-        destination.writeInt(length)
+        destination.writeInt(size)
 
         tags.forEach { it.writeContents(destination) }
     }
@@ -31,15 +29,7 @@ class NBTList<Tag: NBT> internal constructor(val subtagType: Int, private val ta
     /**
      * Returns the tag at the given index
      */
-    operator fun get(index: Int) = tags[index]
-
-    /**
-     * From ArrayList#indexOf:
-     * > Returns the index of the first occurrence of the specified element in this list, or -1 if this list does not contain the element. More formally, returns the lowest index i such that Objects.equals(o, get(i)), or -1 if there is no such index.
-     */
-    fun indexOf(tag: Tag): Int {
-        return tags.indexOf(tag)
-    }
+    override operator fun get(index: Int) = tags[index]
 
     /**
      * Casts this list to another list type. Can throw a ClassCastException, so be careful
@@ -54,8 +44,8 @@ class NBTList<Tag: NBT> internal constructor(val subtagType: Int, private val ta
         other as NBTList<*>
 
         if (subtagType != other.subtagType) return false
-        if (length != other.length) return false
-        for (i in 0 until length) {
+        if (size != other.size) return false
+        for (i in 0 until size) {
             if(this[i] != other[i]) {
                 return false
             }
@@ -90,10 +80,6 @@ class NBTList<Tag: NBT> internal constructor(val subtagType: Int, private val ta
                 source.readTag(subtagType)
             })
         }
-    }
-
-    override fun iterator(): Iterator<Tag> {
-        return tags.iterator()
     }
 }
 

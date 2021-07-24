@@ -13,7 +13,7 @@ public class TestReaderLists {
         String json = "[0,1,2,3]";
         try(NBTGsonReader reader = NBTGsonReader.reader(new StringReader(json))) {
             NBTIntArray array = reader.read(NBTIntArray.class);
-            assertEquals(4, array.getLength());
+            assertEquals(4, array.getSize());
             assertEquals(0, array.get(0));
             assertEquals(1, array.get(1));
             assertEquals(2, array.get(2));
@@ -26,7 +26,7 @@ public class TestReaderLists {
         String json = "[0,1,2,3]";
         try(NBTGsonReader reader = NBTGsonReader.reader(new StringReader(json))) {
             NBTLongArray array = reader.read(NBTLongArray.class);
-            assertEquals(4, array.getLength());
+            assertEquals(4, array.getSize());
             assertEquals(0, array.get(0));
             assertEquals(1, array.get(1));
             assertEquals(2, array.get(2));
@@ -39,7 +39,7 @@ public class TestReaderLists {
         String json = "[0,1,2,3]";
         try(NBTGsonReader reader = NBTGsonReader.reader(new StringReader(json))) {
             NBTByteArray array = reader.read(NBTByteArray.class);
-            assertEquals(4, array.getLength());
+            assertEquals(4, array.getSize());
             assertEquals(0, array.get(0));
             assertEquals(1, array.get(1));
             assertEquals(2, array.get(2));
@@ -68,7 +68,7 @@ public class TestReaderLists {
             NBT guessed = reader.readWithGuess();
             assertTrue(guessed instanceof NBTLongArray);
             NBTLongArray array = (NBTLongArray)guessed;
-            assertEquals(4, array.getLength());
+            assertEquals(4, array.getSize());
             assertEquals(0, array.get(0));
             assertEquals(1, array.get(1));
             assertEquals(2, array.get(2));

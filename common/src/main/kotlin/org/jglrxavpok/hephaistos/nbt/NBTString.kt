@@ -4,7 +4,7 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.util.*
 
-class NBTString internal constructor(val value: String): NBT {
+class NBTString internal constructor(val value: String): NBT, CharSequence by value {
 
     override val ID = NBTTypes.TAG_String
 

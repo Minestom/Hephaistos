@@ -55,12 +55,12 @@ class RegionFile @Throws(AnvilException::class, IOException::class) constructor(
 
         // prepare sectors
         val availableSectors = file.length() / SectorSize
-        freeSectors = ArrayList(availableSectors.toInt())
-        for (i in 0 until availableSectors) {
-            freeSectors += true
+
+        // fill array with trues
+        freeSectors = MutableList(availableSectors.toInt()) { true }.also {
+            it[0] = false // chunk offset table
+            it[1] = false // timestamp table
         }
-        freeSectors[0] = false // chunk offset table
-        freeSectors[1] = false // timestamp table
 
         file.seek(0)
         // read chunk locations

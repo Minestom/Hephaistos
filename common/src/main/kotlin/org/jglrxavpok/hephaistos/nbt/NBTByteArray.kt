@@ -6,12 +6,12 @@ import java.io.DataOutputStream
 
 class NBTByteArray internal constructor(val value: ImmutableByteArray) : NBT, Iterable<Byte> {
 
-    val length get() = value.size
+    val size get() = value.size
 
     override val ID = NBTTypes.TAG_Int_Array
 
     override fun writeContents(destination: DataOutputStream) {
-        destination.writeInt(length)
+        destination.writeInt(size)
         destination.write(value.copyArray())
     }
 

@@ -6,17 +6,15 @@ import java.io.DataOutputStream
 
 class NBTLongArray internal constructor(val value: ImmutableLongArray) : NBT, Iterable<Long> {
 
-    val length get() = value.size
+    val size get() = value.size
 
     override val ID = NBTTypes.TAG_Int_Array
-
-    constructor(): this(ImmutableLongArray())
 
     constructor(vararg numbers: Long): this(ImmutableLongArray(*numbers))
 
     override fun writeContents(destination: DataOutputStream) {
-        destination.writeInt(length)
-        for(i in 0 until length) {
+        destination.writeInt(size)
+        for(i in 0 until size) {
             destination.writeLong(value[i])
         }
     }

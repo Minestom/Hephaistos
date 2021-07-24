@@ -6,13 +6,13 @@ import java.io.DataOutputStream
 
 class NBTIntArray internal constructor(val value: ImmutableIntArray) : NBT, Iterable<Int> {
 
-    val length get() = value.size
+    val size get() = value.size
 
     override val ID = NBTTypes.TAG_Int_Array
 
     override fun writeContents(destination: DataOutputStream) {
-        destination.writeInt(length)
-        for(i in 0 until length) {
+        destination.writeInt(size)
+        for(i in 0 until size) {
             destination.writeInt(value[i])
         }
     }
