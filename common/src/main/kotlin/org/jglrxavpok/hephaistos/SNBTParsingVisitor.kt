@@ -15,9 +15,9 @@ object SNBTParsingVisitor: SNBTBaseVisitor<NBT>() {
         }
     }
 
-    override fun visitCompound(ctx: SNBTParser.CompoundContext): NBT = NBTCompound.compound { map ->
+    override fun visitCompound(ctx: SNBTParser.CompoundContext): NBT = NBT.Kompound {
         ctx.namedElement().forEach {
-            map[(visit(it.name) as NBTString).value] = visit(it.value)
+            this[(visit(it.name) as NBTString).value] = visit(it.value)
         }
     }
 

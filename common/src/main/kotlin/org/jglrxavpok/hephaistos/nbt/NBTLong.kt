@@ -2,12 +2,9 @@ package org.jglrxavpok.hephaistos.nbt
 
 import java.io.DataInputStream
 import java.io.DataOutputStream
-import java.util.*
 
 class NBTLong internal constructor(value: Long) : NBTNumber<Long>(value) {
     override val ID = NBTTypes.TAG_Long
-
-    constructor(): this(0)
 
     // help Java compiler to find the correct type (boxed vs primitive types)
     fun getValue(): Long = value

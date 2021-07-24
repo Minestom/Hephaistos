@@ -206,17 +206,11 @@ class NBTCompound internal constructor(val tags: Map<String, NBT> = mapOf()): NB
 
     companion object : NBTReaderCompanion<NBTCompound> {
 
-        @JvmStatic
-        val EMPTY = NBTCompound()
-
-        @JvmStatic
-        fun compound(lambda: CompoundBuilder) = NBTCompound(mutableMapOf<String, NBT>().also { lambda.run(it) })
-
-        override fun readContents(source: DataInputStream) = compound {
+        override fun readContents(source: DataInputStream) = NBT.Kompound {
             do {
                 val tag = source.readFullyFormedTag()
                 if(tag.second !is NBTEnd) {
-                    it[tag.first] = tag.second
+                    this[tag.first] = tag.second
                 }
             } while(tag.second !is NBTEnd)
         }

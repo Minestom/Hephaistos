@@ -18,9 +18,8 @@ class NBTList<Tag: NBT> internal constructor(val subtagType: Int, private val ta
     override fun writeContents(destination: DataOutputStream) {
         destination.writeByte(subtagType)
         destination.writeInt(length)
-        for(tag in tags) {
-            tag.writeContents(destination)
-        }
+
+        tags.forEach { it.writeContents(destination) }
     }
 
     override fun toSNBT(): String {

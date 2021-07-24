@@ -19,13 +19,6 @@ class NBTByte internal constructor(value: Byte) : NBTNumber<Byte>(value) {
     }
 
     companion object: NBTReaderCompanion<NBTByte> {
-
-        @JvmStatic
-        val ONE = NBTByte(1)
-
-        @JvmStatic
-        val ZERO = NBTByte(0)
-
         override fun readContents(source: DataInputStream): NBTByte {
             return NBTByte(source.readByte())
         }
