@@ -164,21 +164,6 @@ class NBTCompound internal constructor(val tags: Map<String, NBT> = mapOf()): NB
         return tags.hashCode()
     }
 
-    operator fun iterator(): Iterator<Pair<String, NBT>> {
-        return object: Iterator<Pair<String, NBT>> {
-            private val backing = this@NBTCompound.tags.entries.iterator()
-
-            override fun hasNext(): Boolean {
-                return backing.hasNext()
-            }
-
-            override fun next(): Pair<String, NBT> {
-                val (name, value) = backing.next()
-                return name to value
-            }
-        }
-    }
-
     fun modify(lambda: CompoundBuilder) = NBTCompound(MutableNBTCompound(tags.toMutableMap()).also { lambda.run(it) })
 
     companion object : NBTReaderCompanion<NBTCompound> {
