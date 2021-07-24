@@ -12,9 +12,7 @@ class NBTIntArray internal constructor(val value: ImmutableIntArray) : NBT, Iter
 
     override fun writeContents(destination: DataOutputStream) {
         destination.writeInt(size)
-        for(i in 0 until size) {
-            destination.writeInt(value[i])
-        }
+        value.forEach(destination::writeInt)
     }
 
     operator fun get(index: Int) = value[index]

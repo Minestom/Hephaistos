@@ -1,6 +1,5 @@
 package org.jglrxavpok.hephaistos.nbt
 
-import java.lang.IllegalArgumentException
 import kotlin.reflect.KClass
 
 object NBTTypes {
@@ -41,6 +40,7 @@ object NBTTypes {
         else -> throw IllegalArgumentException("$id is not a valid NBT type ID! Must be in 0-12")
     }
 
+    @JvmStatic
     fun <T: NBT> getID(nbtClass: Class<T>) = when(nbtClass) {
         NBTEnd::class.java -> TAG_End
         NBTByte::class.java -> TAG_Byte
@@ -61,6 +61,7 @@ object NBTTypes {
 
     inline fun <reified Tag: NBT> getID() = getID(Tag::class.java)
 
+    @JvmStatic
     fun getClass(id: Int): KClass<out NBT> = when(id) {
         TAG_End -> NBTEnd::class
         TAG_Byte -> NBTByte::class
@@ -79,6 +80,7 @@ object NBTTypes {
         else -> throw IllegalArgumentException("$id is not a valid NBT type ID! Must be in 0-12")
     }
 
+    @JvmStatic
     fun name(type: Int): String = when(type) {
         TAG_End -> "TAG_End"
         TAG_Byte -> "TAG_Byte"
