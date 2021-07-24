@@ -1,6 +1,5 @@
 package org.jglrxavpok.hephaistos.mca
 
-import org.jglrxavpok.hephaistos.collections.ImmutableByteArray
 import org.jglrxavpok.hephaistos.mca.AnvilException.Companion.missing
 import org.jglrxavpok.hephaistos.nbt.NBT
 import org.jglrxavpok.hephaistos.nbt.NBTCompound
@@ -19,7 +18,7 @@ class ChunkSection(val y: Byte) {
      */
     private var palette: Palette? = null
     val empty get()= palette == null
-    private val blockStates: Array<BlockState> = Array(16*16*16) { BlockState.Air }
+    private val blockStates: Array<BlockState> = Array(16*16*16) { BlockState.AIR }
     val blockLights = ByteArray(2048)
     val skyLights = ByteArray(2048)
 
@@ -89,10 +88,10 @@ class ChunkSection(val y: Byte) {
         checkBounds(x, y, z)
         if(palette == null) {
             palette = Palette() // initialize new palette
-            palette!!.blocks += BlockState.Air
+            palette!!.blocks += BlockState.AIR
             palette!!.loadReferences(blockStates.asIterable()) // load as all air
             palette!!.increaseReference(block)
-            palette!!.decreaseReference(BlockState.Air)
+            palette!!.decreaseReference(BlockState.AIR)
             blockStates[index(x, y, z)] = block
         } else {
             val previous = this[x, y, z]
@@ -187,7 +186,7 @@ class ChunkSection(val y: Byte) {
     private fun fillInIfEmpty() {
         if(empty) {
             palette = Palette() // initialize new palette
-            palette!!.blocks += BlockState.Air
+            palette!!.blocks += BlockState.AIR
             palette!!.loadReferences(blockStates.asIterable()) // load as all air
         }
     }

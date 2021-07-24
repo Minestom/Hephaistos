@@ -12,7 +12,7 @@ public class TestWriterLists {
 
     @BeforeEach
     public void init() {
-        writer = new NBTGsonWriter();
+        writer = NBTGsonWriter.writer();
     }
 
     @Test

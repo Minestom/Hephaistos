@@ -64,7 +64,7 @@ public class MCACoordinates {
         assertThrows(IllegalArgumentException.class, () -> {
             ChunkColumn column;
             column = region2.getOrCreateChunk(5 * 32 + 5, -2 * 32 + 5);
-            column.setBlockState(-1, 0, 0, BlockState.Air);
+            column.setBlockState(-1, 0, 0, BlockState.AIR);
         }, "Chunk has a valid position inside the RegionFile, should not throw");
     }
 
@@ -73,7 +73,7 @@ public class MCACoordinates {
         assertThrows(IllegalArgumentException.class, () -> {
             ChunkColumn column;
             column = region2.getOrCreateChunk(5*32+5, -2*32+5);
-            column.setBlockState(16, 0, 0, BlockState.Air);
+            column.setBlockState(16, 0, 0, BlockState.AIR);
         }, "Chunk has a valid position inside the RegionFile, should not throw");
     }
 
@@ -82,7 +82,7 @@ public class MCACoordinates {
         ChunkColumn column;
         try {
             column = region2.getOrCreateChunk(5*32+5, -2*32+5);
-            column.setBlockState(8, 0, 0, BlockState.Air);
+            column.setBlockState(8, 0, 0, BlockState.AIR);
         } catch (AnvilException e) {
             fail("Chunk has a valid position inside the RegionFile, should not throw");
         }
@@ -93,7 +93,7 @@ public class MCACoordinates {
         ChunkColumn column;
         try {
             column = region2.getOrCreateChunk(5*32+5, -2*32+5);
-            column.setBlockState(0, 0, 8, BlockState.Air);
+            column.setBlockState(0, 0, 8, BlockState.AIR);
         } catch (AnvilException e) {
             fail("Chunk has a valid position inside the RegionFile, should not throw");
         }
@@ -104,7 +104,7 @@ public class MCACoordinates {
         assertThrows(IllegalArgumentException.class, () -> {
             ChunkColumn column;
             column = region2.getOrCreateChunk(5*32+5, -2*32+5);
-            column.setBlockState(0, 0, -1, BlockState.Air);
+            column.setBlockState(0, 0, -1, BlockState.AIR);
         });
     }
 
@@ -113,7 +113,7 @@ public class MCACoordinates {
         assertThrows(IllegalArgumentException.class, () -> {
             ChunkColumn column;
             column = region2.getOrCreateChunk(5*32+5, -2*32+5);
-            column.setBlockState(0, 0, 16, BlockState.Air);
+            column.setBlockState(0, 0, 16, BlockState.AIR);
         }, "Chunk has a valid position inside the RegionFile, should not throw");
     }
 
@@ -122,7 +122,7 @@ public class MCACoordinates {
         ChunkColumn column;
         try {
             column = region2.getOrCreateChunk(5*32+5, -2*32+5);
-            column.setBlockState(0, 8, 0, BlockState.Air);
+            column.setBlockState(0, 8, 0, BlockState.AIR);
         } catch (AnvilException e) {
             fail("Chunk has a valid position inside the RegionFile, should not throw");
         }
@@ -133,7 +133,7 @@ public class MCACoordinates {
         assertThrows(IllegalArgumentException.class, () -> {
             ChunkColumn column;
             column = region2.getOrCreateChunk(5*32+5, -2*32+5);
-            column.setBlockState(0, -1, 0, BlockState.Air);
+            column.setBlockState(0, -1, 0, BlockState.AIR);
         });
     }
 
@@ -143,7 +143,7 @@ public class MCACoordinates {
         assertThrows(IllegalArgumentException.class, () -> {
             ChunkColumn column;
             column = region2.getOrCreateChunk(5*32+5, -2*32+5);
-            column.setBlockState(0, 256, 0, BlockState.Air);
+            column.setBlockState(0, 256, 0, BlockState.AIR);
         }, "Chunk has a valid position inside the RegionFile, should not throw");
     }
 
@@ -155,7 +155,7 @@ public class MCACoordinates {
         ChunkColumn chunk = region2.getChunk(32*5+1, -2*32+1);
         assertNotNull(chunk);
         assertEquals(stone, chunk.getBlockState(0, 8, 0));
-        assertEquals(BlockState.Air, chunk.getBlockState(0, 0, 0));
+        assertEquals(BlockState.AIR, chunk.getBlockState(0, 0, 0));
     }
 
     @AfterEach

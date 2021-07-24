@@ -41,6 +41,10 @@ sealed interface NBT {
 
         @JvmStatic
         @Contract(pure = true)
+        fun Boolean(flag: Boolean): NBTByte = if (flag) NBTByte.ONE else NBTByte.ZERO
+
+        @JvmStatic
+        @Contract(pure = true)
         fun Byte(value: Byte) = NBTByte(value)
 
         @JvmStatic

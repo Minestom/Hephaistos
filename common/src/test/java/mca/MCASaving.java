@@ -149,7 +149,7 @@ public class MCASaving {
             for (int x = 0; x < 16; x++) {
                 for (int z = 0; z < 16; z++) {
                     for (int y = 0; y < 256; y++) {
-                        region.setBlockState(x, y, z, BlockState.Air);
+                        region.setBlockState(x, y, z, BlockState.AIR);
                         region.setBlockState(x + 16, y, z, stone);
                     }
                 }
@@ -163,7 +163,7 @@ public class MCASaving {
             for (int x = 0; x < 16; x++) {
                 for (int z = 0; z < 16; z++) {
                     for (int y = 0; y < 256; y++) {
-                        assertEquals(BlockState.Air, region.getBlockState(x, y, z));
+                        assertEquals(BlockState.AIR, region.getBlockState(x, y, z));
                         assertEquals(stone, region.getBlockState(x+16, y, z));
                     }
                 }
@@ -177,7 +177,7 @@ public class MCASaving {
             RegionFile region = new RegionFile(file, 0, 0);
             ChunkColumn chunk0 = region.getOrCreateChunk(0, 0);
             ChunkColumn chunk1 = region.getOrCreateChunk(1, 0);
-            fillChunk(chunk0, BlockState.Air);
+            fillChunk(chunk0, BlockState.AIR);
             fillChunk(chunk1, new BlockState("minecraft:stone"));
             region.writeColumn(chunk0);
             region.writeColumn(chunk1);
@@ -189,7 +189,7 @@ public class MCASaving {
             ChunkColumn reloadedChunk1 = reloaded.getChunk(1, 0);
             assertNotNull(reloadedChunk0);
             assertNotNull(reloadedChunk1);
-            verifyChunk(reloadedChunk0, BlockState.Air);
+            verifyChunk(reloadedChunk0, BlockState.AIR);
             verifyChunk(reloadedChunk1, new BlockState("minecraft:stone"));
         }
     }

@@ -91,7 +91,7 @@ class Palette() {
      * Returns true iif the only referenced block inside this palette is "minecraft:air"
      */
     fun isEmpty(): Boolean {
-        return blocks.size == 1 && blocks[0] == BlockState.Air
+        return blocks.size == 1 && blocks[0] == BlockState.AIR
     }
 
 }

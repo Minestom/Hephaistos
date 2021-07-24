@@ -26,8 +26,6 @@ class NBTByte internal constructor(value: Byte) : NBTNumber<Byte>(value) {
         @JvmStatic
         val ZERO = NBTByte(0)
 
-        fun Boolean(flag: Boolean): NBTByte = if (flag) ONE else ZERO
-
         override fun readContents(source: DataInputStream): NBTByte {
             return NBTByte(source.readByte())
         }

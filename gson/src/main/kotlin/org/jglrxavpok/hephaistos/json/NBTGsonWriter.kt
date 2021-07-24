@@ -3,10 +3,15 @@ package org.jglrxavpok.hephaistos.json
 import com.google.gson.*
 import org.jglrxavpok.hephaistos.nbt.*
 
-class NBTGsonWriter(val gson: Gson = GsonInstance) {
+class NBTGsonWriter internal constructor(val gson: Gson = GsonInstance) {
 
     companion object {
         val GsonInstance = Gson()
+
+        @JvmStatic
+        @JvmOverloads
+        fun writer(gson: Gson = GsonInstance) = NBTGsonWriter(gson)
+
     }
 
     fun write(element: NBT): JsonElement {

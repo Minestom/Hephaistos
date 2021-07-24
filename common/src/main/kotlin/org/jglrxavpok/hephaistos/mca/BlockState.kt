@@ -11,9 +11,9 @@ import org.jglrxavpok.hephaistos.nbt.NBTString
 data class BlockState @JvmOverloads constructor(val name: String, val properties: Map<String, String> = HashMap()) {
     companion object {
         @JvmField
-        val Air = BlockState(NBTCompound.compound {
-            it["Name"] = NBT.String("minecraft:air")
-            it["Properties"] = NBTCompound.EMPTY
+        val AIR = BlockState(NBT.Kompound {
+            this["Name"] = NBT.String("minecraft:air")
+            this["Properties"] = NBTCompound.EMPTY
         })
     }
 
@@ -27,11 +27,11 @@ data class BlockState @JvmOverloads constructor(val name: String, val properties
     /**
      * Converts this BlockState to a TAG_Compound
      */
-    fun toNBT(): NBTCompound = NBTCompound.compound { map ->
-        map["Name"] = NBT.String(name)
-        map["Properties"] = NBTCompound.compound { internalMap ->
+    fun toNBT(): NBTCompound = NBT.Kompound {
+        this["Name"] = NBT.String(name)
+        this["Properties"] = NBT.Kompound {
             for((name, value) in properties) {
-                internalMap[name] = NBT.String(value)
+                this[name] = NBT.String(value)
             }
         }
     }

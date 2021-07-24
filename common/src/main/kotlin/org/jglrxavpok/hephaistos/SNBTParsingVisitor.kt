@@ -45,7 +45,7 @@ object SNBTParsingVisitor: SNBTBaseVisitor<NBT>() {
 
     override fun visitDoubleNBT(ctx: SNBTParser.DoubleNBTContext): NBT {
         var text = ctx.text
-        if(text.endsWith('d') || text.endsWith('D')) {
+        if (text.endsWith('d') || text.endsWith('D')) {
             text = text.dropLast(1)
         }
         return NBT.Double(text.toDouble())

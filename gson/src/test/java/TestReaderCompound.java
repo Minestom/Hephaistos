@@ -15,7 +15,7 @@ public class TestReaderCompound {
                 "\t\"a float\": 45.5,\n" +
                 "\t\"text\": \"hello it is me, example text!\"\n" +
                 "}";
-        try(NBTGsonReader reader = new NBTGsonReader(new StringReader(json))) {
+        try(NBTGsonReader reader = NBTGsonReader.reader(new StringReader(json))) {
             NBTCompound compound = reader.read(NBTCompound.class);
             assertEquals(3, compound.getSize());
             assertEquals(45, compound.getAsInt("anInt").intValue());
@@ -35,7 +35,7 @@ public class TestReaderCompound {
                 "\t\t\"c\": 2\n" +
                 "\t}\n" +
                 "}";
-        try(NBTGsonReader reader = new NBTGsonReader(new StringReader(json))) {
+        try(NBTGsonReader reader = NBTGsonReader.reader(new StringReader(json))) {
             NBTCompound compound = reader.read(NBTCompound.class);
             assertEquals(4, compound.getSize());
             assertEquals(45, compound.getAsInt("anInt"));

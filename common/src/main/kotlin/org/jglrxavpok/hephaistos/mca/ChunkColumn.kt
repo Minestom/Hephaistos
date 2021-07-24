@@ -127,7 +127,7 @@ class ChunkColumn(val x: Int, val z: Int) {
         val sectionY = y / 16
         val section = sections[sectionY]
         if(section.empty) {
-            return BlockState.Air
+            return BlockState.AIR
         }
         return section[x, y % 16, z]
     }

@@ -26,16 +26,16 @@ public class PaletteTests {
     @Test
     public void increaseReferenceOfNonExistentBlock() {
         assertEquals(0, palette.getBlocks().size());
-        palette.increaseReference(BlockState.Air);
+        palette.increaseReference(BlockState.AIR);
         assertEquals(1, palette.getBlocks().size());
-        palette.increaseReference(BlockState.Air);
+        palette.increaseReference(BlockState.AIR);
         assertEquals(1, palette.getBlocks().size());
     }
 
     @Test
     public void decreaseReferenceOfNonExistentBlock() {
         assertThrows(IllegalArgumentException.class, () ->
-            palette.decreaseReference(BlockState.Air)
+            palette.decreaseReference(BlockState.AIR)
         );
 
     }
@@ -43,10 +43,10 @@ public class PaletteTests {
     @Test
     public void decreaseReferenceOfExistentBlock() {
         assertEquals(0, palette.getBlocks().size());
-        palette.increaseReference(BlockState.Air);
+        palette.increaseReference(BlockState.AIR);
         palette.increaseReference(STONE);
         assertEquals(2, palette.getBlocks().size());
-        palette.decreaseReference(BlockState.Air);
+        palette.decreaseReference(BlockState.AIR);
         assertEquals(1, palette.getBlocks().size());
         assertEquals(STONE, palette.getBlocks().get(0));
         palette.decreaseReference(STONE);
@@ -55,12 +55,12 @@ public class PaletteTests {
 
     @Test
     public void testSimpleCompression1_15() {
-        palette.increaseReference(BlockState.Air);
+        palette.increaseReference(BlockState.AIR);
         palette.increaseReference(STONE);
         BlockState[] states = new BlockState[16];
         for (int i = 0; i < states.length; i++) {
             if(i % 3 == 0) {
-                states[i] = BlockState.Air;
+                states[i] = BlockState.AIR;
             } else {
                 states[i] = STONE;
             }
@@ -68,7 +68,7 @@ public class PaletteTests {
         int[] ids = new int[states.length];
         for (int i = 0; i < states.length; i++) {
             // the id assigned to a state is dependent to the order in which the states have been added to the palette
-            ids[i] = states[i] == BlockState.Air ? 0 : 1;
+            ids[i] = states[i] == BlockState.AIR ? 0 : 1;
         }
 
         // 64 bits / 16 entries = 4 bits required per entry.
@@ -80,12 +80,12 @@ public class PaletteTests {
 
     @Test
     public void testSimpleCompression1_16() {
-        palette.increaseReference(BlockState.Air);
+        palette.increaseReference(BlockState.AIR);
         palette.increaseReference(STONE);
         BlockState[] states = new BlockState[16];
         for (int i = 0; i < states.length; i++) {
             if(i % 3 == 0) {
-                states[i] = BlockState.Air;
+                states[i] = BlockState.AIR;
             } else {
                 states[i] = STONE;
             }
@@ -93,7 +93,7 @@ public class PaletteTests {
         int[] ids = new int[states.length];
         for (int i = 0; i < states.length; i++) {
             // the id assigned to a state is dependent to the order in which the states have been added to the palette
-            ids[i] = states[i] == BlockState.Air ? 0 : 1;
+            ids[i] = states[i] == BlockState.AIR ? 0 : 1;
         }
 
         // 64 bits / 16 entries = 4 bits required per entry.
