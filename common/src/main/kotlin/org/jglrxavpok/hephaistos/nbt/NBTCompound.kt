@@ -51,6 +51,9 @@ class NBTCompound internal constructor(val tags: Map<String, NBT> = mapOf()): NB
     @Contract(pure = true)
     fun withRemovedKeys(vararg keys: String) = kmodify { keys.forEach { remove(it) } }
 
+    @Contract(pure = true)
+    fun withKeys(vararg entries: CompoundEntry) = kmodify { entries.forEach { this[it.key] = it.value } }
+
     companion object : NBTReaderCompanion<NBTCompound> {
 
         override fun readContents(source: DataInputStream) = NBT.Kompound {
@@ -61,7 +64,13 @@ class NBTCompound internal constructor(val tags: Map<String, NBT> = mapOf()): NB
                 }
             } while(tag.second !is NBTEnd)
         }
+
+        @Contract(pure = true)
+        internal fun entry(key: String, value: NBT) = CompoundEntry(key, value)
     }
+
+    data class CompoundEntry(val key: String, val value: NBT)
+
 
 }
 

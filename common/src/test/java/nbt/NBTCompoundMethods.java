@@ -208,8 +208,20 @@ public class NBTCompoundMethods {
             map.put("a", NBT.String("value"));
         });
         assertEquals(1, nbt.getSize());
+
         nbt = nbt.withRemovedKeys("a");
         assertEquals(0, nbt.getSize());
         assertNull(nbt.get("a"));
+
+        nbt = nbt.withKeys(
+                NBT.Entry("b", NBT.Int(1)),
+                NBT.Entry("c", NBT.LongArray(5, 4, 3, 2, 1))
+        );
+
+        assertEquals(2, nbt.getSize());
+        assertNull(nbt.get("a"));
+
+        assertEquals(nbt.getAsInt("b"), 1);
+        assertEquals(nbt.getLongArray("c"), new ImmutableLongArray(5, 4, 3, 2, 1));
     }
 }

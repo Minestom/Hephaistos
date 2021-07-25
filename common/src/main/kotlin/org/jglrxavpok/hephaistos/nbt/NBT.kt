@@ -94,6 +94,10 @@ sealed interface NBT {
 
         @JvmStatic
         @Contract(pure = true)
+        fun Entry(key: String, value: NBT) = NBTCompound.entry(key, value)
+
+        @JvmStatic
+        @Contract(pure = true)
         fun Float(value: Float) = NBTFloat(value)
 
         @JvmStatic
