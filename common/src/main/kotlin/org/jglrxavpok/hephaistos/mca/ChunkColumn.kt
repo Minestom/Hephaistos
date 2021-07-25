@@ -195,27 +195,27 @@ class ChunkColumn @JvmOverloads constructor(val x: Int, val z: Int, val minY: In
     /**
      * Converts this ChunkColumn into its NBT representation
      */
-    fun toNBT(): NBTCompound = NBT.Compound { rootMap ->
-        rootMap["DataVersion"] = NBT.Int(dataVersion)
-        rootMap["Level"] = NBT.Compound { levelMap ->
-            levelMap["xPos"] = NBT.Int(x)
-            levelMap["zPos"] = NBT.Int(z)
+    fun toNBT(): NBTCompound = NBT.Kompound {
+        this["DataVersion"] = NBT.Int(dataVersion)
+        this["Level"] = NBT.Kompound {
+            this["xPos"] = NBT.Int(x)
+            this["zPos"] = NBT.Int(z)
 
-            levelMap["LastUpdate"] = NBT.Long(lastUpdate)
-            levelMap["InhabitedTime"] = NBT.Long(inhabitedTime)
-            levelMap["Status"] = NBT.String(generationStatus.id)
+            this["LastUpdate"] = NBT.Long(lastUpdate)
+            this["InhabitedTime"] = NBT.Long(inhabitedTime)
+            this["Status"] = NBT.String(generationStatus.id)
 
             if(biomes != null) {
-                levelMap["Biomes"] = NBT.IntArray(biomes!!)
+                this["Biomes"] = NBT.IntArray(biomes!!)
             }
 
-            levelMap["Heightmaps"] = NBT.Compound { heightMapMap ->
-                heightMapMap["MOTION_BLOCKING"] = NBT.LongArray(motionBlockingHeightMap.compact(version))
-                motionBlockingNoLeavesHeightMap?.let { heightMapMap["MOTION_BLOCKING_NO_LEAVES"] = NBT.LongArray(it.compact(version)) }
-                oceanFloorHeightMap?.let { heightMapMap["OCEAN_FLOOR"] = NBT.LongArray(it.compact(version)) }
-                oceanFloorWorldGenHeightMap?.let { heightMapMap["OCEAN_FLOOR_WG"] = NBT.LongArray(it.compact(version)) }
-                heightMapMap["WORLD_SURFACE"] = NBT.LongArray(worldSurfaceHeightMap.compact(version))
-                worldSurfaceWorldGenHeightMap?.let { heightMapMap["WORLD_SURFACE_WG"] = NBT.LongArray(it.compact(version)) }
+            this["Heightmaps"] = NBT.Kompound {
+                this["MOTION_BLOCKING"] = NBT.LongArray(motionBlockingHeightMap.compact(version))
+                motionBlockingNoLeavesHeightMap?.let { this["MOTION_BLOCKING_NO_LEAVES"] = NBT.LongArray(it.compact(version)) }
+                oceanFloorHeightMap?.let { this["OCEAN_FLOOR"] = NBT.LongArray(it.compact(version)) }
+                oceanFloorWorldGenHeightMap?.let { this["OCEAN_FLOOR_WG"] = NBT.LongArray(it.compact(version)) }
+                this["WORLD_SURFACE"] = NBT.LongArray(worldSurfaceHeightMap.compact(version))
+                worldSurfaceWorldGenHeightMap?.let { this["WORLD_SURFACE_WG"] = NBT.LongArray(it.compact(version)) }
             }
             val sections = NBT.List(
                 NBTTypes.TAG_Compound,
@@ -224,31 +224,31 @@ class ChunkColumn @JvmOverloads constructor(val x: Int, val z: Int, val minY: In
                     .map { it.toNBT(version) }
             )
 
-            levelMap["Sections"] = sections
-            levelMap["Entities"] = entities
-            levelMap["TileEntities"] = tileEntities
-            levelMap["TileTicks"] = tileTicks
-            levelMap["LiquidTicks"] = liquidTicks
+            this["Sections"] = sections
+            this["Entities"] = entities
+            this["TileEntities"] = tileEntities
+            this["TileTicks"] = tileTicks
+            this["LiquidTicks"] = liquidTicks
             if(structures != null) {
-                levelMap["Structures"] = structures!!
+                this["Structures"] = structures!!
             }
             if(airCarvingMask != null || liquidCarvingMask != null) {
-                levelMap["CarvingMasks"] = NBT.Compound { carvingMaskMap ->
-                    airCarvingMask?.let { carvingMaskMap["AIR"] = NBT.ByteArray(it) }
-                    liquidCarvingMask?.let { carvingMaskMap["LIQUID"] = NBT.ByteArray(it) }
+                this["CarvingMasks"] = NBT.Kompound {
+                    airCarvingMask?.let { this["AIR"] = NBT.ByteArray(it) }
+                    liquidCarvingMask?.let { this["LIQUID"] = NBT.ByteArray(it) }
                 }
             }
             if(lights != null) {
-                levelMap["Lights"] = lights!!
+                this["Lights"] = lights!!
             }
             if(liquidsToBeTicked != null) {
-                levelMap["LiquidsToBeTicked"] = liquidsToBeTicked!!
+                this["LiquidsToBeTicked"] = liquidsToBeTicked!!
             }
             if(toBeTicked != null) {
-                levelMap["ToBeTicked"] = toBeTicked!!
+                this["ToBeTicked"] = toBeTicked!!
             }
             if(postProcessing != null) {
-                levelMap["PostProcessing"] = postProcessing!!
+                this["PostProcessing"] = postProcessing!!
             }
         }
     }

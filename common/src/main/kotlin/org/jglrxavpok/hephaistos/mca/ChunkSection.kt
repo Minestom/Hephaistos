@@ -225,13 +225,13 @@ class ChunkSection(val y: Byte) {
      * Converts this ChunkSection into its NBT representation
      */
     @JvmOverloads
-    fun toNBT(version: SupportedVersion = SupportedVersion.Latest): NBTCompound = NBT.Compound {
-        it["Y"] = NBT.Byte(y)
-        it["BlockLight"] = NBT.ByteArray(*blockLights)
-        it["SkyLight"] = NBT.ByteArray(*skyLights)
+    fun toNBT(version: SupportedVersion = SupportedVersion.Latest): NBTCompound = NBT.Kompound {
+        this["Y"] = NBT.Byte(y)
+        this["BlockLight"] = NBT.ByteArray(*blockLights)
+        this["SkyLight"] = NBT.ByteArray(*skyLights)
         if(!empty) {
-            it["Palette"] = palette!!.toNBT()
-            it["BlockStates"] = NBT.LongArray(palette!!.compactIDs(blockStates, version))
+            this["Palette"] = palette!!.toNBT()
+            this["BlockStates"] = NBT.LongArray(palette!!.compactIDs(blockStates, version))
         }
     }
 
