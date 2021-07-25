@@ -1,5 +1,6 @@
 package org.jglrxavpok.hephaistos.nbt
 
+import org.jetbrains.annotations.Contract
 import org.jglrxavpok.hephaistos.nbt.mutable.MutableNBTCompound
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -41,7 +42,14 @@ class NBTCompound internal constructor(val tags: Map<String, NBT> = mapOf()): NB
         return tags.hashCode()
     }
 
+    @Contract(pure = true)
     fun modify(lambda: CompoundBuilder) = NBTCompound(MutableNBTCompound(tags.toMutableMap()).also { lambda.run(it) })
+
+    @Contract(pure = true)
+    fun kmodify(lambda: MutableNBTCompound.() -> Unit) = modify(lambda)
+
+    @Contract(pure = true)
+    fun withRemovedKeys(vararg keys: String) = kmodify { keys.forEach { remove(it) } }
 
     companion object : NBTReaderCompanion<NBTCompound> {
 

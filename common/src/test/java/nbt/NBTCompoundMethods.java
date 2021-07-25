@@ -208,9 +208,7 @@ public class NBTCompoundMethods {
             map.put("a", NBT.String("value"));
         });
         assertEquals(1, nbt.getSize());
-        nbt = nbt.modify((map) -> {
-            map.remove("a");
-        });
+        nbt = nbt.withRemovedKeys("a");
         assertEquals(0, nbt.getSize());
         assertNull(nbt.get("a"));
     }
