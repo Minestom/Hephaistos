@@ -68,7 +68,7 @@ public class NBTSaving {
     @ArgumentsSource(CompressedModeProvider.class)
     public void saveList(CompressedMode compressedMode) throws IOException, NBTException {
         NBTList<NBTString> nbt = NBT.List(
-                NBTTypes.TAG_String,
+                NBTType.TAG_String,
                 NBT.String("A"), NBT.String("B"), NBT.String("C"), NBT.String("D")
         );
 

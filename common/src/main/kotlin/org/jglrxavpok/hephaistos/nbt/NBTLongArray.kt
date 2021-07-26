@@ -8,7 +8,7 @@ class NBTLongArray internal constructor(val value: ImmutableLongArray) : NBT, It
 
     val size get() = value.size
 
-    override val ID = NBTTypes.TAG_Int_Array
+    override val ID = NBTType.TAG_Long_Array
 
     constructor(vararg numbers: Long): this(ImmutableLongArray(*numbers))
 

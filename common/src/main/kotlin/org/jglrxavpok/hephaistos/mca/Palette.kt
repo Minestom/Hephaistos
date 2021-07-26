@@ -4,7 +4,7 @@ import org.jglrxavpok.hephaistos.collections.ImmutableLongArray
 import org.jglrxavpok.hephaistos.nbt.NBT
 import org.jglrxavpok.hephaistos.nbt.NBTCompound
 import org.jglrxavpok.hephaistos.nbt.NBTList
-import org.jglrxavpok.hephaistos.nbt.NBTTypes
+import org.jglrxavpok.hephaistos.nbt.NBTType
 import kotlin.math.ceil
 import kotlin.math.log2
 
@@ -67,7 +67,7 @@ class Palette() {
      * Converts this Palette into its NBT representation
      */
     fun toNBT(): NBTList<NBTCompound> =
-        NBT.List(NBTTypes.TAG_Compound, blocks.map { it.toNBT() })
+        NBT.List(NBTType.TAG_Compound, blocks.map { it.toNBT() })
 
 
     /**

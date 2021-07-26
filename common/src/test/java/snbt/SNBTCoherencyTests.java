@@ -13,7 +13,7 @@ public class SNBTCoherencyTests {
     @Test
     public void testCoherence() throws NBTException {
 
-        NBTList<NBTString> testList = NBT.List(NBTTypes.TAG_String, 10, i -> NBT.String("Test#" + i));
+        NBTList<NBTString> testList = NBT.List(NBTType.TAG_String, 10, i -> NBT.String("Test#" + i));
 
         NBTCompound c = NBT.Compound(root -> {
             root.put("inside", NBT.Compound(inside -> {

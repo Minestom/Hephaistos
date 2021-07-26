@@ -4,7 +4,7 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 
 object NBTEnd: NBT, NBTReaderCompanion<NBTEnd> {
-    override val ID = NBTTypes.TAG_End
+    override val ID = NBTType.TAG_End
 
     override fun readContents(source: DataInputStream): NBTEnd = this
 

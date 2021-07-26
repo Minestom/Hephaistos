@@ -28,9 +28,23 @@ open class CompressedMode {
         override fun generateOutputStream(originalOutputStream: OutputStream) = GZIPOutputStream(originalOutputStream, bufferSize)
     }
 
-    class ParameterizedZlib(val inflater: Inflater = Inflater(), val deflater: Deflater = Deflater(), val bufferSize: Int = 512) : CompressedMode() {
-        override fun generateInputStream(originalInputStream: InputStream) = InflaterInputStream(originalInputStream, inflater, bufferSize)
-        override fun generateOutputStream(originalOutputStream: OutputStream) = DeflaterOutputStream(originalOutputStream, deflater, bufferSize)
+    class ParameterizedZlib(val inflater: Inflater = DEFAULT_INFLATER, val deflater: Deflater = DEFAULT_DEFLATER, val bufferSize: Int = 512) : CompressedMode() {
+        override fun generateInputStream(originalInputStream: InputStream) = if (inflater == DEFAULT_INFLATER) {
+            InflaterInputStream(originalInputStream)
+        } else {
+            InflaterInputStream(originalInputStream, inflater, bufferSize)
+        }
+
+        override fun generateOutputStream(originalOutputStream: OutputStream) = if (deflater == DEFAULT_DEFLATER) {
+            DeflaterOutputStream(originalOutputStream)
+        } else {
+            DeflaterOutputStream(originalOutputStream, deflater, bufferSize)
+        }
+
+        companion object {
+            val DEFAULT_INFLATER = Inflater()
+            val DEFAULT_DEFLATER = Deflater()
+        }
     }
 
 }

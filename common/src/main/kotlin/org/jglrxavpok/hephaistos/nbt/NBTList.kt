@@ -5,16 +5,16 @@ import java.io.DataOutputStream
 import java.io.IOException
 import java.util.*
 
-class NBTList<Tag: NBT> internal constructor(val subtagType: Int, private val tags: List<Tag> = listOf()): List<Tag> by tags, NBT {
+class NBTList<Tag: NBT> internal constructor(val subtagType: NBTType, private val tags: List<Tag> = listOf()): List<Tag> by tags, NBT {
 
-    override val ID = NBTTypes.TAG_List
+    override val ID = NBTType.TAG_List
 
     /**
      * Writes the contents of the list, WITH for the subtag ID
      * @see NBT.writeContents
      */
     override fun writeContents(destination: DataOutputStream) {
-        destination.writeByte(subtagType)
+        destination.writeByte(subtagType.ordinal)
         destination.writeInt(size)
 
         tags.forEach { it.writeContents(destination) }
@@ -55,7 +55,7 @@ class NBTList<Tag: NBT> internal constructor(val subtagType: Int, private val ta
     }
 
     override fun hashCode(): Int {
-        var result = subtagType
+        var result = subtagType.ordinal
         result = 31 * result + run {
             var hashCodeResult = 1
 
@@ -76,7 +76,7 @@ class NBTList<Tag: NBT> internal constructor(val subtagType: Int, private val ta
             val subtagType = source.readByte().toInt()
             val length = source.readInt()
 
-            return NBT.List(subtagType, List(length) {
+            return NBT.List(NBTType.byIndex(subtagType), List(length) {
                 source.readTag(subtagType)
             })
         }

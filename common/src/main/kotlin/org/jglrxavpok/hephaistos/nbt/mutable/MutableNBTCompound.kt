@@ -9,4 +9,7 @@ class MutableNBTCompound(private val tags: MutableMap<String, NBT> = mutableMapO
 
     override fun toCompound(): NBTCompound = NBT.Compound(tags.toMap())
 
+    override fun equals(other: Any?): Boolean = tags == other
+    override fun hashCode() = tags.hashCode()
+
 }

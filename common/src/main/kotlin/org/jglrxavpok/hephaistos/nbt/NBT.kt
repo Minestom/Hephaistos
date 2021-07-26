@@ -17,7 +17,7 @@ sealed interface NBT {
     /**
      * ID of this tag type
      */
-    val ID: Int
+    val ID: NBTType
 
     /**
      * Writes the contents of the tag to the given destination. The tag ID is supposed to be already written
@@ -176,15 +176,15 @@ sealed interface NBT {
 
         @JvmStatic
         @Contract(pure = true)
-        fun <Tag : NBT> List(subtagType: Int, tags: List<Tag> = listOf()) = NBTList(subtagType, tags)
+        fun <Tag : NBT> List(subtagType: NBTType, tags: List<Tag> = listOf()) = NBTList(subtagType, tags)
 
         @JvmStatic
         @Contract(pure = true)
-        fun <Tag : NBT> List(subtagType: Int, vararg tags: Tag) = NBTList(subtagType, tags.toList())
+        fun <Tag : NBT> List(subtagType: NBTType, vararg tags: Tag) = NBTList(subtagType, tags.toList())
 
         @JvmStatic
         @Contract(pure = true)
-        fun <Tag : NBT> List(subtagType: Int, length: Int, generator: NBTListGenerator<Tag>) = NBTList(subtagType, List(length) {
+        fun <Tag : NBT> List(subtagType: NBTType, length: Int, generator: NBTListGenerator<Tag>) = NBTList(subtagType, List(length) {
             generator.run(it)
         })
 

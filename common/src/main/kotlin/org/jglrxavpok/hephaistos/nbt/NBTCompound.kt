@@ -7,7 +7,7 @@ import java.io.DataOutputStream
 
 class NBTCompound internal constructor(val tags: Map<String, NBT> = mapOf()): NBT, NBTCompoundGetters, Map<String, NBT> by tags, CompoundLike {
 
-    override val ID = NBTTypes.TAG_Compound
+    override val ID = NBTType.TAG_Compound
 
     override fun writeContents(destination: DataOutputStream) {
         for(entry in tags.entries) {

@@ -8,7 +8,7 @@ class NBTByteArray internal constructor(val value: ImmutableByteArray) : NBT, It
 
     val size get() = value.size
 
-    override val ID = NBTTypes.TAG_Int_Array
+    override val ID = NBTType.TAG_Byte_Array
 
     override fun writeContents(destination: DataOutputStream) {
         destination.writeInt(size)

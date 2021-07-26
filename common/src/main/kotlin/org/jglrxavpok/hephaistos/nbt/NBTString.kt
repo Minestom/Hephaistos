@@ -6,7 +6,7 @@ import java.util.*
 
 class NBTString internal constructor(val value: String): NBT, CharSequence by value {
 
-    override val ID = NBTTypes.TAG_String
+    override val ID = NBTType.TAG_String
 
     override fun writeContents(destination: DataOutputStream) {
         destination.writeUTF(value)

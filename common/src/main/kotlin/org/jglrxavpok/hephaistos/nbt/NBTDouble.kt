@@ -5,7 +5,7 @@ import java.io.DataOutputStream
 
 class NBTDouble internal constructor(value: Double) : NBTNumber<Double>(value) {
 
-    override val ID = NBTTypes.TAG_Double
+    override val ID = NBTType.TAG_Double
 
     // help Java compiler to find the correct type (boxed vs primitive types)
     fun getValue(): Double = value

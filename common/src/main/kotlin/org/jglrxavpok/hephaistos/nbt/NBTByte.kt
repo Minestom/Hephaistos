@@ -5,7 +5,7 @@ import java.io.DataOutputStream
 
 class NBTByte internal constructor(value: Byte) : NBTNumber<Byte>(value) {
 
-    override val ID = NBTTypes.TAG_Byte
+    override val ID = NBTType.TAG_Byte
 
     // help Java compiler to find the correct type (boxed vs primitive types)
     fun getValue(): Byte = value

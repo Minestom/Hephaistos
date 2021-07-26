@@ -24,7 +24,7 @@ object SNBTParsingVisitor: SNBTBaseVisitor<NBT>() {
 
     override fun visitList(ctx: SNBTParser.ListContext): NBT {
         val elements = ctx.element().map { visit(it) }
-        val subtagType = if (elements.isEmpty()) NBTTypes.TAG_String else elements[0].ID
+        val subtagType = if (elements.isEmpty()) NBTType.TAG_String else elements[0].ID
         return NBT.List(subtagType, elements)
     }
 
