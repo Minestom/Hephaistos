@@ -2,6 +2,22 @@ package org.jglrxavpok.hephaistos.nbt
 
 import kotlin.reflect.KClass
 
+enum class NBTType(val readerCompanion: NBTReaderCompanion<out NBT>) {
+    TAG_End, // 0
+    TAG_Byte, // 1
+    TAG_Short, // 2
+    TAG_Int, // 3
+    TAG_Long, // 4
+    TAG_Float, // 5
+    TAG_Double, // 6
+    TAG_Byte_Array, // 7
+    TAG_String, // 8
+    TAG_List, // 9
+    TAG_Compound, // 10
+    TAG_Int_Array, // 11
+    TAG_Long_Array // 12
+}
+
 object NBTTypes {
     const val TAG_End = 0
     const val TAG_Byte = 1

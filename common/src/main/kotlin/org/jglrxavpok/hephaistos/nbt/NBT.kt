@@ -44,19 +44,45 @@ sealed interface NBT {
 
     companion object {
 
+        /**
+         * Static constant of an empty [NBTCompound].
+         * Equivalent to `NBT.Compound()`
+         */
         @JvmStatic
         val EMPTY = NBTCompound()
 
+        /**
+         * Static constant of a [NBTByte] set to 1
+         * Equivalent to `NBT.Byte(1)`
+         */
         @JvmStatic
         val TRUE = Byte(1)
 
+        /**
+         * Static constant of a [NBTByte] set to 0
+         * Equivalent to `NBT.Byte(0)`
+         */
         @JvmStatic
         val FALSE = Byte(0)
 
+        /**
+         * Convenience method to get an [NBTByte] equivalent to the byte value of the [flag]
+         *
+         * @param flag The flag check against
+         *
+         * @return [TRUE] if [flag] is true, [FALSE] if [flag] is false
+         */
         @JvmStatic
         @Contract(pure = true)
         fun Boolean(flag: Boolean): NBTByte = if (flag) TRUE else FALSE
 
+        /**
+         * Creates an [NBTByte] with the value of [value]
+         *
+         * @param value The value to pass to [NBTByte]
+         *
+         * @return An [NBTByte] containing passed [value]
+         */
         @JvmStatic
         @Contract(pure = true)
         fun Byte(value: Byte) = NBTByte(value)
@@ -88,6 +114,13 @@ sealed interface NBT {
         @Contract(pure = true)
         inline fun Kompound(crossinline lambda: MutableNBTCompound.() -> Unit) = Compound { lambda(it) }
 
+        /**
+         * Creates an [NBTDouble] with the value of [value]
+         *
+         * @param value The value to pass to [NBTDouble]
+         *
+         * @return An [NBTDouble] containing passed [value]
+         */
         @JvmStatic
         @Contract(pure = true)
         fun Double(value: Double) = NBTDouble(value)
@@ -96,10 +129,24 @@ sealed interface NBT {
         @Contract(pure = true)
         fun Entry(key: String, value: NBT) = NBTCompound.entry(key, value)
 
+        /**
+         * Creates an [NBTFloat] with the value of [value]
+         *
+         * @param value The value to pass to [NBTFloat]
+         *
+         * @return An [NBTFloat] containing passed [value]
+         */
         @JvmStatic
         @Contract(pure = true)
         fun Float(value: Float) = NBTFloat(value)
 
+        /**
+         * Creates an [NBTShort] with the value of [value]
+         *
+         * @param value The value to pass to [NBTShort]
+         *
+         * @return An [NBTShort] containing passed [value]
+         */
         @JvmStatic
         @Contract(pure = true)
         fun Short(value: Short) = NBTShort(value)
@@ -108,6 +155,13 @@ sealed interface NBT {
         @Contract(pure = true)
         fun Short(value: Int) = NBTShort(value.toShort())
 
+        /**
+         * Creates an [NBTInt] with the value of [value]
+         *
+         * @param value The value to pass to [NBTInt]
+         *
+         * @return An [NBTInt] containing passed [value]
+         */
         @JvmStatic
         @Contract(pure = true)
         fun Int(value: Int) = NBTInt(value)
@@ -134,6 +188,13 @@ sealed interface NBT {
             generator.run(it)
         })
 
+        /**
+         * Creates an [NBTLong] with the value of [value]
+         *
+         * @param value The value to pass to [NBTLong]
+         *
+         * @return An [NBTLong] containing passed [value]
+         */
         @JvmStatic
         @Contract(pure = true)
         fun Long(value: Long) = NBTLong(value)
@@ -146,6 +207,13 @@ sealed interface NBT {
         @Contract(pure = true)
         fun LongArray(array: ImmutableLongArray) = NBTLongArray(array)
 
+        /**
+         * Creates an [NBTString] with the value of [value]
+         *
+         * @param value The value to pass to [NBTString]
+         *
+         * @return An [NBTString] containing passed [value]
+         */
         @JvmStatic
         @Contract(pure = true)
         fun String(value: String) = NBTString(value)
