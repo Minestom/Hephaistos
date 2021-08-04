@@ -1,6 +1,6 @@
 package mca;
 
-import org.jglrxavpok.hephaistos.RandomAccessFileSource;
+import org.jglrxavpok.hephaistos.data.RandomAccessFileSource;
 import org.jglrxavpok.hephaistos.data.DataSource;
 import org.jglrxavpok.hephaistos.data.GrowableSource;
 import org.junit.jupiter.api.extension.ExtensionContext;

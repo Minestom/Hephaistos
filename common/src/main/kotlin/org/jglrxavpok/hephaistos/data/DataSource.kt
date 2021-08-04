@@ -8,13 +8,13 @@ import java.io.IOException
 interface DataSource: DataInput, DataOutput, Closeable {
 
     @Throws(IOException::class)
-    fun seek(position: Long): Unit
+    fun seek(position: Long)
 
     @Throws(IOException::class)
     fun length(): Long
 
     @Throws(IOException::class)
-    fun setLength(newLength: Long): Unit
+    fun setLength(newLength: Long)
 
     @Throws(IOException::class)
     fun writeByte(pos: Long, b: Byte)

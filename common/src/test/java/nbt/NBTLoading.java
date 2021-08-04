@@ -14,7 +14,7 @@ public class NBTLoading {
 
     @Test
     public void helloWorld() throws IOException, NBTException {
-        try(NBTReader reader = new NBTReader(NBTLoading.class.getResourceAsStream("/hello_world.nbt"), CompressedMode.NONE)) {
+        try(NBTReader reader = new NBTReader(NBTLoading.class.getResourceAsStream("/hello_world.nbt"), CompressedProcesser.NONE)) {
             Pair<String, NBT> namedTag = reader.readNamed();
             assertEquals("hello world", namedTag.getFirst());
             NBT tag = namedTag.getSecond();
@@ -34,7 +34,7 @@ public class NBTLoading {
 
     @Test
     public void bigtest() throws IOException, NBTException {
-        try(NBTReader reader = new NBTReader(NBTLoading.class.getResourceAsStream("/bigtest.nbt"), CompressedMode.GZIP)) {
+        try(NBTReader reader = new NBTReader(NBTLoading.class.getResourceAsStream("/bigtest.nbt"), CompressedProcesser.GZIP)) {
             Pair<String, NBT> namedTag = reader.readNamed();
             assertEquals("Level", namedTag.getFirst());
             NBT tag = namedTag.getSecond();

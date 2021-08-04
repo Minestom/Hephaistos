@@ -1,6 +1,5 @@
-package org.jglrxavpok.hephaistos
+package org.jglrxavpok.hephaistos.data
 
-import org.jglrxavpok.hephaistos.data.DataSource
 import java.io.Closeable
 import java.io.DataInput
 import java.io.DataOutput

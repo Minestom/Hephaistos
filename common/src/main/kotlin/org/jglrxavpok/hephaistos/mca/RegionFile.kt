@@ -1,8 +1,8 @@
 package org.jglrxavpok.hephaistos.mca
 
-import org.jglrxavpok.hephaistos.RandomAccessFileSource
 import org.jglrxavpok.hephaistos.data.DataSource
-import org.jglrxavpok.hephaistos.nbt.CompressedMode
+import org.jglrxavpok.hephaistos.data.RandomAccessFileSource
+import org.jglrxavpok.hephaistos.nbt.CompressedProcesser
 import org.jglrxavpok.hephaistos.nbt.NBTCompound
 import org.jglrxavpok.hephaistos.nbt.NBTReader
 import org.jglrxavpok.hephaistos.nbt.NBTWriter
@@ -163,9 +163,9 @@ class RegionFile @Throws(AnvilException::class, IOException::class) @JvmOverload
         readBytes(offset+5L, rawData)
 
         val reader = NBTReader(rawData, when(compressionType) {
-            GZipCompression -> CompressedMode.GZIP
-            ZlibCompression -> CompressedMode.ZLIB
-            NoCompression -> CompressedMode.NONE
+            GZipCompression -> CompressedProcesser.GZIP
+            ZlibCompression -> CompressedProcesser.ZLIB
+            NoCompression -> CompressedProcesser.NONE
             else -> throw AnvilException("Invalid compression type: $compressionType (only 1 and 2 known)")
         })
 
@@ -201,7 +201,7 @@ class RegionFile @Throws(AnvilException::class, IOException::class) @JvmOverload
 
         val nbt = column.toNBT()
         val dataOut = ByteArrayOutputStream()
-        NBTWriter(dataOut, CompressedMode.ZLIB).use {
+        NBTWriter(dataOut, CompressedProcesser.ZLIB).use {
             it.writeNamed("", nbt)
         }
         val dataSize = dataOut.size()

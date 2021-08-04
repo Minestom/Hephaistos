@@ -7,7 +7,7 @@ import java.io.IOException
  * Companion object for all final NBT types
  * that allows creation of said [NBT] object from a [DataInputStream].
  */
-interface NBTReaderCompanion<T : NBT> {
+sealed interface NBTReaderCompanion<T : NBT> {
 
     /**
      * Reads the contents of the tag from the given source. The tag ID is supposed to be already read.

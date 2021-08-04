@@ -17,67 +17,67 @@ public class NBTSaving {
 
     @ParameterizedTest
     @ArgumentsSource(CompressedModeProvider.class)
-    public void saveByte(CompressedMode compressedMode) throws IOException, NBTException {
+    public void saveByte(CompressedProcesser compressedProcesser) throws IOException, NBTException {
         NBTByte nbt = NBT.Byte(42);
-        test(nbt, compressedMode);
+        test(nbt, compressedProcesser);
     }
 
     @ParameterizedTest
     @ArgumentsSource(CompressedModeProvider.class)
-    public void saveShort(CompressedMode compressedMode) throws IOException, NBTException {
+    public void saveShort(CompressedProcesser compressedProcesser) throws IOException, NBTException {
         NBTShort nbt = NBT.Short(1);
-        test(nbt, compressedMode);
+        test(nbt, compressedProcesser);
     }
 
     @ParameterizedTest
     @ArgumentsSource(CompressedModeProvider.class)
-    public void saveInt(CompressedMode compressedMode) throws IOException, NBTException {
+    public void saveInt(CompressedProcesser compressedProcesser) throws IOException, NBTException {
         NBTInt nbt = NBT.Int(0x42);
-        test(nbt, compressedMode);
+        test(nbt, compressedProcesser);
     }
 
     @ParameterizedTest
     @ArgumentsSource(CompressedModeProvider.class)
-    public void saveLong(CompressedMode compressedMode) throws IOException, NBTException {
+    public void saveLong(CompressedProcesser compressedProcesser) throws IOException, NBTException {
         NBTLong nbt = NBT.Long(0xCAFEBABEL);
-        test(nbt, compressedMode);
+        test(nbt, compressedProcesser);
     }
 
     @ParameterizedTest
     @ArgumentsSource(CompressedModeProvider.class)
-    public void saveDouble(CompressedMode compressedMode) throws IOException, NBTException {
+    public void saveDouble(CompressedProcesser compressedProcesser) throws IOException, NBTException {
         NBTDouble nbt = NBT.Double(0.25);
-        test(nbt, compressedMode);
+        test(nbt, compressedProcesser);
     }
 
     @ParameterizedTest
     @ArgumentsSource(CompressedModeProvider.class)
-    public void saveFloat(CompressedMode compressedMode) throws IOException, NBTException {
+    public void saveFloat(CompressedProcesser compressedProcesser) throws IOException, NBTException {
         NBTFloat nbt = NBT.Float(0.5f);
-        test(nbt, compressedMode);
+        test(nbt, compressedProcesser);
     }
 
     @ParameterizedTest
     @ArgumentsSource(CompressedModeProvider.class)
-    public void saveString(CompressedMode compressedMode) throws IOException, NBTException {
+    public void saveString(CompressedProcesser compressedProcesser) throws IOException, NBTException {
         NBTString nbt = NBT.String("AAA");
-        test(nbt, compressedMode);
+        test(nbt, compressedProcesser);
     }
 
     @ParameterizedTest
     @ArgumentsSource(CompressedModeProvider.class)
-    public void saveList(CompressedMode compressedMode) throws IOException, NBTException {
+    public void saveList(CompressedProcesser compressedProcesser) throws IOException, NBTException {
         NBTList<NBTString> nbt = NBT.List(
                 NBTType.TAG_String,
                 NBT.String("A"), NBT.String("B"), NBT.String("C"), NBT.String("D")
         );
 
-        test(nbt, compressedMode);
+        test(nbt, compressedProcesser);
     }
 
     @ParameterizedTest
     @ArgumentsSource(CompressedModeProvider.class)
-    public void saveCompound(CompressedMode compressedMode) throws IOException, NBTException {
+    public void saveCompound(CompressedProcesser compressedProcesser) throws IOException, NBTException {
         var compound = NBT.Compound((root) -> {
             root.put("byteArray", NBT.ByteArray(1, 2, 3));
             root.put("byte", NBT.Byte(0x42));
@@ -91,32 +91,32 @@ public class NBTSaving {
             root.put("short", NBT.Short(-10));
         });
 
-        test(compound, compressedMode);
+        test(compound, compressedProcesser);
     }
 
-    private <T extends NBT> void test(T nbt, CompressedMode compressedMode) throws IOException, NBTException {
-        T saved = saveAndRead(nbt, compressedMode);
+    private <T extends NBT> void test(T nbt, CompressedProcesser compressedProcesser) throws IOException, NBTException {
+        T saved = saveAndRead(nbt, compressedProcesser);
         assertEquals(nbt, saved);
     }
 
 
-    private <T extends NBT> T saveAndRead(NBT tag, CompressedMode compressedMode) throws IOException, NBTException {
-        NBTWriter output = output(compressedMode);
+    private <T extends NBT> T saveAndRead(NBT tag, CompressedProcesser compressedProcesser) throws IOException, NBTException {
+        NBTWriter output = output(compressedProcesser);
         output.writeNamed("a", tag);
         output.close();
-        Pair<String, NBT> namedTag = input(compressedMode).readNamed();
+        Pair<String, NBT> namedTag = input(compressedProcesser).readNamed();
         assertEquals("a", namedTag.getFirst());
         assertEquals(tag.getClass(), namedTag.getSecond().getClass());
         return (T) namedTag.getSecond();
     }
 
 
-    private NBTReader input(CompressedMode compressedMode) {
-        return NBTReader.fromArray(byteArrayOutputStream.toByteArray(), compressedMode);
+    private NBTReader input(CompressedProcesser compressedProcesser) {
+        return NBTReader.fromArray(byteArrayOutputStream.toByteArray(), compressedProcesser);
     }
 
-    private NBTWriter output(CompressedMode compressedMode) {
-        return new NBTWriter(byteArrayOutputStream, compressedMode);
+    private NBTWriter output(CompressedProcesser compressedProcesser) {
+        return new NBTWriter(byteArrayOutputStream, compressedProcesser);
     }
 
     @BeforeEach

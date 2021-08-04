@@ -8,29 +8,35 @@ import java.nio.file.Path
  * Reads NBT Data from a given input stream.
  * Once the input stream is passed to a NBTReader, use NBTReader#close to close the stream.
  */
-class NBTReader @JvmOverloads constructor(source: InputStream, compressedMode: CompressedMode = CompressedMode.NONE): AutoCloseable, Closeable {
+class NBTReader @JvmOverloads constructor(
+    source: InputStream,
+    compressedProcesser: CompressedProcesser<*, *> = CompressedProcesser.NONE
+): AutoCloseable, Closeable {
 
     private val reader = DataInputStream(
-        compressedMode.generateInputStream(source)
+        compressedProcesser.generateInputStream(source)
     )
 
     /**
-     * Constructs a [NBTReader] from a file (convenience method, equivalent to `NBTReader(BufferedInputStream(FileInputStream(file)), compressedMode)`)
+     * Constructs a [NBTReader] from a file (convenience method, equivalent to `NBTReader(BufferedInputStream(FileInputStream(file)), compressedProcesser)`)
      */
     @Throws(IOException::class)
-    @JvmOverloads constructor(file: File, compressedMode: CompressedMode = CompressedMode.NONE): this(BufferedInputStream(FileInputStream(file)), compressedMode)
+    @JvmOverloads constructor(file: File, compressedProcesser: CompressedProcesser<*, *> = CompressedProcesser.NONE):
+            this(BufferedInputStream(FileInputStream(file)), compressedProcesser)
 
     /**
-     * Constructs a [NBTReader] from a path (convenience method, equivalent to `NBTReader(BufferedOutputStream(Files.newOutputStream(path)), compressedMode)`)
+     * Constructs a [NBTReader] from a path (convenience method, equivalent to `NBTReader(BufferedOutputStream(Files.newOutputStream(path)), compressedProcesser)`)
      */
     @Throws(IOException::class)
-    @JvmOverloads constructor(path: Path, compressedMode: CompressedMode = CompressedMode.NONE): this(BufferedInputStream(Files.newInputStream(path)), compressedMode)
+    @JvmOverloads constructor(path: Path, compressedProcesser: CompressedProcesser<*, *> = CompressedProcesser.NONE):
+            this(BufferedInputStream(Files.newInputStream(path)), compressedProcesser)
 
     /**
-     * Constructs a [NBTReader] from a byte array (convenience method, equivalent to `NBTReader(ByteArrayInputStream(array), compressedMode)`)
+     * Constructs a [NBTReader] from a byte array (convenience method, equivalent to `NBTReader(ByteArrayInputStream(array), compressedProcesser)`)
      */
     @Throws(IOException::class)
-    @JvmOverloads constructor(array: ByteArray, compressedMode: CompressedMode = CompressedMode.NONE): this(ByteArrayInputStream(array), compressedMode)
+    @JvmOverloads constructor(array: ByteArray, compressedProcesser: CompressedProcesser<*, *> = CompressedProcesser.NONE):
+            this(ByteArrayInputStream(array), compressedProcesser)
 
     /**
      * Reads a single named tag from the source. 'first' will hold the name, 'second' the tag
@@ -76,6 +82,7 @@ class NBTReader @JvmOverloads constructor(source: InputStream, compressedMode: C
          */
         @JvmStatic
         @JvmOverloads
-        fun fromArray(array: ByteArray, compressedMode: CompressedMode = CompressedMode.NONE) = NBTReader(ByteArrayInputStream(array), compressedMode)
+        fun fromArray(array: ByteArray, compressedProcesser: CompressedProcesser<*, *> = CompressedProcesser.NONE) =
+            NBTReader(ByteArrayInputStream(array), compressedProcesser)
     }
 }

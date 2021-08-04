@@ -5,7 +5,7 @@ import org.jglrxavpok.hephaistos.nbt.mutable.MutableNBTCompound
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
-class NBTCompound internal constructor(val tags: Map<String, NBT> = mapOf()): NBT, NBTCompoundGetters, Map<String, NBT> by tags, CompoundLike {
+class NBTCompound(val tags: Map<String, NBT> = mapOf()): NBT, NBTCompoundGetters, Map<String, NBT> by tags, NBTCompoundLike {
 
     override val ID = NBTType.TAG_Compound
 
@@ -29,7 +29,10 @@ class NBTCompound internal constructor(val tags: Map<String, NBT> = mapOf()): NB
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (javaClass != other?.javaClass) return false
+
+        if (other == null) return false
+
+        if (this::class != other::class) return false
 
         other as NBTCompound
 

@@ -25,9 +25,9 @@ public class TestWriterCompound {
             root.put("timestamp", NBT.Long(1564864468L));
             root.put("458", NBT.Byte(0x0F));
 
-            root.put("inside", NBT.Compound(inside -> {
-                inside.put("doubledouble", NBT.Double(0.5));
-            }));
+            root.put("inside", NBT.Compound(inside ->
+                inside.put("doubledouble", NBT.Double(0.5))
+            ));
 
             root.put("aaa", NBT.ByteArray(1, 2));
         });

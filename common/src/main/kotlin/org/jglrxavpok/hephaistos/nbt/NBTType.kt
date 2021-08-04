@@ -30,5 +30,11 @@ enum class NBTType(
 
             return values()[index]
         }
+
+        inline fun <reified T : NBT> byClass(): NBTType? = byClass(T::class)
+        fun byClass(clazz: KClass<out NBT>): NBTType? = values().firstOrNull { it.nbtClass == clazz }
+
+        @JvmStatic
+        fun byClass(clazz: Class<out NBT>): NBTType? = byClass(clazz.kotlin)
     }
 }
