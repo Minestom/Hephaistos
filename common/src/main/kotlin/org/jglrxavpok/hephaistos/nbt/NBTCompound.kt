@@ -55,7 +55,7 @@ class NBTCompound(val tags: Map<String, NBT> = mapOf()): NBT, NBTCompoundGetters
     fun withRemovedKeys(vararg keys: String) = kmodify { keys.forEach { remove(it) } }
 
     @Contract(pure = true)
-    fun withKeys(vararg entries: CompoundEntry) = kmodify { entries.forEach { this[it.key] = it.value } }
+    fun withEntries(vararg entries: CompoundEntry) = kmodify { entries.forEach { this[it.key] = it.value } }
 
     companion object : NBTReaderCompanion<NBTCompound> {
 

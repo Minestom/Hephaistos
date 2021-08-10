@@ -29,7 +29,7 @@ open class CompressedProcesser<I : InputStream, O : OutputStream> {
 
     companion object {
         /**
-         * No compresson. Data in and out will remain the same.
+         * No compression. Data in and out will remain the same.
          */
         @JvmField
         val NONE = object : CompressedProcesser<InputStream, OutputStream>() { }

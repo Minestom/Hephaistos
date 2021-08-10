@@ -7,13 +7,10 @@ import org.jglrxavpok.hephaistos.nbt.*
 import java.io.Closeable
 import java.io.Reader
 
-class NBTGsonReader internal constructor(private val reader: Reader): AutoCloseable, Closeable {
+class NBTGsonReader(private val reader: Reader): AutoCloseable, Closeable {
 
     private companion object {
         val GsonInstance = Gson()
-
-        @JvmStatic
-        fun reader(reader: Reader) = NBTGsonReader(reader)
     }
 
     inline fun <reified Tag: NBT> read(): Tag {

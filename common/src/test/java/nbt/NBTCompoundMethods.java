@@ -213,7 +213,7 @@ public class NBTCompoundMethods {
         assertEquals(0, nbt.getSize());
         assertNull(nbt.get("a"));
 
-        nbt = nbt.withKeys(
+        nbt = nbt.withEntries(
                 NBT.Entry("b", NBT.Int(1)),
                 NBT.Entry("c", NBT.LongArray(5, 4, 3, 2, 1))
         );
