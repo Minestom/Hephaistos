@@ -5,7 +5,7 @@ import java.io.DataOutputStream
 import java.io.IOException
 import java.util.*
 
-class NBTList<Tag: NBT> internal constructor(val subtagType: NBTType<Tag>, private val tags: List<Tag> = listOf()): List<Tag> by tags, NBT {
+class NBTList<Tag: NBT> internal constructor(val subtagType: NBTType<out Tag>, private val tags: List<out Tag> = listOf()): List<Tag> by tags, NBT {
 
     override val ID = NBTType.TAG_List
 
@@ -76,7 +76,7 @@ class NBTList<Tag: NBT> internal constructor(val subtagType: NBTType<Tag>, priva
             val subtagType = source.readByte().toInt()
             val length = source.readInt()
 
-            return NBT.List<NBT>(NBTType.byIndex(subtagType), List(length) {
+            return NBT.List(NBTType.byIndex(subtagType), List(length) {
                 source.readTag(subtagType)
             })
         }

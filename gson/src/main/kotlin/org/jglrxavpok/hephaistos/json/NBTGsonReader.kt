@@ -14,29 +14,29 @@ class NBTGsonReader(private val reader: Reader): AutoCloseable, Closeable {
     }
 
     inline fun <reified Tag: NBT> read(): Tag {
-        return read(NBTType.byClass<Tag>()) as Tag
+        return read(NBTType.byClass<Tag>() ?: error("Invalid NBTType: ${Tag::class.qualifiedName}")) as Tag
     }
 
-    fun <Tag: NBT> read(nbtClass: Class<Tag>): Tag = read(NBTType.byClass(nbtClass)?.ordinal) as Tag
+    fun <Tag: NBT> read(nbtClass: Class<Tag>): Tag = read(NBTType.byClass(nbtClass) ?: error("Invalid NBTType: ${nbtClass.canonicalName}")) as Tag
 
-    fun guessType(element: JsonElement): Int {
+    fun guessType(element: JsonElement): NBTType<out NBT> {
         return when {
-            element.isJsonObject -> NBTType.TAG_Compound.ordinal
-            element.isJsonNull -> NBTType.TAG_String.ordinal
+            element.isJsonObject -> NBTType.TAG_Compound
+            element.isJsonNull -> NBTType.TAG_String
             element.isJsonPrimitive -> {
                 val primitive = element.asJsonPrimitive
                 when {
-                    primitive.isBoolean -> NBTType.TAG_Byte.ordinal
-                    primitive.isString -> NBTType.TAG_String.ordinal
+                    primitive.isBoolean -> NBTType.TAG_Byte
+                    primitive.isString -> NBTType.TAG_String
                     primitive.isNumber ->
                         if(primitive.asLong.toDouble() == primitive.asDouble) {
                             if('.' in primitive.asString) {
-                                NBTType.TAG_Double.ordinal
+                                NBTType.TAG_Double
                             } else {
-                                NBTType.TAG_Long.ordinal
+                                NBTType.TAG_Long
                             }
                         } else {
-                            NBTType.TAG_Double.ordinal
+                            NBTType.TAG_Double
                         }
                     else -> error("Primitive that is neither a boolean, a string, nor a number?")
                 }
@@ -45,16 +45,16 @@ class NBTGsonReader(private val reader: Reader): AutoCloseable, Closeable {
             element.isJsonArray -> {
                 val array = element.asJsonArray
                 if(array.size() == 0) {
-                    NBTType.TAG_List.ordinal
+                    NBTType.TAG_List
                 } else {
                     val firstElement = element.asJsonArray.get(0)
                     val guessedType = guessType(firstElement)
                     when(guessedType) {
-                        NBTType.TAG_Long.ordinal -> NBTType.TAG_Long_Array.ordinal
-                        NBTType.TAG_Byte.ordinal -> NBTType.TAG_Byte_Array.ordinal
-                        NBTType.TAG_Int.ordinal -> NBTType.TAG_Int_Array.ordinal
+                        NBTType.TAG_Long -> NBTType.TAG_Long_Array
+                        NBTType.TAG_Byte -> NBTType.TAG_Byte_Array
+                        NBTType.TAG_Int -> NBTType.TAG_Int_Array
 
-                        else -> NBTType.TAG_List.ordinal
+                        else -> NBTType.TAG_List
                     }
                 }
             }
@@ -68,9 +68,9 @@ class NBTGsonReader(private val reader: Reader): AutoCloseable, Closeable {
      * The guess is done by getting the first element and guessing its type via #guessType.
      * If the list is empty, this method will always guess that the subtype is TAG_String
      */
-    private fun <Tag: NBT> parse(nbtType: Int, element: JsonElement): Tag {
+    private fun <Tag: NBT> parse(nbtType: NBTType<out NBT>, element: JsonElement): Tag {
         try {
-            val result = when (NBTType.byIndex(nbtType)) {
+            val result = when (nbtType) {
                 NBTType.TAG_End -> NBTEnd
                 NBTType.TAG_Byte -> NBT.Byte(element.asByte)
                 NBTType.TAG_Short -> NBT.Short(element.asShort)
@@ -108,7 +108,7 @@ class NBTGsonReader(private val reader: Reader): AutoCloseable, Closeable {
         }
     }
 
-    fun read(nbtType: Int): NBT {
+    fun read(nbtType: NBTType<out NBT>): NBT {
         return parse(nbtType, GsonInstance.fromJson(reader, JsonElement::class.java))
     }
 

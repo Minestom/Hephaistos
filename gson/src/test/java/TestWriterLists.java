@@ -36,7 +36,7 @@ public class TestWriterLists {
     @Test
     public void writeList() {
         NBTList<NBTString> list = NBT.List(
-                NBTTypes.TAG_String,
+                NBTType.TAG_String,
                 NBT.String("My"), NBT.String("Super"), NBT.String("Awesome"), NBT.String("List")
         );
         JsonElement element = writer.write(list);

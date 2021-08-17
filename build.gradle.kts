@@ -34,6 +34,7 @@ allprojects {
 
     val compileKotlin: org.jetbrains.kotlin.gradle.tasks.KotlinCompile by tasks
     compileKotlin.kotlinOptions.jvmTarget = JavaVersion.VERSION_11.toString()
+    compileKotlin.kotlinOptions.languageVersion = "1.5"
 
     compileKotlin.kotlinOptions {
         freeCompilerArgs = listOf("-Xuse-experimental=kotlin.MultiPlatform")
