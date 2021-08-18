@@ -288,12 +288,4 @@ public class MCASaving {
 
 
     // End of 1.17 support ============================================
-
-    @AfterEach
-    public void clean() throws IOException {
-        var file = Paths.get("tmp_save_r.0.0.mca");
-
-        if (Files.exists(file))
-            Files.delete(Paths.get("tmp_save_r.0.0.mca"));
-    }
 }

@@ -16,8 +16,9 @@ public class DataSourceProvider implements ArgumentsProvider {
     @Override
     public Stream<? extends Arguments> provideArguments(ExtensionContext context) throws Exception {
         DataSource growable = new GrowableSource();
-        File target = new File("tmp_save_r.0.0.mca");
+        File target = new File(""+context.getUniqueId().hashCode()+".mca");
         target.createNewFile();
+        target.deleteOnExit();
         DataSource raf = new RandomAccessFileSource(new RandomAccessFile(target, "rw"));
 
         return Stream.of(
