@@ -30,7 +30,7 @@ class NBTByteArray internal constructor(val value: ImmutableByteArray) : NBT, It
 
         other as NBTByteArray
 
-        if (value contentEquals other.value) return false
+        if (!(value contentEquals other.value)) return false
 
         return true
     }

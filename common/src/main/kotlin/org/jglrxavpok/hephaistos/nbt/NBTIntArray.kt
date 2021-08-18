@@ -30,7 +30,7 @@ class NBTIntArray internal constructor(val value: ImmutableIntArray) : NBT, Iter
 
         other as NBTIntArray
 
-        if (value contentEquals other.value) return false
+        if (!(value contentEquals other.value)) return false
 
         return true
     }

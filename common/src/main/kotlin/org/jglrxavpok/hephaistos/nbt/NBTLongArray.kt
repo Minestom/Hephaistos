@@ -32,7 +32,7 @@ class NBTLongArray internal constructor(val value: ImmutableLongArray) : NBT, It
 
         other as NBTLongArray
 
-        if (value contentEquals other.value) return false
+        if (!(value contentEquals other.value)) return false
 
         return true
     }

@@ -24,6 +24,27 @@ public class NBTSaving {
 
     @ParameterizedTest
     @ArgumentsSource(CompressedModeProvider.class)
+    public void saveByteArray(CompressedProcesser compressedProcesser) throws IOException, NBTException {
+        NBTByteArray nbt = NBT.ByteArray(42, 53, -56);
+        test(nbt, compressedProcesser);
+    }
+
+    @ParameterizedTest
+    @ArgumentsSource(CompressedModeProvider.class)
+    public void saveIntArray(CompressedProcesser compressedProcesser) throws IOException, NBTException {
+        NBTIntArray nbt = NBT.IntArray(-42, -53, 56, 0xFFC0C0C0);
+        test(nbt, compressedProcesser);
+    }
+
+    @ParameterizedTest
+    @ArgumentsSource(CompressedModeProvider.class)
+    public void saveLongArray(CompressedProcesser compressedProcesser) throws IOException, NBTException {
+        NBTLongArray nbt = NBT.LongArray(0xDEADBEEF, 0xCAFEBABE, 0xAAAAAAA);
+        test(nbt, compressedProcesser);
+    }
+
+    @ParameterizedTest
+    @ArgumentsSource(CompressedModeProvider.class)
     public void saveShort(CompressedProcesser compressedProcesser) throws IOException, NBTException {
         NBTShort nbt = NBT.Short(1);
         test(nbt, compressedProcesser);
