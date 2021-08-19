@@ -37,7 +37,7 @@ class ChunkColumn @JvmOverloads constructor(val x: Int, val z: Int, val minY: In
      * to the biome for a cube of 4x4x4 blocks).
      * Arranged by X, Z and then Y.
      */
-    var biomes: ImmutableIntArray? = null
+    var biomes: IntArray? = null
     var motionBlockingHeightMap = Heightmap()
     var worldSurfaceHeightMap = Heightmap()
     var motionBlockingNoLeavesHeightMap: Heightmap? = null
@@ -81,7 +81,7 @@ class ChunkColumn @JvmOverloads constructor(val x: Int, val z: Int, val minY: In
         lastUpdate = level.getLong("LastUpdate") ?: missing("LastUpdate")
         inhabitedTime = level.getLong("InhabitedTime") ?: missing("InhabitedTime")
         generationStatus = GenerationStatus.fromID(level.getString("Status") ?: missing("Status"))
-        biomes = level.getIntArray("Biomes")
+        biomes = level.getIntArray("Biomes")?.copyArray()
         if(generationStatus.ordinal >= GenerationStatus.Heightmaps.ordinal) {
             val heightmaps = level.getCompound("Heightmaps") ?: missing("Heightmaps")
             motionBlockingHeightMap = Heightmap(heightmaps.getLongArray("MOTION_BLOCKING") ?: missing("MOTION_BLOCKING"), version)
@@ -175,8 +175,9 @@ class ChunkColumn @JvmOverloads constructor(val x: Int, val z: Int, val minY: In
     fun setBiome(x: Int, y: Int, z: Int, biomeID: Int) {
         checkBounds(x, y, z)
         if(biomes == null) {
-            biomes = ImmutableIntArray(biomeArraySize) { if (it == x/4+(z/4)*16+(y/4)*16) biomeID else UnknownBiome }
+            biomes = IntArray(biomeArraySize) { UnknownBiome }
         }
+        biomes?.set(x/4+(z/4)*4+(y/4)*16, biomeID)
     }
 
     /**
@@ -188,8 +189,8 @@ class ChunkColumn @JvmOverloads constructor(val x: Int, val z: Int, val minY: In
         if(biomes == null) {
             return UnknownBiome
         }
-        val index = x/4+(z/4)*16+(y/4)*16
-        return biomes!![index/2]
+        val index = x/4+(z/4)*4+(y/4)*16
+        return biomes!![index]
     }
 
     /**
@@ -206,7 +207,7 @@ class ChunkColumn @JvmOverloads constructor(val x: Int, val z: Int, val minY: In
             this["Status"] = NBT.String(generationStatus.id)
 
             if(biomes != null) {
-                this["Biomes"] = NBT.IntArray(biomes!!)
+                this["Biomes"] = NBT.IntArray(*biomes!!)
             }
 
             this["Heightmaps"] = NBT.Kompound {
