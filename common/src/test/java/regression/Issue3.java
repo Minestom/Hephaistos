@@ -1,4 +1,4 @@
-package regression.issue3;
+package regression;
 
 import org.jglrxavpok.hephaistos.mca.AnvilException;
 import org.jglrxavpok.hephaistos.mca.ChunkColumn;

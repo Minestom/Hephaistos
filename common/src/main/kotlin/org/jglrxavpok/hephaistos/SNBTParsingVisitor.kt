@@ -3,6 +3,7 @@ package org.jglrxavpok.hephaistos
 import org.jglrxavpok.hephaistos.antlr.SNBTBaseVisitor
 import org.jglrxavpok.hephaistos.antlr.SNBTParser
 import org.jglrxavpok.hephaistos.nbt.*
+import java.lang.StringBuilder
 
 object SNBTParsingVisitor: SNBTBaseVisitor<NBT>() {
 
@@ -74,10 +75,31 @@ object SNBTParsingVisitor: SNBTBaseVisitor<NBT>() {
         return NBT.Short(value)
     }
 
+    private fun unescape(str: String): String {
+        var escaped = false
+        val buffer = StringBuilder()
+        for (c in str) {
+            if(escaped) {
+                when(c) {
+                    '\\', '"' -> {
+                        buffer.append(c)
+                        escaped = false
+                    }
+                    else -> error("Unrecognized escape sequence: \\$c")
+                }
+            } else if(c == '\\') {
+                escaped = true;
+            } else {
+                buffer.append(c)
+            }
+        }
+        return buffer.toString()
+    }
+
     override fun visitStringNBT(ctx: SNBTParser.StringNBTContext): NBT {
         return when {
-            ctx.DoubleQuoteText() != null -> NBT.String(ctx.DoubleQuoteText().text.drop(1).dropLast(1))
-            ctx.SingleQuoteText() != null -> NBT.String(ctx.SingleQuoteText().text.drop(1).dropLast(1))
+            ctx.DoubleQuoteText() != null -> NBT.String(unescape(ctx.DoubleQuoteText().text.drop(1).dropLast(1)))
+            ctx.SingleQuoteText() != null -> NBT.String(unescape(ctx.SingleQuoteText().text.drop(1).dropLast(1)))
             else -> NBT.String(ctx.text)
         }
     }
