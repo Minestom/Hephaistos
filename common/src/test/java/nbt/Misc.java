@@ -3,7 +3,7 @@ package nbt;
 import org.jglrxavpok.hephaistos.nbt.*;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class Misc {
 
@@ -17,5 +17,20 @@ public class Misc {
 
         array = NBT.LongArray(1, 2, 3);
         assertEquals("[L;1L,2L,3L]", array.toSNBT());
+    }
+
+    @Test
+    public void truthness() {
+        NBTByte shouldBeFalse = NBT.Byte(0);
+        assertFalse(shouldBeFalse.asBoolean());
+
+        NBTByte shouldBeTrue = NBT.Byte(1);
+        assertTrue(shouldBeTrue.asBoolean());
+
+        NBTByte shouldBeTrue2 = NBT.Byte(-1);
+        assertTrue(shouldBeTrue2.asBoolean());
+
+        NBTByte shouldBeTrueToo = NBT.Byte(42);
+        assertTrue(shouldBeTrueToo.asBoolean());
     }
 }

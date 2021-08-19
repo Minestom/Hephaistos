@@ -11,6 +11,14 @@ interface NBTCompoundGetters: Map<String, NBT> {
     /**
      * Returns the value associated to the given key, if any. Returns 'null' otherwise.
      * Also returns 'null' if the tag is not of the correct type (eg getByte on a NBTCompound will yield 'null')
+     *
+     * Uses `NBTByte#asBoolean()` to determine the truthness
+     */
+    fun getBoolean(key: String) = (get(key) as? NBTByte)?.asBoolean()
+
+    /**
+     * Returns the value associated to the given key, if any. Returns 'null' otherwise.
+     * Also returns 'null' if the tag is not of the correct type (eg getByte on a NBTCompound will yield 'null')
      */
     fun getByteArray(key: String) = (get(key) as? NBTByteArray)?.value
 

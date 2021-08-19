@@ -70,6 +70,9 @@ class NBTCompound(val tags: Map<String, NBT> = mapOf()): NBT, NBTCompoundGetters
 
         @Contract(pure = true)
         internal fun entry(key: String, value: NBT) = CompoundEntry(key, value)
+
+        @JvmStatic
+        val EMPTY = NBTCompound()
     }
 
     data class CompoundEntry(val key: String, val value: NBT)
