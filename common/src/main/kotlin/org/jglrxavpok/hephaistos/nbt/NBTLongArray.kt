@@ -4,7 +4,7 @@ import org.jglrxavpok.hephaistos.collections.ImmutableLongArray
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
-class NBTLongArray internal constructor(val value: ImmutableLongArray) : NBT, Iterable<Long> {
+class NBTLongArray constructor(val value: ImmutableLongArray) : NBT, Iterable<Long> {
 
     val size get() = value.size
 

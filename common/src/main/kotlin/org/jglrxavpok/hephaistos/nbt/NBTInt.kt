@@ -3,7 +3,7 @@ package org.jglrxavpok.hephaistos.nbt
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
-class NBTInt internal constructor(value: Int) : NBTNumber<Int>(value) {
+class NBTInt constructor(value: Int) : NBTNumber<Int>(value) {
     override val ID = NBTType.TAG_Int
 
     // help Java compiler to find the correct type (boxed vs primitive types)

@@ -7,6 +7,8 @@ class NBTByte constructor(value: Byte) : NBTNumber<Byte>(value) {
 
     override val ID = NBTType.TAG_Byte
 
+    constructor(value: Boolean): this(if(value) 1 else 0)
+
     // help Java compiler to find the correct type (boxed vs primitive types)
     fun getValue(): Byte = value
 

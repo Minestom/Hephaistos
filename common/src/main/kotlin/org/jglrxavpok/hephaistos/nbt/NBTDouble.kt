@@ -3,7 +3,7 @@ package org.jglrxavpok.hephaistos.nbt
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
-class NBTDouble internal constructor(value: Double) : NBTNumber<Double>(value) {
+class NBTDouble constructor(value: Double) : NBTNumber<Double>(value) {
 
     override val ID = NBTType.TAG_Double
 

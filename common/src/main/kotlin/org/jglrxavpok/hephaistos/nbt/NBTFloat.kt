@@ -3,7 +3,7 @@ package org.jglrxavpok.hephaistos.nbt
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
-class NBTFloat internal constructor(value: Float) : NBTNumber<Float>(value) {
+class NBTFloat constructor(value: Float) : NBTNumber<Float>(value) {
     override val ID = NBTType.TAG_Float
 
     // help Java compiler to find the correct type (boxed vs primitive types)

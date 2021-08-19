@@ -4,7 +4,7 @@ import org.jglrxavpok.hephaistos.collections.ImmutableIntArray
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
-class NBTIntArray internal constructor(val value: ImmutableIntArray) : NBT, Iterable<Int> {
+class NBTIntArray constructor(val value: ImmutableIntArray) : NBT, Iterable<Int> {
 
     val size get() = value.size
 
