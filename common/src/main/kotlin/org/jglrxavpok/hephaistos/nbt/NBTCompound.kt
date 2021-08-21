@@ -5,7 +5,7 @@ import org.jglrxavpok.hephaistos.nbt.mutable.MutableNBTCompound
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
-class NBTCompound(val tags: Map<String, NBT> = mapOf()): NBT, NBTCompoundGetters, Map<String, NBT> by tags, NBTCompoundLike {
+class NBTCompound @JvmOverloads constructor(val tags: Map<String, NBT> = mapOf()): NBT, NBTCompoundGetters, Map<String, NBT> by tags, NBTCompoundLike {
 
     override val ID = NBTType.TAG_Compound
 

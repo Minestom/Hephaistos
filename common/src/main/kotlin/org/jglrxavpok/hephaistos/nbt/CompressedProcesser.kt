@@ -48,12 +48,12 @@ open class CompressedProcesser<I : InputStream, O : OutputStream> {
         val ZLIB = ParameterizedZlib()
     }
 
-    class ParameterizedGzip(val bufferSize: Int = 512) : CompressedProcesser<GZIPInputStream, GZIPOutputStream>() {
+    class ParameterizedGzip @JvmOverloads constructor(val bufferSize: Int = 512) : CompressedProcesser<GZIPInputStream, GZIPOutputStream>() {
         override fun generateInputStream(originalInputStream: InputStream) = GZIPInputStream(originalInputStream, bufferSize)
         override fun generateOutputStream(originalOutputStream: OutputStream) = GZIPOutputStream(originalOutputStream, bufferSize)
     }
 
-    class ParameterizedZlib(
+    class ParameterizedZlib @JvmOverloads constructor(
         val inflater: Inflater = DEFAULT_INFLATER,
         val deflater: Deflater = DEFAULT_DEFLATER,
         val bufferSize: Int = 512
