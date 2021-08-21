@@ -29,14 +29,12 @@ jobs:
       run: gradle build
       
     - name: Copy key to tmp file
-      run: 'base64 -d "$PRIV_KEY64" > ./key'
+      run: 'echo "$PRIV_KEY64" > ./key64 | base64 -d ./key64 > ./key'
       shell: bash
       env:
         PRIV_KEY64: ${{ secrets.PRIV_KEY64 }}
 
-    # The USERNAME and TOKEN need to correspond to the credentials environment variables used in
-    # the publishing section of your build.gradle
-    - name: Publish to GitHub Packages
+    - name: Publish to Maven Central
       run: gradle publishAllPublicationsToSonatypeRepository
       env:
         SIGNING_KEY_ID: ${{ secrets.KEY_ID }}
