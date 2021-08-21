@@ -29,7 +29,7 @@ jobs:
       run: gradle build
       
     - name: Copy key to tmp file
-      run: 'echo "$PRIV_KEY64" > ./key64 | base64 -d ./key64 > ./key'
+      run: 'echo "$PRIV_KEY64" > ./key64 && base64 -d ./key64 > ./key'
       shell: bash
       env:
         PRIV_KEY64: ${{ secrets.PRIV_KEY64 }}
