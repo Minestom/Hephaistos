@@ -105,7 +105,7 @@ sealed interface NBT {
 
         @JvmStatic
         @Contract(pure = true)
-        fun Compound(lambda: CompoundBuilder) = NBTCompound(MutableNBTCompound().also { lambda.run(it) })
+        fun Compound(lambda: CompoundBuilder) = MutableNBTCompound().also { lambda.run(it) }.toCompound()
 
         @JvmStatic
         @Contract(pure = true)

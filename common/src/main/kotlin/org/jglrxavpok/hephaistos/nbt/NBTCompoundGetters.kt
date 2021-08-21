@@ -1,6 +1,16 @@
 package org.jglrxavpok.hephaistos.nbt
 
-interface NBTCompoundGetters: Map<String, NBT> {
+interface NBTCompoundGetters {
+
+    /**
+     * Returns the value associated to the given key, if any. Returns 'null' otherwise.
+     */
+    operator fun get(key: String): NBT?
+
+    /**
+     * Returns the value associated to the given key, if any. Returns 'defaultValue' otherwise.
+     */
+    fun getOrElse(key: String, defaultValue: NBT): NBT = get(key) ?: defaultValue
 
     /**
      * Returns the value associated to the given key, if any. Returns 'null' otherwise.

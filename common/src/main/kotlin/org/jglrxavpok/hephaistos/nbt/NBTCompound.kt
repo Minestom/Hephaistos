@@ -5,7 +5,7 @@ import org.jglrxavpok.hephaistos.nbt.mutable.MutableNBTCompound
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
-class NBTCompound @JvmOverloads constructor(val tags: Map<String, NBT> = mapOf()): NBT, Map<String, NBT> by tags, NBTCompoundLike {
+class NBTCompound @JvmOverloads constructor(val tags: Map<String, NBT> = mapOf()): NBT, NBTCompoundLike {
 
     override val ID = NBTType.TAG_Compound
 
@@ -32,7 +32,7 @@ class NBTCompound @JvmOverloads constructor(val tags: Map<String, NBT> = mapOf()
 
         if (other == null) return false
 
-        if(other is MutableNBTCompound) return tags == other
+        if(other is MutableNBTCompound) return tags == other.asMapView()
 
         if (this::class != other::class) return false
 
@@ -48,7 +48,7 @@ class NBTCompound @JvmOverloads constructor(val tags: Map<String, NBT> = mapOf()
     }
 
     @Contract(pure = true)
-    fun modify(lambda: CompoundBuilder) = NBTCompound(MutableNBTCompound(tags.toMutableMap()).also { lambda.run(it) })
+    fun modify(lambda: CompoundBuilder) = MutableNBTCompound(tags.toMutableMap()).also { lambda.run(it) }.toCompound()
 
     @Contract(pure = true)
     fun kmodify(lambda: MutableNBTCompound.() -> Unit) = modify(lambda)
@@ -71,16 +71,26 @@ class NBTCompound @JvmOverloads constructor(val tags: Map<String, NBT> = mapOf()
         }
 
         @Contract(pure = true)
-        internal fun entry(key: String, value: NBT) = CompoundEntry(key, value)
+        internal fun entry(key: String, value: NBT) = object: CompoundEntry {
+            override val key: String
+                get() = key
+            override val value: NBT
+                get() = value
+        }
 
         @JvmField
         val EMPTY = NBTCompound()
     }
 
-    data class CompoundEntry(val key: String, val value: NBT)
-
     override fun toCompound() = this
 
+    override fun asMapView() = tags
+
+    override fun toMutableCompound() = MutableNBTCompound(this)
+
+    override fun plus(other: NBTCompoundLike): NBTCompound = modify { nbt ->
+        nbt += other
+    }
 }
 
 fun interface CompoundBuilder {

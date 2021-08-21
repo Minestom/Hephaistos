@@ -5,9 +5,9 @@ import org.jglrxavpok.hephaistos.collections.ImmutableIntArray
 import org.jglrxavpok.hephaistos.collections.ImmutableLongArray
 import org.jglrxavpok.hephaistos.nbt.*
 
-class MutableNBTCompound @JvmOverloads constructor(private val tags: MutableMap<String, NBT> = mutableMapOf()): MutableMap<String, NBT> by tags, NBTCompoundLike {
+class MutableNBTCompound @JvmOverloads constructor(private val tags: MutableMap<String, NBT> = mutableMapOf()): NBTCompoundLike {
 
-    constructor(nbt: NBTCompound): this(HashMap(nbt.tags)) // perform a copy
+    constructor(nbt: NBTCompound): this(nbt.tags.toMutableMap()) // perform a copy
 
     override fun toCompound(): NBTCompound = NBT.Compound(tags.toMap())
 
@@ -21,12 +21,16 @@ class MutableNBTCompound @JvmOverloads constructor(private val tags: MutableMap<
 
     override fun hashCode() = tags.hashCode()
 
+    override fun toString() = toCompound().toString()
     // Convenience methods
 
     /**
      * Sets (and overwrites previous) tag associated to the given key (shorthand method that in turn calls `put`)
      */
-    fun set(key: String, value: NBT) = put(key, value)
+    operator fun set(key: String, value: NBT): MutableNBTCompound {
+        tags[key] = value
+        return this
+    }
 
     /**
      * Sets (and overwrites previous) tag associated to the given key (shorthand method that in turn calls `set`)
@@ -92,4 +96,108 @@ class MutableNBTCompound @JvmOverloads constructor(private val tags: MutableMap<
      * Sets (and overwrites previous) tag associated to the given key (shorthand method that in turn calls `set`)
      */
     fun setString(key: String, value: String) = set(key, NBTString(value))
+
+    override fun asMapView(): Map<String, NBT> {
+        return tags
+    }
+
+    override fun toMutableCompound(): MutableNBTCompound {
+        return MutableNBTCompound(HashMap(tags))
+    }
+
+    // ============================
+    // Map-like interface
+    // ============================
+    /**
+     * Removes all elements from this compound.
+     */
+    fun clear() {
+        tags.clear()
+    }
+
+    /**
+     * Associates the specified value with the specified key in the compound.
+     */
+    fun put(key: String, value: NBT) = tags.put(key, value)
+
+    /**
+     * Updates this compound with key/value pairs from the specified compound from.
+     * Returns itself for chaining
+     */
+    fun putAll(from: Map<String, NBT>): MutableNBTCompound {
+        for((key, value) in from) {
+            this[key] = value
+        }
+        return this
+    }
+
+    /**
+     * Updates this compound with key/value pairs from the specified compound from.
+     * Returns itself for chaining
+     */
+    fun putAll(from: NBTCompoundLike): MutableNBTCompound {
+        return putAll(from.asMapView())
+    }
+
+    /**
+     * Updates this compound with key/value pairs from the specified compound from.
+     * Returns itself for chaining
+     */
+    fun setAll(from: Map<String, NBT>) = putAll(from)
+
+    /**
+     * Updates this compound with key/value pairs from the specified compound from.
+     * Returns itself for chaining
+     */
+    fun setAll(from: NBTCompoundLike) = putAll(from)
+
+    /**
+     * Updates this compound with key/value pairs from the specified compound other.
+     */
+    operator fun plusAssign(other: Map<String, NBT>): Unit {
+        putAll(other)
+    }
+
+    /**
+     * Updates this compound with key/value pairs from the specified compound other.
+     */
+    operator fun plusAssign(other: NBTCompoundLike): Unit {
+        plusAssign(other.asMapView())
+    }
+
+    /**
+     * Updates this compound with the given key/value pair.
+     */
+    operator fun plusAssign(p: Pair<String, NBT>): Unit {
+        tags += p
+    }
+
+    /**
+     * Creates a new mutable compound by replacing or adding entries to this compound from another compound.
+     */
+    override operator fun plus(other: NBTCompoundLike): MutableNBTCompound {
+        val mutable = MutableNBTCompound(tags.toMutableMap())
+        mutable += other
+        return mutable
+    }
+
+    /**
+     * Removes the specified key and its corresponding value from this compound.
+     */
+    fun remove(key: String) = tags.remove(key)
+
+    /**
+     * Removes the entry for the specified key only if it is mapped to the specified value.
+     */
+    fun remove(key: String, value: NBT) = tags.remove(key, value)
+
+    /**
+     * Returns the value for the given key. If the key is not found in the compound, calls the defaultValue function, puts its result into the compound under the given key and returns it.
+     */
+    fun getOrPut(key: String, defaultValue: () -> NBT) = tags.getOrPut(key, defaultValue)
+
+    /**
+     * Returns a MutableIterator over the mutable entries in the MutableNBTCompound.
+     */
+    override fun iterator(): MutableIterator<MutableCompoundEntry> = tags.iterator()
 }
