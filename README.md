@@ -1,21 +1,48 @@
 # Hephaistos
-![](https://github.com/jglrxavpok/Hephaistos/workflows/Gradle%20Build/badge.svg)
 
+![](https://github.com/jglrxavpok/Hephaistos/workflows/Gradle%20Build/badge.svg)
 ![](https://github.com/jglrxavpok/Hephaistos/workflows/Gradle%20Tests/badge.svg)
+
+[![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
 
 This library is both a NBT library and a Minecraft Anvil format library.
 
 Made in Kotlin, it is accessible for all languages that run on the JVM.
 As it is in Kotlin, this means your project may have to add a new dependency on the Kotlin runtime library.
 
+## Table of Contents
+
+- [Background](#background)
+- [Install](#install)
+- [Usage](#usage)
+- [Maintainers](#maintainers)
+- [Contributing](#contributing)
+- [License](#license)
+
+## Background
+
+[Minestom](https://github.com/Minestom/Minestom) required an NBT library during its development. Available librairies were deemed either too heavy, or lacking in features.
+
+Hephaistos has been created in hopes to provide a library for handling NBT data and MCA files with a clean API.
+
+## Install
+
+This project is supposed to be used as a library.
+
+It is available on Maven Central with the following coordinate:
+`io.github.jglrxavpok.hephaistos:common:<version>`
+
+The Gson compatibility layer is available at: `io.github.jglrxavpok.hephaistos:gson:<version>`
+
+## Usage
+
 Hephaistos can read NBT from SNBT, binary format or (with additional dependencies) JSON.
 See more in the "parsing" section below for more information.
 
-## NBT
+### NBT
 Based on the up-to-date specs present at [Wiki.vg](https://wiki.vg/NBT)
 and on the [Minecraft Wiki](https://minecraft.gamepedia.com/NBT_format#TAG_definition).
 
-### Examples
 While the tests in `src/test/java/nbt` can help comprehension, here are a few more examples to show the philosophy:
 
 #### Reading 'servers.dat'
@@ -59,18 +86,18 @@ try(NBTWriter writer = new NBTWriter(new File("level.dat"), CompressedMode.GZIP)
 }
 ```
 
-## Parsing
+### Parsing
 Hephaistos can parse and write NBT data from/to SNBT, NBT binary format or JSON.
 
-### NBT binary format
+#### NBT binary format
 Use `NBTWriter#writeNamed` and `NBTReader#read()`.
 
-### SNBT format
+#### SNBT format
 If you want to read SNBT, use `SNBTParser#parse` with a `Reader` which contains the SNBT string to parse.
 
 If you want to write SNBT, simply use the `toSNBT()` method on any `NBT` instance.
 
-### JSON format
+#### JSON format
 Using JSON requires an additional library. For the moment, only Gson is supported by Hephaistos.
 
 To access the Gson-based reader and writer, you will need to add a new dependency in your `build.gradle` file (example with Jitpack.io names):
@@ -87,7 +114,7 @@ dependencies {
 }
 ```
 
-## Anvil format
+### Anvil format
 Built upon the NBT library part, the `mca` package allows loading and saving MCA (Minecraft Anvil) files.
 
 Contrary to `NBTReader` and `NBTWriter`, `RegionFile` requires a `DataSource` instead of a InputStream/OutputStream.
@@ -101,8 +128,6 @@ Finally, Hephaistos allows you to load and save Entities/TileEntities/Lighting b
 In the event that you find that a convenience method would help you in your work, do not hesitate to submit a Pull Request or post an issue on this Github repository.
 
 Here comes the part you are all waiting for, examples!
-
-### Examples
 
 #### Creating a RegionFile/MCAFile from scratch
 
@@ -168,3 +193,21 @@ for (int z = 0; z < 16; z++) {
 column0_0.getTileEntities()
 column0_0.getEntities()
 ```
+
+## Maintainers
+
+* [@jglrxavpok](https://github.com/jglrxavpok).
+* [@LeoDog896](https://github.com/LeoDog896).
+
+## Contributing
+
+Feel free to dive in! [Open an issue](https://github.com/jglrxavpok/Hephaistos/issues/new) or submit PRs.
+
+### Special thinks
+
+Thanks to the following people who greatly helped the development of this project:
+* [@LeoDog896](https://github.com/LeoDog896). Worked on the v2 rework of the library.
+
+## License
+
+[MIT](LICENSE.md) © Xavier "jglrxavpok" Niochaut

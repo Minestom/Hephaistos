@@ -1,3 +1,4 @@
+secrets.properties
 .gradle
 **/build/
 !common/src/**/build/

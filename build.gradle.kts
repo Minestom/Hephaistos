@@ -1,15 +1,20 @@
 plugins {
     kotlin("jvm") version "1.5.10"
     java
-    `maven-publish`
+    id("org.jetbrains.dokka") version "1.5.0"
 }
 
-group = "org.jglrxavpok.nbt"
-version = "2.0.0"
+repositories {
+    mavenCentral()
+}
 
 allprojects {
     apply(plugin = "java")
     apply(plugin = "kotlin")
+    apply(plugin = "org.jetbrains.dokka")
+
+    group = "io.github.jglrxavpok.hephaistos"
+    version = "2.0.0-rc"
 
     repositories {
         mavenCentral()
@@ -30,6 +35,16 @@ allprojects {
     java {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+
+        withSourcesJar()
+    }
+
+    val dokkaHtml by tasks.getting(org.jetbrains.dokka.gradle.DokkaTask::class)
+
+    val javadocJar: TaskProvider<Jar> by tasks.registering(Jar::class) {
+        dependsOn(dokkaHtml)
+        archiveClassifier.set("javadoc")
+        from(dokkaHtml.outputDirectory)
     }
 
     val compileKotlin: org.jetbrains.kotlin.gradle.tasks.KotlinCompile by tasks
