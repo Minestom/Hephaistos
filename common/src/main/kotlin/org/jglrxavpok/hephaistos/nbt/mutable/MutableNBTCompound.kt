@@ -7,14 +7,18 @@ import org.jglrxavpok.hephaistos.nbt.*
 
 class MutableNBTCompound @JvmOverloads constructor(private val tags: MutableMap<String, NBT> = mutableMapOf()): MutableMap<String, NBT> by tags, NBTCompoundLike {
 
+    constructor(nbt: NBTCompound): this(HashMap(nbt.tags)) // perform a copy
+
     override fun toCompound(): NBTCompound = NBT.Compound(tags.toMap())
 
     override fun equals(other: Any?): Boolean {
+        if(other is NBTCompound) return tags == other.tags
 
         if (other !is MutableNBTCompound) return false
 
         return tags == other.tags
     }
+
     override fun hashCode() = tags.hashCode()
 
     // Convenience methods

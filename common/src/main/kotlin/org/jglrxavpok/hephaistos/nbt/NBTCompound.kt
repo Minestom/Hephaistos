@@ -32,6 +32,8 @@ class NBTCompound @JvmOverloads constructor(val tags: Map<String, NBT> = mapOf()
 
         if (other == null) return false
 
+        if(other is MutableNBTCompound) return tags == other
+
         if (this::class != other::class) return false
 
         other as NBTCompound

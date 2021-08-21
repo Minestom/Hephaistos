@@ -1,6 +1,7 @@
 package nbt;
 
 import org.jglrxavpok.hephaistos.nbt.*;
+import org.jglrxavpok.hephaistos.nbt.mutable.MutableNBTCompound;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,5 +33,31 @@ public class Misc {
 
         NBTByte shouldBeTrueToo = NBT.Byte(42);
         assertTrue(shouldBeTrueToo.asBoolean());
+    }
+
+    @Test
+    public void equalityBetweenMutableAndNonMutable() {
+        NBTCompound myCompound = NBT.Compound(n -> {
+            n.setString("test", "aaa");
+        });
+
+        MutableNBTCompound mutableCopy = new MutableNBTCompound(myCompound);
+        assertEquals(myCompound, mutableCopy);
+        assertEquals(mutableCopy, myCompound);
+        mutableCopy.setString("test", "bbb");
+        assertNotEquals(myCompound, mutableCopy);
+        assertNotEquals(mutableCopy, myCompound);
+    }
+
+    @Test
+    public void mutableNBTConstructorShouldCopyNBTCompound() {
+        NBTCompound myCompound = NBT.Compound(n -> {
+            n.setString("test", "aaa");
+        });
+
+        MutableNBTCompound mutableCopy = new MutableNBTCompound(myCompound);
+        assertEquals("aaa", mutableCopy.getString("test"));
+        mutableCopy.setString("test", "bbb");
+        assertEquals("bbb", mutableCopy.getString("test"));
     }
 }
