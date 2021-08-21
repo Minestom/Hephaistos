@@ -6,7 +6,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":antlr"))
+    api(project(":antlr"))
 }
 
 configurations {
