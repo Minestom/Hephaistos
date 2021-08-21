@@ -38,7 +38,7 @@ public class ParallelizationTests {
     }
 
     @Test
-    public void parallelLoad() throws InterruptedException, IOException {
+    public void parallelLoad() throws InterruptedException, IOException, AnvilException {
         Files.copy(Paths.get("src/test/resources/r.0.0.mca"), Paths.get("tmp_parallel_r.0.0.mca"), REPLACE_EXISTING);
 
         RegionFile region = new RegionFile(new RandomAccessFile(new File("tmp_parallel_r.0.0.mca"), "rw"), 0, 0);

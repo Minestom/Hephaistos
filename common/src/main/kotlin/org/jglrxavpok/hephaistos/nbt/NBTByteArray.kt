@@ -44,6 +44,7 @@ class NBTByteArray constructor(val value: ImmutableByteArray) : NBT, Iterable<By
 
     companion object : NBTReaderCompanion<NBTByteArray> {
 
+        @JvmField
         val EMPTY = NBTByteArray(ImmutableByteArray.EMPTY)
 
         override fun readContents(source: DataInputStream): NBTByteArray {

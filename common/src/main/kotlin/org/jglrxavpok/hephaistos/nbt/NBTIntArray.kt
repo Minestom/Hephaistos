@@ -43,6 +43,10 @@ class NBTIntArray constructor(val value: ImmutableIntArray) : NBT, Iterable<Int>
     override fun iterator() = value.iterator()
 
     companion object : NBTReaderCompanion<NBTIntArray> {
+
+        @JvmField
+        val EMPTY = NBTIntArray()
+
         override fun readContents(source: DataInputStream): NBTIntArray {
             val length = source.readInt()
             val value = ImmutableIntArray(length) { source.readInt() }

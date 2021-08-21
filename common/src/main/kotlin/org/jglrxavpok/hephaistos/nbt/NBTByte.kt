@@ -30,10 +30,10 @@ class NBTByte constructor(value: Byte) : NBTNumber<Byte>(value) {
             return NBTByte(source.readByte())
         }
 
-        @JvmStatic
+        @JvmField
         val ONE = NBTByte(1)
 
-        @JvmStatic
+        @JvmField
         val ZERO = NBTByte(0)
     }
 }

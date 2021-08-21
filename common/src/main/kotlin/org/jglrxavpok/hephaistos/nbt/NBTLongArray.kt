@@ -42,6 +42,9 @@ class NBTLongArray constructor(val value: ImmutableLongArray) : NBT, Iterable<Lo
     override fun iterator() = value.iterator()
 
     companion object : NBTReaderCompanion<NBTLongArray> {
+        @JvmField
+        val EMPTY = NBTLongArray()
+
         override fun readContents(source: DataInputStream): NBTLongArray {
             val length = source.readInt()
             val value = ImmutableLongArray(length) { source.readLong() }

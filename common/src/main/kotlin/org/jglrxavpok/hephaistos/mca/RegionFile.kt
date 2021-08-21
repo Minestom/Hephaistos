@@ -45,7 +45,7 @@ class RegionFile @Throws(AnvilException::class, IOException::class) @JvmOverload
 
     val logicalHeight = maxY - minY +1
 
-    @JvmOverloads constructor(file: RandomAccessFile, regionX: Int, regionZ: Int, minY: Int = 0, maxY: Int = 255):
+    @Throws(AnvilException::class, IOException::class) @JvmOverloads constructor(file: RandomAccessFile, regionX: Int, regionZ: Int, minY: Int = 0, maxY: Int = 255):
             this(RandomAccessFileSource(file), regionX, regionZ, minY, maxY)
 
     init {

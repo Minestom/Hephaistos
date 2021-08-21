@@ -2,7 +2,7 @@ package org.jglrxavpok.hephaistos.nbt
 
 import org.jetbrains.annotations.Contract
 
-interface NBTCompoundLike {
+interface NBTCompoundLike: NBTCompoundGetters {
 
     /**
      * Creates a NBTCompound. This will be immutable and copied,

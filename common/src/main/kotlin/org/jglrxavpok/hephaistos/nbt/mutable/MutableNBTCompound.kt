@@ -5,7 +5,7 @@ import org.jglrxavpok.hephaistos.collections.ImmutableIntArray
 import org.jglrxavpok.hephaistos.collections.ImmutableLongArray
 import org.jglrxavpok.hephaistos.nbt.*
 
-class MutableNBTCompound @JvmOverloads constructor(private val tags: MutableMap<String, NBT> = mutableMapOf()): NBTCompoundGetters, MutableMap<String, NBT> by tags, NBTCompoundLike {
+class MutableNBTCompound @JvmOverloads constructor(private val tags: MutableMap<String, NBT> = mutableMapOf()): MutableMap<String, NBT> by tags, NBTCompoundLike {
 
     override fun toCompound(): NBTCompound = NBT.Compound(tags.toMap())
 
@@ -18,6 +18,11 @@ class MutableNBTCompound @JvmOverloads constructor(private val tags: MutableMap<
     override fun hashCode() = tags.hashCode()
 
     // Convenience methods
+
+    /**
+     * Sets (and overwrites previous) tag associated to the given key (shorthand method that in turn calls `put`)
+     */
+    fun set(key: String, value: NBT) = put(key, value)
 
     /**
      * Sets (and overwrites previous) tag associated to the given key (shorthand method that in turn calls `set`)

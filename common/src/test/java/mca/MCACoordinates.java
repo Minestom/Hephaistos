@@ -20,7 +20,7 @@ public class MCACoordinates {
     private RegionFile region2;
 
     @BeforeEach
-    void init() throws IOException {
+    void init() throws IOException, AnvilException {
         Path target = Path.of("./tmp_coords_r.0.0.mca");
         Path target2 = Path.of("./tmp_coords_r2.0.0.mca");
         Files.createFile(target);
