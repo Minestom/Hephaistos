@@ -7,16 +7,18 @@ import org.jglrxavpok.hephaistos.nbt.*
 
 class MutableNBTCompound @JvmOverloads constructor(private val tags: MutableMap<String, NBT> = mutableMapOf()): NBTCompoundLike {
 
-    constructor(nbt: NBTCompound): this(nbt.tags.toMutableMap()) // perform a copy
+    constructor(nbt: NBTCompound): this(nbt.asMapView().toMutableMap()) // perform a copy
 
     override fun toCompound(): NBTCompound = NBT.Compound(tags.toMap())
 
     override fun equals(other: Any?): Boolean {
-        if(other is NBTCompound) return tags == other.tags
+        if(other === this) return true
 
-        if (other !is MutableNBTCompound) return false
+        if(other == null) return false
 
-        return tags == other.tags
+        if(other !is NBTCompoundLike) return false
+
+        return tags == other.asMapView()
     }
 
     override fun hashCode() = tags.hashCode()
@@ -106,7 +108,7 @@ class MutableNBTCompound @JvmOverloads constructor(private val tags: MutableMap<
     }
 
     // ============================
-    // Map-like interface
+    // MutableMap-like interface
     // ============================
     /**
      * Removes all elements from this compound.

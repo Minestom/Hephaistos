@@ -51,7 +51,7 @@ public @NotNull Component serializeShowEntity(HoverEvent.@NotNull ShowEntity inp
 }
 ```
 
-* `NBTList` is no longer mutable. `NBTList#add` (and similar methods) still exists because it extends `java.util.List` in Java. Calling these methods WILL throw an exception. Use `NBT.List` to create a list:
+* `NBTList` is no longer mutable. Use `NBT.List` to create a list:
   
 Old:
 ```java

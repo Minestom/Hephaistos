@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Issue8 {
 
     @Test
-    public void escapeString0() throws IOException, AnvilException {
+    public void escapeString() {
         String input = "{\"t\":\"h \\\" hihi \\\" i\"}";
         NBTCompound compound;
         try {
@@ -31,6 +31,7 @@ public class Issue8 {
         );
     }
 
+    /* Removed test. Reason: tag-order dependent, and redundant with test above
     @Test
     public void escapeString() throws IOException, AnvilException {
         String input = "{\"Unbreakable\":1B,\"CustomModelData\":22,\"item_id\":\"test_back\",\"display\":{\"Lore\":[\"{\\\"text\\\":\\\"This is a test backpack! Used for wearing and testing! Put it on your back slot!\\\"}\"],\"Name\":\"{\\\"text\\\":\\\"Test Backpack\\\"}\"}}";
@@ -46,5 +47,6 @@ public class Issue8 {
                 compound.toString()
         );
     }
+    */
 
 }
