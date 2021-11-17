@@ -34,14 +34,26 @@ class ChunkSection(val y: Byte) {
         }
 
         // empty palette can happen if the section exist but requires more than 8 bits to save the block IDs (in that case, the global ID is directly used)
-        val paletteNBT = nbt.getList<NBTCompound>("Palette")
+        val paletteNBT =
+            when {
+                version < SupportedVersion.MC_1_18_PRE_3 -> nbt.getList<NBTCompound>("Palette")
+                else -> (nbt.getCompound("block_states") ?: missing("block_states")).getList<NBTCompound>("palette")
+            }
+        palette = paletteNBT?.let { Palette(it) } // We consider that there are no blocks inside this section if the palette is null (because we cannot interpret IDs)
 
-        // We consider that there are no blocks inside this section if the palette is null (because we cannot interpret IDs)
-        palette = paletteNBT?.let { Palette(it) }
+        if(palette == null) {
+            val hasBlockStates = if(version < SupportedVersion.MC_1_18_PRE_3) {
+                nbt.containsKey("BlockStates")
+            } else {
+                (nbt.getCompound("block_states") ?: missing("block_states")).containsKey("data")
+            }
 
-        if(palette == null && nbt.containsKey("BlockStates")) {
-            System.err.println("[Hephaistos] Attempted to load a ChunkSection with no palette but block states. Because Hephaistos cannot interpret global IDs, block states will be skipped")
-        } else if(palette != null) {
+            if(!hasBlockStates) {
+                System.err.println("[Hephaistos] Attempted to load a ChunkSection with no palette but block states. Because Hephaistos cannot interpret global IDs, block states will be skipped")
+            }
+        }
+
+        if(palette != null) {
             val compactedBlockStates = nbt.getLongArray("BlockStates") ?: missing("BlockStates")
             val sizeInBits = compactedBlockStates.size*64 / 4096
             val ids: IntArray
@@ -230,8 +242,17 @@ class ChunkSection(val y: Byte) {
         this["BlockLight"] = NBT.ByteArray(*blockLights)
         this["SkyLight"] = NBT.ByteArray(*skyLights)
         if(!empty) {
-            this["Palette"] = palette!!.toNBT()
-            this["BlockStates"] = NBT.LongArray(palette!!.compactIDs(blockStates, version))
+            if(version < SupportedVersion.MC_1_18_PRE_3) {
+                this["Palette"] = palette!!.toNBT()
+                this["BlockStates"] = NBT.LongArray(palette!!.compactIDs(blockStates, version))
+            } else {
+                this["block_states"] = NBT.Kompound {
+                    this["palette"] = palette!!.toNBT()
+                    this["data"] = NBT.LongArray(palette!!.compactIDs(blockStates, version))
+                }
+            }
+
+            TODO("1.18 support: biomes")
         }
     }
 

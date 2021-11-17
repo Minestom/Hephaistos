@@ -233,7 +233,7 @@ public class MCASaving {
         assertEquals((byte) 12, c.getSection((byte)0).getSkyLight(0,5,0));
     }
 
-    // Start of 1.17 support ============================================
+    // Start of 1.17+ support ============================================
 
     @ParameterizedTest
     @ArgumentsSource(DataSourceProvider.class)
@@ -287,5 +287,5 @@ public class MCASaving {
     }
 
 
-    // End of 1.17 support ============================================
+    // End of 1.17+ support ============================================
 }
