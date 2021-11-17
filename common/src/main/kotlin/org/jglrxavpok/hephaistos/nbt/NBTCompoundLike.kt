@@ -7,7 +7,7 @@ import java.util.function.BiConsumer
 typealias CompoundEntry = Map.Entry<String, NBT>
 typealias MutableCompoundEntry = MutableMap.MutableEntry<String, NBT>
 
-interface NBTCompoundLike: NBTCompoundGetters {
+interface NBTCompoundLike: NBTCompoundGetters, Iterable<CompoundEntry> {
 
     /**
      * Creates a NBTCompound. This will be immutable and copied,
@@ -82,7 +82,7 @@ interface NBTCompoundLike: NBTCompoundGetters {
     /**
      * Returns an Iterator over the entries in the compound.
      */
-    operator fun iterator(): Iterator<CompoundEntry> = asMapView().iterator()
+    override operator fun iterator(): Iterator<CompoundEntry> = asMapView().iterator()
 
     /**
      * Returns the value corresponding to the given key, or null if such a key is not present in the compound.

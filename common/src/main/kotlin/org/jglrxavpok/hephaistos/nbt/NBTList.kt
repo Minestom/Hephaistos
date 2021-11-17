@@ -6,7 +6,7 @@ import java.io.IOException
 import java.util.*
 import java.util.function.Consumer
 
-class NBTList<Tag: NBT> @JvmOverloads constructor(val subtagType: NBTType<out Tag>, _tags: List<out Tag> = listOf()): NBT {
+class NBTList<Tag: NBT> @JvmOverloads constructor(val subtagType: NBTType<out Tag>, _tags: List<out Tag> = listOf()): NBT, Iterable<Tag> {
 
     private val tags: List<out Tag> = java.util.List.copyOf(_tags)
 
@@ -126,7 +126,7 @@ class NBTList<Tag: NBT> @JvmOverloads constructor(val subtagType: NBTType<out Ta
     /**
      * Returns an iterator over the elements of this object.
      */
-    operator fun iterator() = tags.iterator()
+    override operator fun iterator() = tags.iterator()
 
     /**
      * Returns a list iterator over the elements in this list (in proper sequence), starting at the specified index.
@@ -142,11 +142,6 @@ class NBTList<Tag: NBT> @JvmOverloads constructor(val subtagType: NBTType<out Ta
      * Performs the given action on each element.
      */
     fun forEach(action: (Tag) -> Unit) = tags.forEach(action)
-
-    /**
-     * Performs the given action on each element.
-     */
-    fun forEach(action: Consumer<Tag>) = tags.forEach(action)
 }
 
 fun interface NBTListGenerator<T: NBT> {
