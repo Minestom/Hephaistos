@@ -190,7 +190,8 @@ class RegionFile @Throws(AnvilException::class, IOException::class) @JvmOverload
      * one instanced on their own, and passing it to writeColumn *is* valid.
      */
     @Throws(IOException::class)
-    fun writeColumn(column: ChunkColumn) {
+    @JvmOverloads
+    fun writeColumn(column: ChunkColumn, version: SupportedVersion = SupportedVersion.Latest) {
         if(column.minY < minY)
             throw AnvilException("ChunkColumn minY must be >= to RegionFile minY")
         if(column.maxY > maxY)
@@ -199,7 +200,7 @@ class RegionFile @Throws(AnvilException::class, IOException::class) @JvmOverload
         val z = column.z
         if(out(x, z)) throw AnvilException("Out of RegionFile: $x,$z (chunk)")
 
-        val nbt = column.toNBT()
+        val nbt = column.toNBT(version)
         val dataOut = ByteArrayOutputStream()
         NBTWriter(dataOut, CompressedProcesser.ZLIB).use {
             it.writeNamed("", nbt)
@@ -401,7 +402,7 @@ class RegionFile @Throws(AnvilException::class, IOException::class) @JvmOverload
      * @throws IllegalArgumentException if x,y,z is not a valid position inside this region
      */
     @Throws(AnvilException::class, IllegalArgumentException::class)
-    fun setBiome(x: Int, y: Int, z: Int, biomeID: Int) {
+    fun setBiome(x: Int, y: Int, z: Int, biomeID: String) {
         if(out(x.blockToChunk(), z.blockToChunk())) throw IllegalArgumentException("Out of region $x;$z (block)")
         if(y !in 0..255) throw IllegalArgumentException("y ($y) must be in 0..255")
 
@@ -421,7 +422,7 @@ class RegionFile @Throws(AnvilException::class, IOException::class) @JvmOverload
      * @throws AnvilException if the chunk corresponding to x,z does not exist in this region (ie not loaded by the game, nor created and waiting for saving with this lib)
      */
     @Throws(AnvilException::class, IllegalArgumentException::class)
-    fun getBiome(x: Int, y: Int, z: Int): Int {
+    fun getBiome(x: Int, y: Int, z: Int): String {
         if(out(x.blockToChunk(), z.blockToChunk())) throw IllegalArgumentException("Out of region $x;$z (block)")
         if(y !in 0..255) throw IllegalArgumentException("y ($y) must be in 0..255")
 

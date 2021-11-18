@@ -2,10 +2,10 @@ package org.jglrxavpok.hephaistos.mca
 
 import org.jglrxavpok.hephaistos.collections.ImmutableByteArray
 import org.jglrxavpok.hephaistos.mca.AnvilException.Companion.missing
+import org.jglrxavpok.hephaistos.mcdata.Biome
 import org.jglrxavpok.hephaistos.nbt.*
 import org.jglrxavpok.hephaistos.nbt.mutable.MutableNBTCompound
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.math.min
 
 /**
  * 16x256x16 (XYZ) area of the world. Consists of 16 ChunkSections vertically stacked.
@@ -14,12 +14,12 @@ import kotlin.math.min
 class ChunkColumn {
 
     companion object {
-        const val UnknownBiome = -1
-
-        private fun SectionName(version: SupportedVersion) = if(version < SupportedVersion.MC_1_18_PRE_3) "Sections" else "sections"
-        private fun EntitiesName(version: SupportedVersion) = if(version < SupportedVersion.MC_1_18_PRE_3) "Entities" else "entities"
-        private fun BlockEntitiesName(version: SupportedVersion) = if(version < SupportedVersion.MC_1_18_PRE_3) "TileEntities" else "block_entities"
-        private fun StructuresName(version: SupportedVersion) = if(version < SupportedVersion.MC_1_18_PRE_3) "Structures" else "structures"
+        private fun SectionName(version: SupportedVersion) = if(version < SupportedVersion.MC_1_18_PRE_4) "Sections" else "sections"
+        private fun EntitiesName(version: SupportedVersion) = if(version < SupportedVersion.MC_1_18_PRE_4) "Entities" else "entities"
+        private fun BlockEntitiesName(version: SupportedVersion) = if(version < SupportedVersion.MC_1_18_PRE_4) "TileEntities" else "block_entities"
+        private fun StructuresName(version: SupportedVersion) = if(version < SupportedVersion.MC_1_18_PRE_4) "Structures" else "structures"
+        private fun BlockTicksName(version: SupportedVersion) = if(version < SupportedVersion.MC_1_18_PRE_4) "TileTicks" else "block_ticks"
+        private fun FluidTicksName(version: SupportedVersion) = if(version < SupportedVersion.MC_1_18_PRE_4) "LiquidTicks" else "fluid_ticks"
     }
 
     /**
@@ -60,12 +60,6 @@ class ChunkColumn {
     var lastUpdate: Long = 0L
     var inhabitedTime: Long = 0L
 
-    /**
-     * May not exist. If it does, it is 1024 ints of Biome IDs, for a 4x4x4 volume in the chunk (ie 1 number correspond
-     * to the biome for a cube of 4x4x4 blocks).
-     * Arranged by X, Z and then Y.
-     */
-    var biomes: IntArray? = null
     var motionBlockingHeightMap = Heightmap()
     var worldSurfaceHeightMap = Heightmap()
     var motionBlockingNoLeavesHeightMap: Heightmap? = null
@@ -78,8 +72,12 @@ class ChunkColumn {
     var liquidTicks: NBTList<NBTCompound> = NBT.List(NBTType.TAG_Compound)
     var structures: NBTCompound? = null
     var lights: NBTList<NBTList<NBTShort>>? = null
+
+    @Deprecated("liquidsToBeTicked no longer exists in 1.18+ worlds", level = DeprecationLevel.WARNING)
     var liquidsToBeTicked: NBTList<NBTList<NBTShort>>? = null
+    @Deprecated("toBeTicked no longer exists in 1.18+ worlds", level = DeprecationLevel.WARNING)
     var toBeTicked: NBTList<NBTList<NBTShort>>? = null
+
     var postProcessing: NBTList<NBTList<NBTShort>>? = null
 
     /**
@@ -93,8 +91,7 @@ class ChunkColumn {
     var lightOn = true
 
     val logicalHeight get()= maxY - minY +1
-
-    private val biomeArraySize get()= logicalHeight.blockToSection() * 4*4*4
+    val biomeArraySize get()= logicalHeight * 4 * 4 * 4
 
     @JvmOverloads
     constructor(x: Int, z: Int, minY: Int = 0, maxY: Int = 255) {
@@ -115,7 +112,7 @@ class ChunkColumn {
 
         val levelData =
             when {
-                version < SupportedVersion.MC_1_18_PRE_3 -> {
+                version < SupportedVersion.MC_1_18_PRE_4 -> {
                     chunkData.getCompound("Level") ?: missing("Level")
                 }
 
@@ -125,7 +122,7 @@ class ChunkColumn {
             }
         this.x = levelData.getInt("xPos") ?: missing("xPos")
         this.z = levelData.getInt("zPos") ?: missing("zPos")
-        if(version < SupportedVersion.MC_1_18_PRE_3) {
+        if(version < SupportedVersion.MC_1_18_PRE_4) {
             if(version < SupportedVersion.MC_1_17_0) {
                 if(minY != 0) {
                     error("Pre 1.17 worlds do not support minY != 0")
@@ -166,9 +163,8 @@ class ChunkColumn {
         entities = levelData.getList(EntitiesName(version)) ?: NBT.List(NBTType.TAG_Compound)
         tileEntities = levelData.getList(BlockEntitiesName(version)) ?: NBT.List(NBTType.TAG_Compound)
 
-        TODO("1.18 support")
-        tileTicks = levelData.getList("TileTicks") ?: NBT.List(NBTType.TAG_Compound)
-        liquidTicks = levelData.getList("LiquidTicks") ?: NBT.List(NBTType.TAG_Compound)
+        tileTicks = levelData.getList(BlockTicksName(version)) ?: NBT.List(NBTType.TAG_Compound)
+        liquidTicks = levelData.getList(FluidTicksName(version)) ?: NBT.List(NBTType.TAG_Compound)
 
         structures = levelData.getCompound(StructuresName(version))
 
@@ -179,11 +175,10 @@ class ChunkColumn {
         }
         lights = levelData.getList("Lights")
 
-        if(version < SupportedVersion.MC_1_18_PRE_3) {
+        if(version < SupportedVersion.MC_1_18_PRE_4) {
             liquidsToBeTicked = levelData.getList("LiquidsToBeTicked")
             toBeTicked = levelData.getList("ToBeTicked")
         } else {
-            TODO("1.18 support")
             lightOn = levelData.getBoolean("isLightOn") ?: missing("isLightOn")
         }
 
@@ -197,16 +192,20 @@ class ChunkColumn {
                     continue
             }
             sections[sectionY] = ChunkSection(nbt, version)
-            if(version >= SupportedVersion.MC_1_18_PRE_3) {
+            if(version >= SupportedVersion.MC_1_18_PRE_4) {
                 this.maxY = maxOf(this.maxY, sectionY.toInt().sectionToBlock())
             }
         }
 
-        TODO("<1.17 support")
-        if(version < SupportedVersion.MC_1_18_PRE_3) {
+        if(version < SupportedVersion.MC_1_18_PRE_4) {
             val biomes = levelData.getIntArray("Biomes")
             if(biomes != null) {
-                TODO("Load non-palette biomes")
+                val biomeNamespaces = biomes.map(Biome::numericalIDToNamespaceID).toTypedArray()
+                for ((sectionY, section) in sections) {
+                    val offset = sectionY * 4 * 4 * 4
+                    section.biomes = Array<String>(4*4*4) { Biome.UnknownBiome }
+                    biomeNamespaces.copyInto(section.biomes!!, startIndex = offset, endIndex = offset + 4 * 4 * 4)
+                }
             }
         }
     }
@@ -229,7 +228,7 @@ class ChunkColumn {
         checkBounds(x, y, z)
         val sectionY = y.blockToSection()
         val section = getSection(sectionY)
-        section[x, y.blockInsideSection(), z] = state
+        section[x.blockInsideSection(), y.blockInsideSection(), z.blockInsideSection()] = state
     }
 
     /**
@@ -243,7 +242,7 @@ class ChunkColumn {
         if(section.empty) {
             return BlockState.AIR
         }
-        return section[x, y.blockInsideSection(), z]
+        return section[x.blockInsideSection(), y.blockInsideSection(), z.blockInsideSection()]
     }
 
     private fun checkBounds(x: Int, y: Int, z: Int) {
@@ -256,28 +255,23 @@ class ChunkColumn {
     }
 
     /**
-     * Sets the biome stored inside this column at the given position
-     * If biome data did not exist before calling this method, the biome array is created then filled with UnknownBiome
+     * Sets the biome stored inside this column at the given position, looking into the corresponding section
+     * If biome data did not exist before calling this method, the section's biome array is created then filled with UnknownBiome
      */
-    fun setBiome(x: Int, y: Int, z: Int, biomeID: Int) {
+    fun setBiome(x: Int, y: Int, z: Int, biomeID: String) {
         checkBounds(x, y, z)
-        if(biomes == null) {
-            biomes = IntArray(biomeArraySize) { UnknownBiome }
-        }
-        biomes?.set(x/4+(z/4)*4+(y/4)*16, biomeID)
+        val section = getSection(y.blockToSection())
+        section.setBiome(x.blockInsideSection(), y.blockInsideSection(), z.blockInsideSection(), biomeID)
     }
 
     /**
-     * Returns the biome stored inside this column at the given position
-     * Be aware that biome data may not be present inside this column, in that case, this method returns UnknownBiome
+     * Returns the biome stored inside this column at the given position, looking into the corresponding section
+     * Be aware that biome data may not be present inside the section, in that case, this method returns UnknownBiome
      */
-    fun getBiome(x: Int, y:Int, z: Int): Int {
+    fun getBiome(x: Int, y:Int, z: Int): String {
         checkBounds(x, y, z)
-        if(biomes == null) {
-            return UnknownBiome
-        }
-        val index = x/4+(z/4)*4+(y/4)*16
-        return biomes!![index]
+        val section = getSection(y.blockToSection())
+        return section.getBiome(x.blockInsideSection(), y.blockInsideSection(), z.blockInsideSection())
     }
 
     /**
@@ -288,8 +282,9 @@ class ChunkColumn {
     @JvmOverloads
     @Throws(IllegalArgumentException::class)
     fun toNBT(version: SupportedVersion = this.version): NBTCompound = NBT.Kompound {
-        if(version < this@ChunkColumn.version) {
-            throw IllegalArgumentException("Version ${ version.name } is lower than chunk version (${ this@ChunkColumn.version })!")
+        if(version < SupportedVersion.MC_1_17_0) {
+            if(minY != 0 || maxY != 255)
+                throw IllegalArgumentException("Versions prior to 1.17 do not support chunks with Y outside of 0-255 range. Current is $minY - ${maxY}")
         }
         this["DataVersion"] = NBT.Int(version.lowestDataVersion)
 
@@ -298,7 +293,7 @@ class ChunkColumn {
                 this["xPos"] = NBT.Int(x)
                 this["zPos"] = NBT.Int(z)
 
-                if(version >= SupportedVersion.MC_1_18_PRE_3) {
+                if(version >= SupportedVersion.MC_1_18_PRE_4) {
                     this["yPos"] = NBT.Int(minY.blockToSection().toInt())
                 }
 
@@ -306,9 +301,26 @@ class ChunkColumn {
                 this["InhabitedTime"] = NBT.Long(inhabitedTime)
                 this["Status"] = NBT.String(generationStatus.id)
 
-                TODO("1.18 support")
-                if(biomes != null) {
-                    this["Biomes"] = NBT.IntArray(*biomes!!)
+                if(version >= SupportedVersion.MC_1_18_PRE_4) {
+                    this["yPos"] = NBT.Int(minY.blockToSection().toInt())
+                } else {
+                    var biomes: IntArray? = null
+                    for(section in sections.values) {
+                        if(section.hasBiomeData()) {
+                            if(biomes == null) {
+                                biomes = IntArray(biomeArraySize)
+                            }
+
+                            val offset = section.y * 4 * 4 *4
+                            section.biomes!!.forEachIndexed { index, id ->
+                                val oldBiome = Biome.fromNamespaceID(id)
+                                biomes[offset + index] = oldBiome.numericalID
+                            }
+                        }
+                    }
+                    if(biomes != null) {
+                        this["Biomes"] = NBT.IntArray(*biomes)
+                    }
                 }
 
                 this["Heightmaps"] = NBT.Kompound {
@@ -330,9 +342,8 @@ class ChunkColumn {
                 this[EntitiesName(version)] = entities
                 this[BlockEntitiesName(version)] = tileEntities
 
-                TODO("1.18 support")
-                this["TileTicks"] = tileTicks
-                this["LiquidTicks"] = liquidTicks
+                this[BlockTicksName(version)] = tileTicks
+                this[FluidTicksName(version)] = liquidTicks
 
                 if(structures != null) {
                     this[StructuresName(version)] = structures!!
@@ -347,23 +358,24 @@ class ChunkColumn {
                     this["Lights"] = lights!!
                 }
 
-                TODO("1.18 support")
-                if(liquidsToBeTicked != null) {
-                    this["LiquidsToBeTicked"] = liquidsToBeTicked!!
-                }
-                if(toBeTicked != null) {
-                    this["ToBeTicked"] = toBeTicked!!
+                if(version < SupportedVersion.MC_1_18_PRE_4) {
+                    if(liquidsToBeTicked != null) {
+                        this["LiquidsToBeTicked"] = liquidsToBeTicked!!
+                    }
+                    if(toBeTicked != null) {
+                        this["ToBeTicked"] = toBeTicked!!
+                    }
+                } else {
+                    this["isLightOn"] = NBT.Boolean(lightOn)
                 }
 
                 if(postProcessing != null) {
                     this["PostProcessing"] = postProcessing!!
                 }
-
-                TODO("isLightOn")
             }
         }
 
-        if(version < SupportedVersion.MC_1_18_PRE_3) {
+        if(version < SupportedVersion.MC_1_18_PRE_4) {
             this["Level"] = NBT.Kompound { writeLevelData(this) }
         } else {
             writeLevelData(this)

@@ -1,6 +1,7 @@
 package org.jglrxavpok.hephaistos.mca
 
 import org.jglrxavpok.hephaistos.mca.AnvilException.Companion.missing
+import org.jglrxavpok.hephaistos.mcdata.Biome
 import org.jglrxavpok.hephaistos.nbt.NBT
 import org.jglrxavpok.hephaistos.nbt.NBTCompound
 import kotlin.experimental.and
@@ -22,6 +23,15 @@ class ChunkSection(val y: Byte) {
     var skyLights = ByteArray(0)
 
     /**
+     * May not exist. If it does, it is 4*4*4 Strings of Biome IDs, for a 4x4x4 volume in the chunk (ie 1 string correspond
+     * to the biome for a cube of 4x4x4 blocks).
+     * Arranged by X, Z and then Y.
+     */
+    var biomes: Array<String>? = null
+
+    private val biomeArraySize get()= 4*4*4
+
+    /**
      * Constructs a ChunkSection from a TAG_Compound.
      * @throws AnvilException if the Compound in the argument is missing fields for loading
      */
@@ -36,25 +46,30 @@ class ChunkSection(val y: Byte) {
         // empty palette can happen if the section exist but requires more than 8 bits to save the block IDs (in that case, the global ID is directly used)
         val paletteNBT =
             when {
-                version < SupportedVersion.MC_1_18_PRE_3 -> nbt.getList<NBTCompound>("Palette")
+                version < SupportedVersion.MC_1_18_PRE_4 -> nbt.getList<NBTCompound>("Palette")
                 else -> (nbt.getCompound("block_states") ?: missing("block_states")).getList<NBTCompound>("palette")
             }
         palette = paletteNBT?.let { Palette(it) } // We consider that there are no blocks inside this section if the palette is null (because we cannot interpret IDs)
 
         if(palette == null) {
-            val hasBlockStates = if(version < SupportedVersion.MC_1_18_PRE_3) {
+            val hasBlockStates = if(version < SupportedVersion.MC_1_18_PRE_4) {
                 nbt.containsKey("BlockStates")
             } else {
                 (nbt.getCompound("block_states") ?: missing("block_states")).containsKey("data")
             }
 
-            if(!hasBlockStates) {
-                System.err.println("[Hephaistos] Attempted to load a ChunkSection with no palette but block states. Because Hephaistos cannot interpret global IDs, block states will be skipped")
+            if(hasBlockStates) {
+                System.err.println("[Hephaistos] Attempted to load a ChunkSection with no palette but with block states. Because Hephaistos cannot interpret global IDs, block states will be skipped")
             }
         }
 
         if(palette != null) {
-            val compactedBlockStates = nbt.getLongArray("BlockStates") ?: missing("BlockStates")
+            val compactedBlockStates =
+                when {
+                    version < SupportedVersion.MC_1_18_PRE_4 -> nbt.getLongArray("BlockStates") ?: missing("BlockStates")
+                    else -> (nbt.getCompound("block_states") ?: missing("block_states")).getLongArray("data") ?: missing("block_states.data")
+                }
+
             val sizeInBits = compactedBlockStates.size*64 / 4096
             val ids: IntArray
             when {
@@ -91,6 +106,11 @@ class ChunkSection(val y: Byte) {
                 skyLights = ByteArray(it.size)
                 it.copyInto(skyLights)
             }
+        }
+
+        if(version >= SupportedVersion.MC_1_18_PRE_4) {
+            TODO("1.18 biomes")
+
         }
     }
 
@@ -231,6 +251,34 @@ class ChunkSection(val y: Byte) {
         return blockStates[index(x,y,z)]
     }
 
+    /**
+     * Returns the biome stored inside this section at the given position
+     * Be aware that biome data may not be present inside this column, in that case, this method returns UnknownBiome
+     */
+    fun getBiome(x: Int, y: Int, z: Int): String {
+        if(biomes == null) {
+            return Biome.UnknownBiome
+        }
+        val index = x/4+(z/4)*4+(y/4)*16
+        return biomes!![index]
+    }
+
+    /**
+     * Sets the biome stored inside this section at the given position
+     * If biome data did not exist before calling this method, the biome array is created then filled with UnknownBiome
+     */
+    fun setBiome(x: Int, y: Int, z: Int, biomeID: String) {
+        if(biomes == null) {
+            biomes = Array<String>(biomeArraySize) { Biome.UnknownBiome }
+        }
+        biomes?.set(x/4+(z/4)*4+(y/4)*16, biomeID)
+    }
+
+    /**
+     * Returs true iif this section has biome data
+     */
+    fun hasBiomeData() = biomes != null
+
     private fun index(x: Int, y: Int, z: Int) = y*16*16+z*16+x
 
     /**
@@ -242,7 +290,7 @@ class ChunkSection(val y: Byte) {
         this["BlockLight"] = NBT.ByteArray(*blockLights)
         this["SkyLight"] = NBT.ByteArray(*skyLights)
         if(!empty) {
-            if(version < SupportedVersion.MC_1_18_PRE_3) {
+            if(version < SupportedVersion.MC_1_18_PRE_4) {
                 this["Palette"] = palette!!.toNBT()
                 this["BlockStates"] = NBT.LongArray(palette!!.compactIDs(blockStates, version))
             } else {
@@ -250,9 +298,9 @@ class ChunkSection(val y: Byte) {
                     this["palette"] = palette!!.toNBT()
                     this["data"] = NBT.LongArray(palette!!.compactIDs(blockStates, version))
                 }
-            }
 
-            TODO("1.18 support: biomes")
+                TODO("1.18 support: biomes")
+            }
         }
     }
 

@@ -5,12 +5,12 @@ enum class SupportedVersion(val lowestDataVersion: Int) {
     MC_1_15(2225),
     MC_1_16(2504),
     MC_1_17_0(2724),
-    MC_1_18_PRE_3(2849),
+    MC_1_18_PRE_4(2850),
     ;
 
     companion object {
 
-        val Latest: SupportedVersion = MC_1_18_PRE_3
+        val Latest: SupportedVersion = MC_1_18_PRE_4
 
         /**
          * Returns the highest version known for the given data version

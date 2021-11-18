@@ -11,7 +11,7 @@ public class PathProvider implements ArgumentsProvider {
     @Override
     public Stream<? extends Arguments> provideArguments(ExtensionContext context) throws Exception {
         return Stream.of(
-                Arguments.of(Paths.get("src/test/resources/1.18-pre3regions/r.0.0.mca")),
+                Arguments.of(Paths.get("src/test/resources/1.18-pre4regions/r.0.0.mca")),
                 Arguments.of(Paths.get("src/test/resources/r.0.0.mca"))
                 );
     }
