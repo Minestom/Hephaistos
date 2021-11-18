@@ -1,8 +1,10 @@
 package org.jglrxavpok.hephaistos.mca
 
+import org.jglrxavpok.hephaistos.Options
 import org.jglrxavpok.hephaistos.collections.ImmutableByteArray
 import org.jglrxavpok.hephaistos.mca.AnvilException.Companion.missing
 import org.jglrxavpok.hephaistos.mcdata.Biome
+import org.jglrxavpok.hephaistos.mcdata.*
 import org.jglrxavpok.hephaistos.nbt.*
 import org.jglrxavpok.hephaistos.nbt.mutable.MutableNBTCompound
 import java.util.concurrent.ConcurrentHashMap
@@ -37,13 +39,13 @@ class ChunkColumn {
     /**
      * Min Y value available in this chunk (block Y)
      */
-    var minY: Int = 0
+    var minY: Int = VanillaMinY
         private set
 
     /**
      * Max Y value available in this chunk (block Y)
      */
-    var maxY: Int = 255
+    var maxY: Int = VanillaMaxY
         private set
 
     /**
@@ -94,7 +96,7 @@ class ChunkColumn {
     val biomeArraySize get()= logicalHeight * 4 * 4 * 4
 
     @JvmOverloads
-    constructor(x: Int, z: Int, minY: Int = 0, maxY: Int = 255) {
+    constructor(x: Int, z: Int, minY: Int = VanillaMinY, maxY: Int = VanillaMaxY) {
         this.x = x
         this.z = z
         this.minY = minY
@@ -106,7 +108,7 @@ class ChunkColumn {
      */
     @Throws(AnvilException::class)
     @JvmOverloads
-    constructor(chunkData: NBTCompound, minY: Int = 0, maxY: Int = 255) {
+    constructor(chunkData: NBTCompound, minY: Int = VanillaMinY, maxY: Int = VanillaMaxY) {
         dataVersion = chunkData.getInt("DataVersion") ?: missing("DataVersion")
         version = SupportedVersion.closest(dataVersion)
 
@@ -123,19 +125,19 @@ class ChunkColumn {
         this.x = levelData.getInt("xPos") ?: missing("xPos")
         this.z = levelData.getInt("zPos") ?: missing("zPos")
         if(version < SupportedVersion.MC_1_18_PRE_4) {
-            if(version < SupportedVersion.MC_1_17_0) {
+            if(Options.WarnOnPre1_17WorldsWithInvalidYRange.active && version < SupportedVersion.MC_1_17_0) {
                 if(minY != 0) {
-                    error("Pre 1.17 worlds do not support minY != 0")
+                    System.err.println("Pre 1.17 chunks do not support minY != 0")
                 }
                 if(maxY != 255) {
-                    error("Pre 1.17 worlds do not support maxY != 255")
+                    System.err.println("Pre 1.17 chunks do not support maxY != 255")
                 }
             }
-            this.minY = minY
-            this.maxY = maxY
+            this.minY = 0
+            this.maxY = 255
         } else {
             this.minY = (levelData.getInt("yPos") ?: missing("yPos")).sectionToBlock()
-
+            this.maxY = minY
         }
 
         if(minY > maxY)
@@ -193,7 +195,7 @@ class ChunkColumn {
             }
             sections[sectionY] = ChunkSection(nbt, version)
             if(version >= SupportedVersion.MC_1_18_PRE_4) {
-                this.maxY = maxOf(this.maxY, sectionY.toInt().sectionToBlock())
+                this.maxY = maxOf(this.maxY, sectionY.toInt().sectionToBlock()+15)
             }
         }
 
@@ -233,7 +235,7 @@ class ChunkColumn {
 
     /**
      * Returns the block state at the given position in the chunk.
-     * X,Y,Z must be in chunk coordinates (ie x&z in 0..15, y in 0..255)
+     * X,Y,Z must be in chunk coordinates (ie x&z in 0..15, y in minY..maxY)
      */
     fun getBlockState(x: Int, y: Int, z: Int): BlockState {
         checkBounds(x, y, z)
@@ -251,7 +253,7 @@ class ChunkColumn {
         if(z !in 0..15)
             throw IllegalArgumentException("z ($z) is not in 0..15")
         if(y !in minY..maxY)
-            throw IllegalArgumentException("y ($y) is not in 0..255")
+            throw IllegalArgumentException("y ($y) is not in $minY..$maxY")
     }
 
     /**
@@ -293,16 +295,15 @@ class ChunkColumn {
                 this["xPos"] = NBT.Int(x)
                 this["zPos"] = NBT.Int(z)
 
-                if(version >= SupportedVersion.MC_1_18_PRE_4) {
-                    this["yPos"] = NBT.Int(minY.blockToSection().toInt())
-                }
-
                 this["LastUpdate"] = NBT.Long(lastUpdate)
                 this["InhabitedTime"] = NBT.Long(inhabitedTime)
                 this["Status"] = NBT.String(generationStatus.id)
 
                 if(version >= SupportedVersion.MC_1_18_PRE_4) {
                     this["yPos"] = NBT.Int(minY.blockToSection().toInt())
+                    for (sectionY in minY.blockToSection() .. maxY.blockToSection()) {
+                        getSection(sectionY.toByte()) // 1.18+ seems to always save all sections
+                    }
                 } else {
                     var biomes: IntArray? = null
                     for(section in sections.values) {

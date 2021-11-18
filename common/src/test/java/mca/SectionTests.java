@@ -2,6 +2,7 @@ package mca;
 
 import org.jglrxavpok.hephaistos.mca.BlockState;
 import org.jglrxavpok.hephaistos.mca.ChunkSection;
+import org.jglrxavpok.hephaistos.mca.SupportedVersion;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.jglrxavpok.hephaistos.nbt.NBTList;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,7 @@ public class SectionTests {
     public void paletteAfterSetBlockState() {
         ChunkSection section = new ChunkSection((byte)0);
         section.set(0,0,0, new BlockState("minecraft:stone", new HashMap<>()));
-        NBTCompound nbt = section.toNBT();
+        NBTCompound nbt = section.toNBT(SupportedVersion.MC_1_17_0);
         NBTList<NBTCompound> palette = nbt.getList("Palette");
         assertEquals(2, palette.getSize());
         assertEquals(BlockState.AIR.getName(), palette.get(0).getString("Name"));

@@ -2,6 +2,7 @@ package org.jglrxavpok.hephaistos.mca
 
 import org.jglrxavpok.hephaistos.data.DataSource
 import org.jglrxavpok.hephaistos.data.RandomAccessFileSource
+import org.jglrxavpok.hephaistos.mcdata.*
 import org.jglrxavpok.hephaistos.nbt.CompressedProcesser
 import org.jglrxavpok.hephaistos.nbt.NBTCompound
 import org.jglrxavpok.hephaistos.nbt.NBTReader
@@ -22,7 +23,7 @@ import kotlin.math.ceil
  * [Code based on Mojang source code](https://www.mojang.com/2012/02/new-minecraft-map-format-anvil/)
  * [also based on the Minecraft Wiki "Region File format page"](https://minecraft.gamepedia.com/Region_file_format)
  */
-class RegionFile @Throws(AnvilException::class, IOException::class) @JvmOverloads constructor(val dataSource: DataSource, val regionX: Int, val regionZ: Int, val minY: Int = 0, val maxY: Int = 255): Closeable {
+class RegionFile @Throws(AnvilException::class, IOException::class) @JvmOverloads constructor(val dataSource: DataSource, val regionX: Int, val regionZ: Int, val minY: Int = VanillaMinY, val maxY: Int = VanillaMaxY): Closeable {
 
     companion object {
         private const val GZipCompression: Byte = 1
@@ -45,7 +46,7 @@ class RegionFile @Throws(AnvilException::class, IOException::class) @JvmOverload
 
     val logicalHeight = maxY - minY +1
 
-    @Throws(AnvilException::class, IOException::class) @JvmOverloads constructor(file: RandomAccessFile, regionX: Int, regionZ: Int, minY: Int = 0, maxY: Int = 255):
+    @Throws(AnvilException::class, IOException::class) @JvmOverloads constructor(file: RandomAccessFile, regionX: Int, regionZ: Int, minY: Int = VanillaMinY, maxY: Int = VanillaMaxY):
             this(RandomAccessFileSource(file), regionX, regionZ, minY, maxY)
 
     init {
@@ -191,7 +192,7 @@ class RegionFile @Throws(AnvilException::class, IOException::class) @JvmOverload
      */
     @Throws(IOException::class)
     @JvmOverloads
-    fun writeColumn(column: ChunkColumn, version: SupportedVersion = SupportedVersion.Latest) {
+    fun writeColumn(column: ChunkColumn) {
         if(column.minY < minY)
             throw AnvilException("ChunkColumn minY must be >= to RegionFile minY")
         if(column.maxY > maxY)
@@ -200,7 +201,7 @@ class RegionFile @Throws(AnvilException::class, IOException::class) @JvmOverload
         val z = column.z
         if(out(x, z)) throw AnvilException("Out of RegionFile: $x,$z (chunk)")
 
-        val nbt = column.toNBT(version)
+        val nbt = column.toNBT()
         val dataOut = ByteArrayOutputStream()
         NBTWriter(dataOut, CompressedProcesser.ZLIB).use {
             it.writeNamed("", nbt)

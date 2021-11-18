@@ -125,8 +125,6 @@ public class MCASaving {
         assertEquals(1, length); // chunk very light, should only use a single 4kib sector
     }
 
-    // TODO: 1.17 TESTS
-
     @ParameterizedTest
     @ArgumentsSource(DataSourceProvider.class)
     public void creationFromScratchViaRegionFile(DataSource dataSource) throws AnvilException, IOException {
@@ -236,11 +234,14 @@ public class MCASaving {
 
     // Start of 1.17+ support ============================================
 
+    /**
+     * Checks that minY - maxY is supported properly by ChunkColumn
+     */
     @ParameterizedTest
     @ArgumentsSource(DataSourceProvider.class)
     public void creationFromScratchViaChunks_1_17Plus(DataSource dataSource) throws AnvilException, IOException {
         int[] randomValues = {
-                -2598, -267, -428, -392, 899,
+                -2047, -267, -428, -392, 899,
                 32, 64, 128, 0, 256, 31, 63, 127, 255,
                 342, 341
         };
@@ -253,6 +254,7 @@ public class MCASaving {
                 boolean expectAnvilException = minY > maxY;
                 try {
                     {
+                        dataSource.setLength(0);
                         RegionFile region = new RegionFile(dataSource, 0, 0, minY, maxY);
                         ChunkColumn chunk0 = region.getOrCreateChunk(0, 0);
                         ChunkColumn chunk1 = region.getOrCreateChunk(1, 0);
