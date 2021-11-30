@@ -93,7 +93,7 @@ class ChunkColumn {
     var lightOn = true
 
     val logicalHeight get()= maxY - minY +1
-    val biomeArraySize get()= logicalHeight * 4 * 4 * 4
+    private val biomeArraySize get()= logicalHeight * 4 * 4 * 4
 
     @JvmOverloads
     constructor(x: Int, z: Int, minY: Int = VanillaMinY, maxY: Int = VanillaMaxY) {

@@ -10,7 +10,7 @@ import java.nio.file.Path
  */
 class NBTReader @JvmOverloads constructor(
     source: InputStream,
-    compressedProcesser: CompressedProcesser<*, *> = CompressedProcesser.NONE
+    compressedProcesser: CompressedProcesser<*, *> = CompressedProcesser.GZIP
 ): AutoCloseable, Closeable {
 
     private val reader = DataInputStream(
@@ -21,21 +21,21 @@ class NBTReader @JvmOverloads constructor(
      * Constructs a [NBTReader] from a file (convenience method, equivalent to `NBTReader(BufferedInputStream(FileInputStream(file)), compressedProcesser)`)
      */
     @Throws(IOException::class)
-    @JvmOverloads constructor(file: File, compressedProcesser: CompressedProcesser<*, *> = CompressedProcesser.NONE):
+    @JvmOverloads constructor(file: File, compressedProcesser: CompressedProcesser<*, *> = CompressedProcesser.GZIP):
             this(BufferedInputStream(FileInputStream(file)), compressedProcesser)
 
     /**
      * Constructs a [NBTReader] from a path (convenience method, equivalent to `NBTReader(BufferedOutputStream(Files.newOutputStream(path)), compressedProcesser)`)
      */
     @Throws(IOException::class)
-    @JvmOverloads constructor(path: Path, compressedProcesser: CompressedProcesser<*, *> = CompressedProcesser.NONE):
+    @JvmOverloads constructor(path: Path, compressedProcesser: CompressedProcesser<*, *> = CompressedProcesser.GZIP):
             this(BufferedInputStream(Files.newInputStream(path)), compressedProcesser)
 
     /**
      * Constructs a [NBTReader] from a byte array (convenience method, equivalent to `NBTReader(ByteArrayInputStream(array), compressedProcesser)`)
      */
     @Throws(IOException::class)
-    @JvmOverloads constructor(array: ByteArray, compressedProcesser: CompressedProcesser<*, *> = CompressedProcesser.NONE):
+    @JvmOverloads constructor(array: ByteArray, compressedProcesser: CompressedProcesser<*, *> = CompressedProcesser.GZIP):
             this(ByteArrayInputStream(array), compressedProcesser)
 
     /**

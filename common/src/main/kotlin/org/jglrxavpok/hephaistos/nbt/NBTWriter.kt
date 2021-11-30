@@ -10,7 +10,7 @@ import java.nio.file.Path
  */
 class NBTWriter @JvmOverloads constructor(
     destination: OutputStream,
-    compressedProcesser: CompressedProcesser<*, *> = CompressedProcesser.NONE
+    compressedProcesser: CompressedProcesser<*, *> = CompressedProcesser.GZIP
 ): AutoCloseable, Closeable {
 
     private val writer = DataOutputStream(
@@ -21,13 +21,13 @@ class NBTWriter @JvmOverloads constructor(
      * Constructs a NBTWriter from a file (convenience method, equivalent to `NBTWriter(BufferedOutputStream(FileOutputStream(file)))`)
      */
     @Throws(IOException::class)
-    @JvmOverloads constructor(file: File, compressedProcesser: CompressedProcesser<*, *> = CompressedProcesser.NONE): this(BufferedOutputStream(FileOutputStream(file)), compressedProcesser)
+    @JvmOverloads constructor(file: File, compressedProcesser: CompressedProcesser<*, *> = CompressedProcesser.GZIP): this(BufferedOutputStream(FileOutputStream(file)), compressedProcesser)
 
     /**
      * Constructs a NBTWriter from a path (convenience method, equivalent to `NBTWriter(BufferedOutputStream(Files.newOutputStream(path)))`)
      */
     @Throws(IOException::class)
-    @JvmOverloads constructor(path: Path, compressedProcesser: CompressedProcesser<*, *> = CompressedProcesser.NONE): this(BufferedOutputStream(Files.newOutputStream(path)), compressedProcesser)
+    @JvmOverloads constructor(path: Path, compressedProcesser: CompressedProcesser<*, *> = CompressedProcesser.GZIP): this(BufferedOutputStream(Files.newOutputStream(path)), compressedProcesser)
 
     /**
      * Write a tag with a name inside the destination
