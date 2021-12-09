@@ -302,8 +302,11 @@ class ChunkSection(val y: Byte) {
     /**
      * Returns the biome stored inside this section at the given position
      * Be aware that biome data may not be present inside this column, in that case, this method returns UnknownBiome
+     *
+     * Coordinates must be section-local
      */
     fun getBiome(x: Int, y: Int, z: Int): String {
+        checkBounds(x, y, z)
         if(biomes == null) {
             return baseBiome
         }
@@ -314,8 +317,11 @@ class ChunkSection(val y: Byte) {
     /**
      * Sets the biome stored inside this section at the given position
      * If biome data did not exist before calling this method, the biome array is created then filled with UnknownBiome
+     *
+     * Coordinates must be section-local
      */
     fun setBiome(x: Int, y: Int, z: Int, biomeID: String) {
+        checkBounds(x, y, z)
         if(biomes == null) {
             biomes = Array<String>(biomeArraySize) { Biome.UnknownBiome }
         }
