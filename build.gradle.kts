@@ -14,7 +14,7 @@ allprojects {
     apply(plugin = "org.jetbrains.dokka")
 
     group = "io.github.jglrxavpok.hephaistos"
-    version = "2.3.0-rc3"
+    version = "2.3.0"
 
     repositories {
         mavenCentral()
