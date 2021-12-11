@@ -1,10 +1,7 @@
 package mca;
 
 import org.jglrxavpok.hephaistos.collections.ImmutableLongArray;
-import org.jglrxavpok.hephaistos.mca.BlockState;
-import org.jglrxavpok.hephaistos.mca.LongCompactorKt;
-import org.jglrxavpok.hephaistos.mca.Palette;
-import org.jglrxavpok.hephaistos.mca.SupportedVersion;
+import org.jglrxavpok.hephaistos.mca.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,21 +12,21 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class PaletteTests {
 
-    private Palette palette;
+    private BlockPalette palette;
     private static final BlockState STONE = new BlockState("minecraft:stone", new HashMap<>());
 
     @BeforeEach
     public void init() {
-        palette = new Palette();
+        palette = new BlockPalette();
     }
 
     @Test
     public void increaseReferenceOfNonExistentBlock() {
-        assertEquals(0, palette.getBlocks().size());
+        assertEquals(0, palette.getElements().size());
         palette.increaseReference(BlockState.AIR);
-        assertEquals(1, palette.getBlocks().size());
+        assertEquals(1, palette.getElements().size());
         palette.increaseReference(BlockState.AIR);
-        assertEquals(1, palette.getBlocks().size());
+        assertEquals(1, palette.getElements().size());
     }
 
     @Test
@@ -42,15 +39,15 @@ public class PaletteTests {
 
     @Test
     public void decreaseReferenceOfExistentBlock() {
-        assertEquals(0, palette.getBlocks().size());
+        assertEquals(0, palette.getElements().size());
         palette.increaseReference(BlockState.AIR);
         palette.increaseReference(STONE);
-        assertEquals(2, palette.getBlocks().size());
+        assertEquals(2, palette.getElements().size());
         palette.decreaseReference(BlockState.AIR);
-        assertEquals(1, palette.getBlocks().size());
-        assertEquals(STONE, palette.getBlocks().get(0));
+        assertEquals(1, palette.getElements().size());
+        assertEquals(STONE, palette.getElements().get(0));
         palette.decreaseReference(STONE);
-        assertEquals(0, palette.getBlocks().size());
+        assertEquals(0, palette.getElements().size());
     }
 
     @Test

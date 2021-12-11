@@ -2,6 +2,7 @@ package org.jglrxavpok.hephaistos.mca
 
 import org.jglrxavpok.hephaistos.data.DataSource
 import org.jglrxavpok.hephaistos.data.RandomAccessFileSource
+import org.jglrxavpok.hephaistos.mcdata.*
 import org.jglrxavpok.hephaistos.nbt.CompressedProcesser
 import org.jglrxavpok.hephaistos.nbt.NBTCompound
 import org.jglrxavpok.hephaistos.nbt.NBTReader
@@ -22,7 +23,7 @@ import kotlin.math.ceil
  * [Code based on Mojang source code](https://www.mojang.com/2012/02/new-minecraft-map-format-anvil/)
  * [also based on the Minecraft Wiki "Region File format page"](https://minecraft.gamepedia.com/Region_file_format)
  */
-class RegionFile @Throws(AnvilException::class, IOException::class) @JvmOverloads constructor(val dataSource: DataSource, val regionX: Int, val regionZ: Int, val minY: Int = 0, val maxY: Int = 255): Closeable {
+class RegionFile @Throws(AnvilException::class, IOException::class) @JvmOverloads constructor(val dataSource: DataSource, val regionX: Int, val regionZ: Int, val minY: Int = VanillaMinY, val maxY: Int = VanillaMaxY): Closeable {
 
     companion object {
         private const val GZipCompression: Byte = 1
@@ -45,7 +46,7 @@ class RegionFile @Throws(AnvilException::class, IOException::class) @JvmOverload
 
     val logicalHeight = maxY - minY +1
 
-    @Throws(AnvilException::class, IOException::class) @JvmOverloads constructor(file: RandomAccessFile, regionX: Int, regionZ: Int, minY: Int = 0, maxY: Int = 255):
+    @Throws(AnvilException::class, IOException::class) @JvmOverloads constructor(file: RandomAccessFile, regionX: Int, regionZ: Int, minY: Int = VanillaMinY, maxY: Int = VanillaMaxY):
             this(RandomAccessFileSource(file), regionX, regionZ, minY, maxY)
 
     init {
@@ -190,6 +191,7 @@ class RegionFile @Throws(AnvilException::class, IOException::class) @JvmOverload
      * one instanced on their own, and passing it to writeColumn *is* valid.
      */
     @Throws(IOException::class)
+    @JvmOverloads
     fun writeColumn(column: ChunkColumn) {
         if(column.minY < minY)
             throw AnvilException("ChunkColumn minY must be >= to RegionFile minY")
@@ -401,7 +403,7 @@ class RegionFile @Throws(AnvilException::class, IOException::class) @JvmOverload
      * @throws IllegalArgumentException if x,y,z is not a valid position inside this region
      */
     @Throws(AnvilException::class, IllegalArgumentException::class)
-    fun setBiome(x: Int, y: Int, z: Int, biomeID: Int) {
+    fun setBiome(x: Int, y: Int, z: Int, biomeID: String) {
         if(out(x.blockToChunk(), z.blockToChunk())) throw IllegalArgumentException("Out of region $x;$z (block)")
         if(y !in 0..255) throw IllegalArgumentException("y ($y) must be in 0..255")
 
@@ -421,7 +423,7 @@ class RegionFile @Throws(AnvilException::class, IOException::class) @JvmOverload
      * @throws AnvilException if the chunk corresponding to x,z does not exist in this region (ie not loaded by the game, nor created and waiting for saving with this lib)
      */
     @Throws(AnvilException::class, IllegalArgumentException::class)
-    fun getBiome(x: Int, y: Int, z: Int): Int {
+    fun getBiome(x: Int, y: Int, z: Int): String {
         if(out(x.blockToChunk(), z.blockToChunk())) throw IllegalArgumentException("Out of region $x;$z (block)")
         if(y !in 0..255) throw IllegalArgumentException("y ($y) must be in 0..255")
 

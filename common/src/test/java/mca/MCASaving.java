@@ -5,6 +5,7 @@ import org.jglrxavpok.hephaistos.mca.AnvilException;
 import org.jglrxavpok.hephaistos.mca.BlockState;
 import org.jglrxavpok.hephaistos.mca.ChunkColumn;
 import org.jglrxavpok.hephaistos.mca.RegionFile;
+import org.jglrxavpok.hephaistos.mcdata.Biome;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
@@ -124,8 +125,6 @@ public class MCASaving {
         assertEquals(1, length); // chunk very light, should only use a single 4kib sector
     }
 
-    // TODO: 1.17 TESTS
-
     @ParameterizedTest
     @ArgumentsSource(DataSourceProvider.class)
     public void creationFromScratchViaRegionFile(DataSource dataSource) throws AnvilException, IOException {
@@ -206,9 +205,9 @@ public class MCASaving {
     public void setBiomes(DataSource dataSource) throws AnvilException, IOException {
         RegionFile region = new RegionFile(dataSource, 0, 0);
         region.getOrCreateChunk(0, 0); // force create chunk
-        assertEquals(ChunkColumn.UnknownBiome, region.getBiome(0,0,0));
-        region.setBiome(0,0,0, 1);
-        assertEquals(1, region.getBiome(0,0,0));
+        assertEquals(Biome.Companion.getUnknownBiome(), region.getBiome(0,0,0));
+        region.setBiome(0,0,0, "biome 1");
+        assertEquals("biome 1", region.getBiome(0,0,0));
     }
 
     @ParameterizedTest
@@ -233,13 +232,16 @@ public class MCASaving {
         assertEquals((byte) 12, c.getSection((byte)0).getSkyLight(0,5,0));
     }
 
-    // Start of 1.17 support ============================================
+    // Start of 1.17+ support ============================================
 
+    /**
+     * Checks that minY - maxY is supported properly by ChunkColumn
+     */
     @ParameterizedTest
     @ArgumentsSource(DataSourceProvider.class)
-    public void creationFromScratchViaChunks_1_17(DataSource dataSource) throws AnvilException, IOException {
+    public void creationFromScratchViaChunks_1_17Plus(DataSource dataSource) throws AnvilException, IOException {
         int[] randomValues = {
-                -2598, -267, -428, -392, 899,
+                -2047, -267, -428, -392, 899,
                 32, 64, 128, 0, 256, 31, 63, 127, 255,
                 342, 341
         };
@@ -252,6 +254,7 @@ public class MCASaving {
                 boolean expectAnvilException = minY > maxY;
                 try {
                     {
+                        dataSource.setLength(0);
                         RegionFile region = new RegionFile(dataSource, 0, 0, minY, maxY);
                         ChunkColumn chunk0 = region.getOrCreateChunk(0, 0);
                         ChunkColumn chunk1 = region.getOrCreateChunk(1, 0);
@@ -287,5 +290,5 @@ public class MCASaving {
     }
 
 
-    // End of 1.17 support ============================================
+    // End of 1.17+ support ============================================
 }

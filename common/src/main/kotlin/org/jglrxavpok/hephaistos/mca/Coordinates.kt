@@ -11,3 +11,4 @@ fun Int.blockInsideChunk() = this and 15
 fun Int.blockInsideSection() = this and 15
 
 fun Int.blockToSection() = floor(this / 16.0).toInt().toByte()
+fun Int.sectionToBlock() = this * 16

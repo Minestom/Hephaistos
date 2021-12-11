@@ -18,7 +18,7 @@ public class ChunkMutability {
         for (int y = 0; y < 256; y += biomeGranularity) {
             for (int x = 0; x < 16; x += biomeGranularity) {
                 for (int z = 0; z < 16; z += biomeGranularity) {
-                    int biomeID = x + y * 16 + z * 16 * 16;
+                    String biomeID = "hephaistos:" + (x + y * 16 + z * 16 * 16);
                     chunk.setBiome(x, y, z, biomeID);
                 }
             }
@@ -28,8 +28,8 @@ public class ChunkMutability {
         for (int y = 0; y < 256; y += biomeGranularity) {
             for (int x = 0; x < 16; x += biomeGranularity) {
                 for (int z = 0; z < 16; z += biomeGranularity) {
-                    int expectedBiomeID = x + y * 16 + z * 16 * 16;
-                    int actualBiomeID = chunk.getBiome(x, y, z);
+                    String expectedBiomeID = "hephaistos:" + (x + y * 16 + z * 16 * 16);
+                    String actualBiomeID = chunk.getBiome(x, y, z);
                     Assertions.assertEquals(expectedBiomeID, actualBiomeID);
                 }
             }

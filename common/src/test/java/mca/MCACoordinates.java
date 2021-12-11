@@ -129,11 +129,11 @@ public class MCACoordinates {
     }
 
     @Test
-    public void throwOnInvalidChunkLocalPositionYNegative() {
+    public void throwOnInvalidChunkLocalPositionYBelowMinY() {
         assertThrows(IllegalArgumentException.class, () -> {
             ChunkColumn column;
             column = region2.getOrCreateChunk(5*32+5, -2*32+5);
-            column.setBlockState(0, -1, 0, BlockState.AIR);
+            column.setBlockState(0, column.getMinY()-1, 0, BlockState.AIR);
         });
     }
 
@@ -143,7 +143,7 @@ public class MCACoordinates {
         assertThrows(IllegalArgumentException.class, () -> {
             ChunkColumn column;
             column = region2.getOrCreateChunk(5*32+5, -2*32+5);
-            column.setBlockState(0, 256, 0, BlockState.AIR);
+            column.setBlockState(0, column.getMaxY()+1, 0, BlockState.AIR);
         }, "Chunk has a valid position inside the RegionFile, should not throw");
     }
 
