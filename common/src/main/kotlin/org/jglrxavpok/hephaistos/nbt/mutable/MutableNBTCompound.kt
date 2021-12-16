@@ -23,7 +23,8 @@ class MutableNBTCompound @JvmOverloads constructor(private val tags: MutableMap<
 
     override fun hashCode() = tags.hashCode()
 
-    override fun toString() = toCompound().toString()
+    override fun toString() = toSNBT()
+
     // Convenience methods
 
     /**
@@ -181,6 +182,22 @@ class MutableNBTCompound @JvmOverloads constructor(private val tags: MutableMap<
         val mutable = MutableNBTCompound(tags.toMutableMap())
         mutable += other
         return mutable
+    }
+
+    /**
+     * Replaces all the contents of the compound with the given tags
+     */
+    fun copyFrom(from: Map<String, NBT>): MutableNBTCompound {
+        clear()
+        return setAll(from)
+    }
+
+    /**
+     * Replaces all the contents of the compound with the given tags
+     */
+    fun copyFrom(from: NBTCompoundLike): MutableNBTCompound {
+        clear()
+        return setAll(from)
     }
 
     /**
