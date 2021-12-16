@@ -21,7 +21,7 @@ class NBTCompound @JvmOverloads constructor(_tags: Map<String, NBT> = mapOf()): 
     }
 
     override fun toSNBT(): String {
-        val tagStr = tags.map { entry ->
+        val tagStr = asMapView().map { entry ->
             "\"${entry.key.replace("\"", "\\\"")}\":${entry.value.toSNBT()}"
         }.joinToString(",")
         return "{$tagStr}"

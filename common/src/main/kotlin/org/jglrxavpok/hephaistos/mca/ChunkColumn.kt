@@ -125,16 +125,18 @@ class ChunkColumn {
         this.x = levelData.getInt("xPos") ?: missing("xPos")
         this.z = levelData.getInt("zPos") ?: missing("zPos")
         if(version < SupportedVersion.MC_1_18_PRE_4) {
-            if(Options.WarnOnPre1_17WorldsWithInvalidYRange.active && version < SupportedVersion.MC_1_17_0) {
-                if(minY != 0) {
-                    System.err.println("Pre 1.17 chunks do not support minY != 0")
+            if(version < SupportedVersion.MC_1_17_0) {
+                if(Options.WarnOnPre1_17WorldsWithInvalidYRange.active) {
+                    if(minY != 0) {
+                        System.err.println("Pre 1.17 chunks do not support minY != 0")
+                    }
+                    if(maxY != 255) {
+                        System.err.println("Pre 1.17 chunks do not support maxY != 255")
+                    }
                 }
-                if(maxY != 255) {
-                    System.err.println("Pre 1.17 chunks do not support maxY != 255")
-                }
+                this.minY = 0
+                this.maxY = 255
             }
-            this.minY = 0
-            this.maxY = 255
         } else {
             this.minY = (levelData.getInt("yPos") ?: missing("yPos")).sectionToBlock()
             this.maxY = minY
@@ -187,6 +189,8 @@ class ChunkColumn {
         postProcessing = levelData.getList("PostProcessing")
 
         val sectionsNBT = levelData.getList<NBTCompound>(SectionName(version)) ?: missing(SectionName(version))
+        var minSectionYDetected = Integer.MAX_VALUE
+        var maxSectionYDetected = Integer.MIN_VALUE
         for(nbt in sectionsNBT) {
             val sectionY = nbt.getByte("Y") ?: missing("Y")
             if(version < SupportedVersion.MC_1_17_0) {
@@ -196,6 +200,9 @@ class ChunkColumn {
             sections[sectionY] = ChunkSection(nbt, version)
             if(version >= SupportedVersion.MC_1_18_PRE_4) {
                 this.maxY = maxOf(this.maxY, sectionY.toInt().sectionToBlock()+15)
+            } else {
+                minSectionYDetected = minOf(minSectionYDetected, sectionY.toInt())
+                maxSectionYDetected = maxOf(maxSectionYDetected, sectionY.toInt())
             }
         }
 
@@ -204,6 +211,9 @@ class ChunkColumn {
             if(biomes != null) {
                 val biomeNamespaces = biomes.map(Biome::numericalIDToNamespaceID).toTypedArray()
                 for ((sectionY, section) in sections) {
+                    if(sectionY <= minSectionYDetected || sectionY >= maxSectionYDetected) {
+                        continue
+                    }
                     val offset = sectionY * 4 * 4 * 4
                     section.biomes = Array<String>(4*4*4) { Biome.UnknownBiome }
                     biomeNamespaces.copyInto(section.biomes!!, startIndex = offset, endIndex = offset + 4 * 4 * 4)

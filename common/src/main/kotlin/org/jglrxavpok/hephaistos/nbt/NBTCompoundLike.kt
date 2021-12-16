@@ -17,6 +17,16 @@ interface NBTCompoundLike: NBTCompoundGetters, Iterable<CompoundEntry> {
     fun toCompound(): NBTCompound
 
     /**
+     * Same semantics than NBT#toSNBT
+     */
+    fun toSNBT(): String {
+        val tagStr = asMapView().map { entry ->
+            "\"${entry.key.replace("\"", "\\\"")}\":${entry.value.toSNBT()}"
+        }.joinToString(",")
+        return "{$tagStr}"
+    }
+
+    /**
      * Returns a Map representing this compound. The map is not modifiable if this is a NBTCompound, which is immutable.
      */
     fun asMapView(): Map<String, NBT>
