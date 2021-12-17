@@ -123,15 +123,15 @@ class ChunkSection(val y: Byte) {
             }
 
             blockPalette!!.loadReferences(blockStates.asIterable())
+        }
 
-            nbt.getByteArray("BlockLight")?.let {
-                blockLights = ByteArray(it.size)
-                it.copyInto(blockLights)
-            }
-            nbt.getByteArray("SkyLight")?.let {
-                skyLights = ByteArray(it.size)
-                it.copyInto(skyLights)
-            }
+        nbt.getByteArray("BlockLight")?.let {
+            blockLights = ByteArray(it.size)
+            it.copyInto(blockLights)
+        }
+        nbt.getByteArray("SkyLight")?.let {
+            skyLights = ByteArray(it.size)
+            it.copyInto(skyLights)
         }
 
         if(version >= SupportedVersion.MC_1_18_PRE_4) {
