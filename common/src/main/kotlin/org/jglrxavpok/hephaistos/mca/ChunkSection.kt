@@ -53,7 +53,7 @@ class ChunkSection(val y: Byte) {
         val blockPaletteNBT =
             when {
                 version < SupportedVersion.MC_1_18_PRE_4 -> nbt.getList<NBTCompound>("Palette")
-                else -> (nbt.getCompound("block_states") ?: missing("block_states")).getList<NBTCompound>("palette")
+                else -> nbt.getCompound("block_states")?.getList<NBTCompound>("palette")
             }
         blockPalette = blockPaletteNBT?.let { BlockPalette(it) } // We consider that there are no blocks inside this section if the palette is null (because we cannot interpret IDs)
 
@@ -61,7 +61,7 @@ class ChunkSection(val y: Byte) {
             val hasBlockStates = if(version < SupportedVersion.MC_1_18_PRE_4) {
                 nbt.containsKey("BlockStates")
             } else {
-                (nbt.getCompound("block_states") ?: missing("block_states")).containsKey("data")
+                nbt.getCompound("block_states")?.containsKey("data") ?: false
             }
 
             if(hasBlockStates) {
@@ -322,6 +322,7 @@ class ChunkSection(val y: Byte) {
      */
     fun setBiome(x: Int, y: Int, z: Int, biomeID: String) {
         checkBounds(x, y, z)
+        fillInIfEmpty()
         if(biomes == null) {
             biomes = Array<String>(biomeArraySize) { Biome.UnknownBiome }
         }
@@ -341,24 +342,31 @@ class ChunkSection(val y: Byte) {
     @JvmOverloads
     fun toNBT(version: SupportedVersion = SupportedVersion.Latest): NBTCompound = NBT.Kompound {
         this["Y"] = NBT.Byte(y)
-        this["BlockLight"] = NBT.ByteArray(*blockLights)
-        this["SkyLight"] = NBT.ByteArray(*skyLights)
+        if(blockLights.isNotEmpty()) {
+            this["BlockLight"] = NBT.ByteArray(*blockLights)
+        }
+        if(skyLights.isNotEmpty()) {
+            this["SkyLight"] = NBT.ByteArray(*skyLights)
+        }
         if(!empty) {
             if(version < SupportedVersion.MC_1_18_PRE_4) {
                 this["Palette"] = blockPalette!!.toNBT()
-                this["BlockStates"] = NBT.LongArray(blockPalette!!.compactIDs(blockStates, version))
+                this["BlockStates"] = NBT.LongArray(blockPalette!!.compactIDs(blockStates, version, 4))
             } else {
                 this["block_states"] = NBT.Kompound {
                     this["palette"] = blockPalette!!.toNBT()
-                    this["data"] = NBT.LongArray(blockPalette!!.compactIDs(blockStates, version))
+                    this["data"] = NBT.LongArray(blockPalette!!.compactIDs(blockStates, version, 4))
                 }
 
 
                 if(biomes != null) {
                     val biomePalette = BiomePalette()
+                    for(b in biomes!!) {
+                        biomePalette.increaseReference(b)
+                    }
                     this["biomes"] = NBT.Kompound {
-                        this["palette"] = biomePalette!!.toNBT()
-                        this["data"] = NBT.LongArray(biomePalette!!.compactIDs(biomes!!, version))
+                        this["palette"] = biomePalette.toNBT()
+                        this["data"] = NBT.LongArray(biomePalette.compactIDs(biomes!!, version))
                     }
                 }
             }

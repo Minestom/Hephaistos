@@ -189,8 +189,6 @@ class ChunkColumn {
         postProcessing = levelData.getList("PostProcessing")
 
         val sectionsNBT = levelData.getList<NBTCompound>(SectionName(version)) ?: missing(SectionName(version))
-        var minSectionYDetected = Integer.MAX_VALUE
-        var maxSectionYDetected = Integer.MIN_VALUE
         for(nbt in sectionsNBT) {
             val sectionY = nbt.getByte("Y") ?: missing("Y")
             if(version < SupportedVersion.MC_1_17_0) {
@@ -200,9 +198,6 @@ class ChunkColumn {
             sections[sectionY] = ChunkSection(nbt, version)
             if(version >= SupportedVersion.MC_1_18_PRE_4) {
                 this.maxY = maxOf(this.maxY, sectionY.toInt().sectionToBlock()+15)
-            } else {
-                minSectionYDetected = minOf(minSectionYDetected, sectionY.toInt())
-                maxSectionYDetected = maxOf(maxSectionYDetected, sectionY.toInt())
             }
         }
 
@@ -211,7 +206,7 @@ class ChunkColumn {
             if(biomes != null) {
                 val biomeNamespaces = biomes.map(Biome::numericalIDToNamespaceID).toTypedArray()
                 for ((sectionY, section) in sections) {
-                    if(sectionY <= minSectionYDetected || sectionY >= maxSectionYDetected) {
+                    if(sectionY*16 < minY || sectionY*16 > maxY) {
                         continue
                     }
                     val offset = sectionY * 4 * 4 * 4

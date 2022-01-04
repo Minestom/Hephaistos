@@ -11,7 +11,7 @@ import kotlin.math.log2
  * Represents the palette of elements used in a chunk section. This palette allows to save space when saving to disk or transferring over network,
  * as it lowers the required number of bits used to represent an element, by remapping global IDs to local IDs, with fewer bits per entry.
  */
-sealed class Palette<ElementType>(private val defaultValue: ElementType, private val writer: (ElementType) -> NBTCompound) {
+sealed class Palette<ElementType>(private val nbtType: NBTType<out NBT>, private val defaultValue: ElementType, private val writer: (ElementType) -> NBT) {
 
     val elements = mutableListOf<ElementType>()
     private val referenceCounts = HashMap<ElementType, Int>()
@@ -59,18 +59,22 @@ sealed class Palette<ElementType>(private val defaultValue: ElementType, private
     /**
      * Converts this Palette into its NBT representation
      */
-    fun toNBT(): NBTList<NBTCompound> =
-        NBT.List(NBTType.TAG_Compound, elements.map { writer(it) })
+    fun toNBT(): NBTList<NBT> =
+        NBT.List(nbtType, elements.map { writer(it) })
 
     /**
      * Produces a long array with the compacted IDs based on this palette.
      * Bit length is selected on the size of this palette (`ceil(log2(size))`), ID correspond to the index inside this palette
      */
     @JvmOverloads
-    fun compactIDs(states: Array<ElementType>, version: SupportedVersion = SupportedVersion.Latest): ImmutableLongArray {
+    fun compactIDs(states: Array<ElementType>, version: SupportedVersion = SupportedVersion.Latest, minimumBitSize: Int = 1): ImmutableLongArray {
+        if(minimumBitSize <= 0) {
+            error("Minimum bit size cannot be 0 or negative")
+        }
+
         // convert state list into uncompressed data
         val indices = states.map(elements::indexOf).toIntArray()
-        val bitLength = ceil(log2(elements.size.toFloat())).toInt().coerceAtLeast(1) // at least one bit
+        val bitLength = ceil(log2(elements.size.toFloat())).toInt().coerceAtLeast(minimumBitSize) // at least one bit
         return when {
             version == SupportedVersion.MC_1_15 -> compress(indices, bitLength)
             version >= SupportedVersion.MC_1_16 -> pack(indices, bitLength)
@@ -88,14 +92,14 @@ sealed class Palette<ElementType>(private val defaultValue: ElementType, private
 
 }
 
-class BlockPalette(): Palette<BlockState>(BlockState.AIR, BlockState::toNBT) {
+class BlockPalette(): Palette<BlockState>(NBTType.TAG_Compound, BlockState.AIR, BlockState::toNBT) {
     constructor(elements: NBTList<NBTCompound>): this() {
         for(b in elements) {
             this.elements += BlockState(b)
         }
     }
 }
-class BiomePalette(): Palette<String>(Biome.UnknownBiome, { str -> NBT.Kompound { this["Name"] = NBT.String(str) }}) {
+class BiomePalette(): Palette<String>(NBTType.TAG_String, Biome.UnknownBiome, { str -> NBT.String(str)}) {
     constructor(elements: NBTList<NBTString>): this() {
         elements.forEachIndexed { index, b ->
             this.elements += b.value

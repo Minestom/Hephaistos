@@ -192,7 +192,7 @@ class RegionFile @Throws(AnvilException::class, IOException::class) @JvmOverload
      */
     @Throws(IOException::class)
     @JvmOverloads
-    fun writeColumn(column: ChunkColumn) {
+    fun writeColumn(column: ChunkColumn, version: SupportedVersion = SupportedVersion.Latest) {
         if(column.minY < minY)
             throw AnvilException("ChunkColumn minY must be >= to RegionFile minY")
         if(column.maxY > maxY)
@@ -201,7 +201,7 @@ class RegionFile @Throws(AnvilException::class, IOException::class) @JvmOverload
         val z = column.z
         if(out(x, z)) throw AnvilException("Out of RegionFile: $x,$z (chunk)")
 
-        val nbt = column.toNBT()
+        val nbt = column.toNBT(version)
         val dataOut = ByteArrayOutputStream()
         NBTWriter(dataOut, CompressedProcesser.ZLIB).use {
             it.writeNamed("", nbt)

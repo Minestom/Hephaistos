@@ -1,10 +1,8 @@
 package mca;
 
 import org.jglrxavpok.hephaistos.data.DataSource;
-import org.jglrxavpok.hephaistos.mca.AnvilException;
-import org.jglrxavpok.hephaistos.mca.BlockState;
-import org.jglrxavpok.hephaistos.mca.ChunkColumn;
-import org.jglrxavpok.hephaistos.mca.RegionFile;
+import org.jglrxavpok.hephaistos.data.GrowableSource;
+import org.jglrxavpok.hephaistos.mca.*;
 import org.jglrxavpok.hephaistos.mcdata.Biome;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -232,6 +230,41 @@ public class MCASaving {
         assertEquals((byte) 12, c.getSection((byte)0).getSkyLight(0,5,0));
     }
 
+    @ParameterizedTest
+    @ArgumentsSource(SupportedVersionProvider.class)
+    public void saveAndLoadBiomes(SupportedVersion version) throws AnvilException, IOException {
+        GrowableSource dataSource = new GrowableSource();
+        {
+            RegionFile region = new RegionFile(dataSource, 0, 0, 0, 255);
+            ChunkColumn chunk0 = region.getOrCreateChunk(0, 0);
+            for (int x = 0; x < 4; x++) {
+                for (int y = 0; y < 256/4; y++) {
+                    for (int z = 0; z < 4; z++) {
+                        int id = z * 4 * 4 + y/16 * 4 + x;
+                        Biome b = Biome.values()[id % Biome.values().length];
+                        chunk0.setBiome(x*4, y*4, z*4, b.getNamespaceID());
+                    }
+                }
+            }
+            region.writeColumn(chunk0, version);
+        }
+
+        {
+            RegionFile reloaded = new RegionFile(dataSource, 0, 0, 0, 255);
+            ChunkColumn reloadedChunk0 = reloaded.getChunk(0, 0);
+            assertNotNull(reloadedChunk0);
+            for (int x = 0; x < 4; x++) {
+                for (int y = 0; y < 256/4; y++) {
+                    for (int z = 0; z < 4; z++) {
+                        int id = z * 4 * 4 + y/16 * 4 + x;
+                        Biome b = Biome.values()[id % Biome.values().length];
+                        assertEquals(b.getNamespaceID(), reloadedChunk0.getBiome(x*4, y*4, z*4));
+                    }
+                }
+            }
+        }
+    }
+
     // Start of 1.17+ support ============================================
 
     /**
@@ -288,7 +321,5 @@ public class MCASaving {
 
         System.out.println("Done! (" + progress + " / " + total + ")");
     }
-
-
     // End of 1.17+ support ============================================
 }
