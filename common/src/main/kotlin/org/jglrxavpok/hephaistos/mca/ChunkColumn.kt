@@ -8,6 +8,7 @@ import org.jglrxavpok.hephaistos.mcdata.*
 import org.jglrxavpok.hephaistos.nbt.*
 import org.jglrxavpok.hephaistos.nbt.mutable.MutableNBTCompound
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.math.max
 
 /**
  * 16x256x16 (XYZ) area of the world. Consists of 16 ChunkSections vertically stacked.
@@ -103,12 +104,15 @@ class ChunkColumn {
         this.maxY = maxY
     }
 
+    @Throws(AnvilException::class)
+    @Deprecated(message = "MinY / MaxY is now auto-detected when loading chunks", replaceWith = ReplaceWith("Remove the MinY/MaxY arguments"))
+    constructor(chunkData: NBTCompound, __minY: Int = VanillaMinY, __maxY: Int = VanillaMaxY): this(chunkData)
+
     /**
      * minY and maxY are ignored for 1.18+ worlds, as the information can be deduced from the NBT data
      */
     @Throws(AnvilException::class)
-    @JvmOverloads
-    constructor(chunkData: NBTCompound, minY: Int = VanillaMinY, maxY: Int = VanillaMaxY) {
+    constructor(chunkData: NBTCompound) {
         dataVersion = chunkData.getInt("DataVersion") ?: missing("DataVersion")
         version = SupportedVersion.closest(dataVersion)
 
@@ -124,19 +128,22 @@ class ChunkColumn {
             }
         this.x = levelData.getInt("xPos") ?: missing("xPos")
         this.z = levelData.getInt("zPos") ?: missing("zPos")
-        if(version < SupportedVersion.MC_1_18_PRE_4) {
-            if(version < SupportedVersion.MC_1_17_0) {
-                if(Options.WarnOnPre1_17WorldsWithInvalidYRange.active) {
-                    if(minY != 0) {
-                        System.err.println("Pre 1.17 chunks do not support minY != 0")
-                    }
-                    if(maxY != 255) {
-                        System.err.println("Pre 1.17 chunks do not support maxY != 255")
-                    }
-                }
-                this.minY = 0
-                this.maxY = 255
+
+        val sectionsNBT = levelData.getList<NBTCompound>(SectionName(version)) ?: missing(SectionName(version))
+        if(version < SupportedVersion.MC_1_17_0) {
+            this.minY = 0
+            this.maxY = 255
+        } else if(version < SupportedVersion.MC_1_18_PRE_4) {
+            var minSectionY = Byte.MAX_VALUE
+            for(nbt in sectionsNBT) {
+                val sectionY = nbt.getByte("Y") ?: missing("Y")
+                minSectionY = minOf(minSectionY, sectionY)
             }
+
+            val biomes = levelData.getIntArray("Biomes") ?: throw AnvilException("Cannot guess minY-maxY of chunk without biome information for 1.17 worlds")
+
+            this.minY = (minSectionY.toInt()+1).sectionToBlock()
+            this.maxY = biomes.size / (4 * 4 * 4) + minY -1
         } else {
             this.minY = (levelData.getInt("yPos") ?: missing("yPos")).sectionToBlock()
             this.maxY = minY
@@ -188,7 +195,6 @@ class ChunkColumn {
 
         postProcessing = levelData.getList("PostProcessing")
 
-        val sectionsNBT = levelData.getList<NBTCompound>(SectionName(version)) ?: missing(SectionName(version))
         for(nbt in sectionsNBT) {
             val sectionY = nbt.getByte("Y") ?: missing("Y")
             if(version < SupportedVersion.MC_1_17_0) {
@@ -206,7 +212,7 @@ class ChunkColumn {
             if(biomes != null) {
                 val biomeNamespaces = biomes.map(Biome::numericalIDToNamespaceID).toTypedArray()
                 for ((sectionY, section) in sections) {
-                    if(sectionY*16 < minY || sectionY*16 > maxY) {
+                    if(sectionY*16 < this.minY || sectionY*16 > this.maxY) {
                         continue
                     }
                     val offset = sectionY * 4 * 4 * 4
@@ -307,7 +313,7 @@ class ChunkColumn {
                 if(version >= SupportedVersion.MC_1_18_PRE_4) {
                     this["yPos"] = NBT.Int(minY.blockToSection().toInt())
                     for (sectionY in minY.blockToSection() .. maxY.blockToSection()) {
-                        getSection(sectionY.toByte()) // 1.18+ seems to always save all sections
+                        getSection(sectionY.toByte()) // 1.18+ always saves all sections to know the chunk height
                     }
                 } else {
                     var biomes: IntArray? = null
@@ -326,6 +332,8 @@ class ChunkColumn {
                     }
                     if(biomes != null) {
                         this["Biomes"] = NBT.IntArray(*biomes)
+                    } else {
+                        this["Biomes"] = NBT.IntArray(*IntArray(biomeArraySize) { Biome.TheVoid.numericalID })
                     }
                 }
 
@@ -337,11 +345,17 @@ class ChunkColumn {
                     this["WORLD_SURFACE"] = NBT.LongArray(worldSurfaceHeightMap.compact(version))
                     worldSurfaceWorldGenHeightMap?.let { this["WORLD_SURFACE_WG"] = NBT.LongArray(it.compact(version)) }
                 }
+                val allSections: MutableList<NBTCompound> = this@ChunkColumn.sections.values
+                    .filter { version >= SupportedVersion.MC_1_18_PRE_4 || !it.empty }
+                    .map { it.toNBT(version) }
+                    .toMutableList()
+
+                if(version < SupportedVersion.MC_1_18_PRE_4) {
+                    allSections += ChunkSection((minY.blockToSection()-1).toByte()).toNBT(version)
+                }
                 val sections = NBT.List(
                     NBTType.TAG_Compound,
-                    this@ChunkColumn.sections.values
-                        .filter { !it.empty }
-                        .map { it.toNBT(version) }
+                    allSections
                 )
 
                 this[SectionName(version)] = sections
@@ -385,6 +399,31 @@ class ChunkColumn {
             this["Level"] = NBT.Kompound { writeLevelData(this) }
         } else {
             writeLevelData(this)
+        }
+    }
+
+    /**
+     * Updates this chunk version, both the 'version' field and the DataVersion
+     */
+    fun changeVersion(version: SupportedVersion) {
+        this.version = version
+        this.dataVersion = version.lowestDataVersion
+    }
+
+    /**
+     * Changes the Y range of this chunk
+     */
+    fun setYRange(minY: Int, maxY: Int) {
+        if(version < SupportedVersion.MC_1_17_0) {
+            throw IllegalArgumentException("Versions prior to 1.17 do not support chunks with Y outside of 0-255 range.")
+        }
+        if(minY >= maxY) {
+            throw IllegalArgumentException("minY ($minY) must be < maxY ($maxY)")
+        }
+        this.minY = minY
+        this.maxY = maxY
+        for (sectionY in minY.blockToSection() .. maxY.blockToSection()) {
+            getSection(sectionY.toByte()) // make sure section exists
         }
     }
 

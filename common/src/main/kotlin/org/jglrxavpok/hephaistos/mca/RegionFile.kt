@@ -181,7 +181,7 @@ class RegionFile @Throws(AnvilException::class, IOException::class) @JvmOverload
 
     @Throws(AnvilException::class, IOException::class)
     private fun readColumn(x: Int, z: Int): ChunkColumn {
-        return ChunkColumn(readColumnData(x, z), minY, maxY)
+        return ChunkColumn(readColumnData(x, z))
     }
 
     /**
