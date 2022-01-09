@@ -3,7 +3,7 @@ package org.jglrxavpok.hephaistos.mca
 import org.jglrxavpok.hephaistos.collections.ImmutableLongArray
 
 /**
- * Represents a heightmap for a 16x16 area. Heights are assumed to be in the range in 0..255
+ * Represents a heightmap for a 16x16 area.
  */
 class Heightmap() {
 

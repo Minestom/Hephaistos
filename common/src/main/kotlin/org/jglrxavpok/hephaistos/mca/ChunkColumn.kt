@@ -157,13 +157,15 @@ class ChunkColumn {
         generationStatus = GenerationStatus.fromID(levelData.getString("Status") ?: missing("Status"))
 
         if(generationStatus.ordinal >= GenerationStatus.Heightmaps.ordinal) {
-            val heightmaps = levelData.getCompound("Heightmaps") ?: missing("Heightmaps")
-            motionBlockingHeightMap = Heightmap(heightmaps.getLongArray("MOTION_BLOCKING") ?: missing("MOTION_BLOCKING"), version)
-            worldSurfaceHeightMap = Heightmap(heightmaps.getLongArray("WORLD_SURFACE") ?: missing("WORLD_SURFACE"), version)
-            motionBlockingNoLeavesHeightMap = heightmaps.getLongArray("MOTION_BLOCKING_NO_LEAVES")?.let { Heightmap(it, version) }
-            worldSurfaceWorldGenHeightMap = heightmaps.getLongArray("WORLD_SURFACE_WG")?.let { Heightmap(it, version) }
-            oceanFloorHeightMap = heightmaps.getLongArray("OCEAN_FLOOR")?.let { Heightmap(it, version) }
-            oceanFloorWorldGenHeightMap = heightmaps.getLongArray("OCEAN_FLOOR_WG")?.let { Heightmap(it, version) }
+            if(levelData.contains("Heightmaps")) {
+                val heightmaps = levelData.getCompound("Heightmaps") ?: missing("Heightmaps")
+                motionBlockingHeightMap = Heightmap(heightmaps.getLongArray("MOTION_BLOCKING") ?: missing("MOTION_BLOCKING"), version)
+                worldSurfaceHeightMap = Heightmap(heightmaps.getLongArray("WORLD_SURFACE") ?: missing("WORLD_SURFACE"), version)
+                motionBlockingNoLeavesHeightMap = heightmaps.getLongArray("MOTION_BLOCKING_NO_LEAVES")?.let { Heightmap(it, version) }
+                worldSurfaceWorldGenHeightMap = heightmaps.getLongArray("WORLD_SURFACE_WG")?.let { Heightmap(it, version) }
+                oceanFloorHeightMap = heightmaps.getLongArray("OCEAN_FLOOR")?.let { Heightmap(it, version) }
+                oceanFloorWorldGenHeightMap = heightmaps.getLongArray("OCEAN_FLOOR_WG")?.let { Heightmap(it, version) }
+            }
         } else {
             // chunk is under construction, generate empty heightmaps
             motionBlockingHeightMap = Heightmap()
@@ -189,9 +191,8 @@ class ChunkColumn {
         if(version < SupportedVersion.MC_1_18_PRE_4) {
             liquidsToBeTicked = levelData.getList("LiquidsToBeTicked")
             toBeTicked = levelData.getList("ToBeTicked")
-        } else {
-            lightOn = levelData.getBoolean("isLightOn") ?: missing("isLightOn")
         }
+        lightOn = levelData.getBoolean("isLightOn") ?: true
 
         postProcessing = levelData.getList("PostProcessing")
 
