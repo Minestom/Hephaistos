@@ -78,12 +78,38 @@ object SNBTParsingVisitor: SNBTBaseVisitor<NBT>() {
     private fun unescape(str: String): String {
         var escaped = false
         val buffer = StringBuilder()
-        for (c in str) {
+        var toSkip = 0
+        for ((index, c) in str.withIndex()) {
+            if(toSkip > 0) {
+                toSkip--
+                continue
+            }
             if(escaped) {
                 when(c) {
-                    '\\', '"' -> {
+                    '\\', '"', '\'' -> {
                         buffer.append(c)
                         escaped = false
+                    }
+                    'n' -> {
+                        buffer.append('\n')
+                        escaped = false
+                    }
+                    'r' -> {
+                        buffer.append('\r')
+                        escaped = false
+                    }
+                    'b' -> {
+                        buffer.append('\b')
+                        escaped = false
+                    }
+                    'u' -> {
+                        if(index+4 >= str.length) {
+                            error("Not enough characters for Unicode escape sequence")
+                        } else {
+                            buffer.append(Character.toChars(Integer.parseInt(str.substring(index+1..index+4), 16)))
+                            toSkip = 4
+                            escaped = false
+                        }
                     }
                     else -> error("Unrecognized escape sequence: \\$c")
                 }
