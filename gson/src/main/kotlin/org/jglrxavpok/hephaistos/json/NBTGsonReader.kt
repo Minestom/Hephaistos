@@ -7,10 +7,11 @@ import org.jglrxavpok.hephaistos.nbt.*
 import java.io.Closeable
 import java.io.Reader
 
-class NBTGsonReader(private val reader: Reader): AutoCloseable, Closeable {
+class NBTGsonReader(private val reader: Reader = Reader.nullReader()): AutoCloseable, Closeable {
 
     private companion object {
         val GsonInstance = Gson()
+
     }
 
     inline fun <reified Tag: NBT> read(): Tag {
@@ -112,9 +113,17 @@ class NBTGsonReader(private val reader: Reader): AutoCloseable, Closeable {
         return parse(nbtType, GsonInstance.fromJson(reader, JsonElement::class.java))
     }
 
+    fun read(nbtType: NBTType<out NBT>, element: JsonElement): NBT {
+        return parse(nbtType, element);
+    }
+
     fun readWithGuess(): NBT {
         val element = GsonInstance.fromJson(reader, JsonElement::class.java)
         return parse(guessType(element), element)
+    }
+
+    fun readWithGuess(element: JsonElement): NBT {
+        return parse(guessType(element), element);
     }
 
     private fun toCompound(jsonObject: JsonObject) = NBT.Kompound {
