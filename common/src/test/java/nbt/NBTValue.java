@@ -7,6 +7,8 @@ import org.jglrxavpok.hephaistos.nbt.NBT;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
+
 public class NBTValue {
 
     @Test
@@ -22,6 +24,8 @@ public class NBTValue {
         assertType(ImmutableByteArray.class, NBT.ByteArray());
         assertType(ImmutableIntArray.class, NBT.IntArray());
         assertType(ImmutableLongArray.class, NBT.LongArray());
+
+        assertType(Map.class, NBT.Compound(Map.of()));
     }
 
     @Test
@@ -54,6 +58,8 @@ public class NBTValue {
 
         NBT nbt = NBT.Byte(0);
         Object v18 = nbt.getValue();
+
+        Map<String, NBT> v19 = NBT.Compound(Map.of()).getValue();
     }
 
     void assertType(Class<?> expected, NBT nbt) {
