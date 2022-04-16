@@ -6,6 +6,8 @@ import java.io.DataOutputStream
 object NBTEnd: NBT, NBTReaderCompanion<NBTEnd> {
     override val ID = NBTType.TAG_End
 
+    override val value: Any get() = throw UnsupportedOperationException("This tag has no value")
+
     override fun readContents(source: DataInputStream): NBTEnd = this
 
     override fun writeContents(destination: DataOutputStream) {}

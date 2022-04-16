@@ -3,14 +3,14 @@ package org.jglrxavpok.hephaistos.nbt
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
-import java.util.*
-import java.util.function.Consumer
 
-class NBTList<Tag: NBT> @JvmOverloads constructor(val subtagType: NBTType<out Tag>, _tags: List<out Tag> = listOf()): NBT, Iterable<Tag> {
+class NBTList<Tag: NBT> @JvmOverloads constructor(val subtagType: NBTType<out Tag>, _tags: List<Tag> = listOf()): NBT, Iterable<Tag> {
 
-    private val tags: List<out Tag> = java.util.List.copyOf(_tags)
+    private val tags: List<Tag> = java.util.List.copyOf(_tags)
 
     override val ID = NBTType.TAG_List
+
+    override val value: List<Tag> = tags
 
     /**
      * Writes the contents of the list, WITH for the subtag ID

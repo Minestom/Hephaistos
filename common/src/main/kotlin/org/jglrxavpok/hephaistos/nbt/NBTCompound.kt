@@ -11,6 +11,8 @@ class NBTCompound @JvmOverloads constructor(_tags: Map<String, NBT> = mapOf()): 
 
     override val ID = NBTType.TAG_Compound
 
+    override val value: Map<String, NBT> = tags
+
     override fun writeContents(destination: DataOutputStream) {
         for(entry in tags.entries) {
             val name = entry.key
