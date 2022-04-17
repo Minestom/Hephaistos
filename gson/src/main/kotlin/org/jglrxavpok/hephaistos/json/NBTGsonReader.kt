@@ -17,6 +17,7 @@ class NBTGsonReader(private val reader: Reader): AutoCloseable, Closeable {
          * The guess is done by getting the first element and guessing its type via #guessType.
          * If the list is empty, this method will always guess that the subtype is TAG_String
          */
+        @JvmStatic
         fun <Tag: NBT> parse(nbtType: NBTType<out NBT>, element: JsonElement): Tag {
             try {
                 val result = when (nbtType) {
@@ -57,6 +58,7 @@ class NBTGsonReader(private val reader: Reader): AutoCloseable, Closeable {
             }
         }
 
+        @JvmStatic
         private fun toCompound(jsonObject: JsonObject) = NBT.Kompound {
             for((key, value) in jsonObject.entrySet()) {
                 val nbt = parse<NBT>(guessType(value), value)
@@ -64,6 +66,7 @@ class NBTGsonReader(private val reader: Reader): AutoCloseable, Closeable {
             }
         }
 
+        @JvmStatic
         private fun guessType(element: JsonElement): NBTType<out NBT> {
             return when {
                 element.isJsonObject -> NBTType.TAG_Compound
