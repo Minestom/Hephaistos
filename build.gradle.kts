@@ -14,7 +14,7 @@ allprojects {
     apply(plugin = "org.jetbrains.dokka")
 
     group = "io.github.jglrxavpok.hephaistos"
-    version = "2.4.2"
+    version = "2.4.4"
 
     repositories {
         mavenCentral()
@@ -25,7 +25,7 @@ allprojects {
         implementation(kotlin("stdlib"))
 
         // Use the JUpiter test library.
-        testImplementation("org.junit.jupiter:junit-jupiter:5.7.2")
+        testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
     }
 
     tasks {

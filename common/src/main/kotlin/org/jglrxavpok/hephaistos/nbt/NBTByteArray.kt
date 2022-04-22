@@ -1,11 +1,10 @@
 package org.jglrxavpok.hephaistos.nbt
 
 import org.jglrxavpok.hephaistos.collections.ImmutableByteArray
-import org.jglrxavpok.hephaistos.collections.ImmutableIntArray
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
-class NBTByteArray constructor(val value: ImmutableByteArray) : NBT, Iterable<Byte> {
+class NBTByteArray constructor(override val value: ImmutableByteArray) : NBT, Iterable<Byte> {
 
     val size get() = value.size
 

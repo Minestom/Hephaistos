@@ -19,6 +19,8 @@ sealed interface NBT {
      */
     val ID: NBTType<out NBT>
 
+    val value: Any
+
     /**
      * Writes the contents of the tag to the given destination. The tag ID is supposed to be already written
      * @throws IOException if an error occurred during writing
