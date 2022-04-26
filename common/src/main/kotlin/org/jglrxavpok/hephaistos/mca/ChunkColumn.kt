@@ -152,10 +152,9 @@ class ChunkColumn {
         liquidCarvingMask = chunkReader.getLiquidCarvingMask()
         lights = chunkReader.getLights()
 
+        @Suppress("DEPRECATION")
         if(version < SupportedVersion.MC_1_18_PRE_4) {
-            @Suppress("DEPRECATION")
             liquidsToBeTicked = chunkReader.getOldLiquidsToBeTicked()
-            @Suppress("DEPRECATION")
             toBeTicked = chunkReader.getOldToBeTicked()
         }
         lightOn = chunkReader.isLightOn()

@@ -8,7 +8,7 @@ import org.jglrxavpok.hephaistos.nbt.*
  * Does not cache nor convert the raw data.
  * Use when you want to read parts of a chunk without having the memory overhead of ChunkColumn.
  *
- * Only one information is cached with this object: the data version of the chunk, which is used to know how to extract the chunk data.
+ * Only two piece of information are cached with this object: the data version of the chunk, which is used to know how to extract the chunk data, and the input NBT.
  *
  * Can throw AnvilException if the NBT data is not recognized or incomplete.
  *
@@ -95,7 +95,12 @@ class ChunkReader @Throws(AnvilException::class) constructor(val chunkData: NBTC
      */
     fun getOldEntities() = levelData.getList(EntitiesName(minecraftVersion)) ?: NBT.List(NBTType.TAG_Compound)
 
-    fun getTileEntities() = levelData.getList(BlockEntitiesName(minecraftVersion)) ?: NBT.List(NBTType.TAG_Compound)
+    fun getBlockEntities() = levelData.getList(BlockEntitiesName(minecraftVersion)) ?: NBT.List(NBTType.TAG_Compound)
+
+    /**
+     * Alternative name for getBlockEntities
+     */
+    fun getTileEntities() = getBlockEntities()
 
     fun getTileTicks() = levelData.getList(BlockTicksName(minecraftVersion)) ?: NBT.List(NBTType.TAG_Compound)
     fun getLiquidTicks() = levelData.getList(FluidTicksName(minecraftVersion)) ?: NBT.List(NBTType.TAG_Compound)
