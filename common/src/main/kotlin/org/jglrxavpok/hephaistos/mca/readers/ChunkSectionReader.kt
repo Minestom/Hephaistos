@@ -32,6 +32,13 @@ class ChunkSectionReader constructor(val version: SupportedVersion, val nbt: NBT
         private val BiomeArraySize = 4*4*4
     }
 
+    /**
+     * Gets the Y value of the section.
+     */
+    val y = getY(nbt)
+
+    fun isSectionEmpty() = getBlockPalette() == null
+
     fun getBlockPalette() = when {
         version < SupportedVersion.MC_1_18_PRE_4 -> nbt.getList<NBTCompound>("Palette")
         else -> nbt.getCompound("block_states")?.getList<NBTCompound>("palette")
@@ -119,9 +126,6 @@ class ChunkSectionReader constructor(val version: SupportedVersion, val nbt: NBT
             throw AnvilException("No biomes inside sections before 1.18")
 
         val biomesNBT = getBiomes()!!
-        val paletteNBT = biomesNBT.getList<NBTString>("palette") ?: AnvilException.missing("biomes.palette")
-        val biomePalette = BiomePalette(paletteNBT)
-
         val compressedBiomes = biomesNBT.getLongArray("data")!!
 
         val sizeInBits = compressedBiomes.size * 64 / BiomeArraySize
