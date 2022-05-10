@@ -1,5 +1,7 @@
+import com.google.gson.JsonObject;
 import org.jglrxavpok.hephaistos.json.NBTGsonReader;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
+import org.jglrxavpok.hephaistos.nbt.NBTType;
 import org.junit.jupiter.api.Test;
 
 import java.io.StringReader;
@@ -23,6 +25,7 @@ public class TestReaderCompound {
             assertEquals("hello it is me, example text!", compound.getString("text"));
         }
     }
+
     @Test
     public void readCompoundWithInnerCompound() {
         String json = "{\n" +
@@ -48,5 +51,38 @@ public class TestReaderCompound {
             assertEquals(1, innerObject.getAsInt("b"));
             assertEquals(2, innerObject.getAsInt("c"));
         }
+    }
+
+    @Test
+    public void readCompoundFromGsonElement() {
+        JsonObject object = new JsonObject();
+        object.addProperty("a string", "hello");
+        object.addProperty("a float", 1F);
+
+        NBTCompound compound = NBTGsonReader.parse(NBTType.TAG_Compound, object);
+
+        assertEquals(2, compound.getSize());
+        assertEquals("hello", compound.getString("a string"));
+        assertEquals(1f, compound.getAsFloat("a float"));
+    }
+
+    @Test
+    public void readCompoundFromGsonElementWithInnerElement() {
+        JsonObject object = new JsonObject();
+        object.addProperty("a string", "hello");
+        object.addProperty("a float", 1F);
+        JsonObject inner = new JsonObject();
+        inner.addProperty("inner", "yes");
+        object.add("inner", inner);
+
+        NBTCompound compound = NBTGsonReader.parse(NBTType.TAG_Compound, object);
+
+        assertEquals(3, compound.getSize());
+        assertEquals("hello", compound.getString("a string"));
+        assertEquals(1f, compound.getAsFloat("a float"));
+
+        NBTCompound innerCompound = compound.getCompound("inner");
+
+        assertEquals("yes", innerCompound.getString("inner"));
     }
 }
