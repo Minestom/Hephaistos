@@ -68,6 +68,7 @@ public class ChunkHeightGuessing {
     public void test1_17() throws AnvilException {
         Checker checker = (int minY, int maxY) -> {
             final int worldHeight = maxY - minY +1;
+            final int sectionCount = (int) Math.ceil((double)worldHeight/CoordinatesKt.sectionToBlock(1));
             NBTCompound data = NBT.Compound(nbt -> {
                 nbt.setInt("DataVersion", SupportedVersion.MC_1_17_0.getLowestDataVersion());
 
@@ -86,7 +87,7 @@ public class ChunkHeightGuessing {
                     level.setString("Status", ChunkColumn.GenerationStatus.Spawn.getId()); // don't have to do the heightmaps
                     level.setByte("isLightOn", (byte) 1);
 
-                    int[] biomes = new int[4*4*4* worldHeight];
+                    int[] biomes = new int[(int) (4*4*4* sectionCount)];
                     level.setIntArray("Biomes", biomes);
                 }));
             });

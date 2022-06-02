@@ -234,7 +234,7 @@ class ChunkSection(val y: Byte) {
         if(biomes == null) {
             return baseBiome
         }
-        val index = x/4+(z/4)*4+(y/4)*16
+        val index = x/4 + (z/4) * 4 + (y/4) * 16
         return biomes!![index]
     }
 
@@ -250,7 +250,7 @@ class ChunkSection(val y: Byte) {
         if(biomes == null) {
             biomes = Array<String>(biomeArraySize) { Biome.UnknownBiome }
         }
-        biomes?.set(x/4+(z/4)*4+(y/4)*16, biomeID)
+        biomes?.set(x/4 + (z/4) * 4 + (y/4) * 16, biomeID)
     }
 
     /**
@@ -258,7 +258,7 @@ class ChunkSection(val y: Byte) {
      */
     fun hasBiomeData() = biomes != null
 
-    private fun index(x: Int, y: Int, z: Int) = y*16*16+z*16+x
+    private fun index(x: Int, y: Int, z: Int) = y * 16 * 16 + z * 16 + x
 
     /**
      * Converts this ChunkSection into its NBT representation

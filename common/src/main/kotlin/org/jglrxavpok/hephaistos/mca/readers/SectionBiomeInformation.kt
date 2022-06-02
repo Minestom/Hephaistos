@@ -4,7 +4,10 @@ package org.jglrxavpok.hephaistos.mca.readers
  * Holds the information about biomes for a single section.
  * There are 3 possible: scenarii:
  * 1. biomes = null and baseBiome = null
- *      This means the section is from before 1.18, so no biome information exists in the section.
+ *      This means
+ *          either the section is from before 1.18, so no biome information exists in the section
+ *          OR
+ *          you accessed the biomes via ChunkReader directly, and no biome information is available for the given section.
  * 2. biomes = null and baseBiome != null
  *      This means the section has biome information, but the entire section is filled with baseBiome.
  *      Technically this means there is a palette with at least 1 element but no data.
@@ -15,9 +18,9 @@ data class SectionBiomeInformation(val biomes: Array<String>?, val baseBiome: St
     constructor(): this(null, null)
 
     /**
-     * Likely to be a pre-1.18 section
+     * False iif both biomes and baseBiome are null
      */
-    fun hasBiomeInformation() = biomes == null && baseBiome == null
+    fun hasBiomeInformation() = biomes != null || baseBiome != null
 
     /**
      * Is the entire section filled with a single biome?

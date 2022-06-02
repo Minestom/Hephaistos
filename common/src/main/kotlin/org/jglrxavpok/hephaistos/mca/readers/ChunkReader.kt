@@ -1,6 +1,7 @@
 package org.jglrxavpok.hephaistos.mca.readers
 
 import org.jglrxavpok.hephaistos.mca.*
+import org.jglrxavpok.hephaistos.mcdata.Biome
 import org.jglrxavpok.hephaistos.nbt.*
 
 /**
@@ -76,7 +77,7 @@ class ChunkReader @Throws(AnvilException::class) constructor(val chunkData: NBTC
             val biomes = levelData.getIntArray("Biomes") ?: throw AnvilException("Cannot guess minY-maxY of chunk without biome information for 1.17 worlds")
 
             minY = (minSectionY.toInt()+1).sectionToBlock()
-            maxY = biomes.size / (4 * 4 * 4) + minY -1
+            maxY = (biomes.size / (4 * 4 * 4)).sectionToBlock() + minY -1
         } else {
             minY = (levelData.getInt("yPos") ?: AnvilException.missing("yPos")).sectionToBlock()
             maxY = minY
@@ -195,4 +196,34 @@ class ChunkReader @Throws(AnvilException::class) constructor(val chunkData: NBTC
      */
     fun getOceanFloorWorldGenHeightmap() = getHeightmaps()?.getLongArray("OCEAN_FLOOR_WG")
 
+    /**
+     * Can return null if none found.
+     * Use this method to avoid caring about 1.18+/pre-1.18 biome format.
+     */
+    fun readSectionBiomes(chunkSectionReader: ChunkSectionReader): SectionBiomeInformation? {
+        val yRange = getYRange()
+        val sectionY = chunkSectionReader.y
+        if(sectionY*16 !in yRange) {
+            throw AnvilException("Accessing a section outside of the chunk! (SectionY=$sectionY Y=${sectionY*16} but minY..maxY is ${yRange.first}..${yRange.last})")
+        }
+
+        if(getGenerationStatus() < ChunkColumn.GenerationStatus.Biomes)
+            return null
+
+        if(minecraftVersion < SupportedVersion.MC_1_18_PRE_4) {
+            val biomes = getOldBiomes()
+            if(biomes != null) {
+                val offset = sectionY * 4 * 4 * 4
+                val biomeNames = Array<String>(4*4*4) { Biome.UnknownBiome }
+                for (index in offset until offset+4*4*4) {
+                    biomeNames[index - offset] = Biome.numericalIDToNamespaceID(biomes[index])
+                }
+                return SectionBiomeInformation(biomeNames, null)
+            } else {
+                return null
+            }
+        } else {
+            return chunkSectionReader.getBiomeInformation()
+        }
+    }
 }
