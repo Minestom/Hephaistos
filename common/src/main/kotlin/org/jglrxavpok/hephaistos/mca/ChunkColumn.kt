@@ -1,9 +1,11 @@
 package org.jglrxavpok.hephaistos.mca
 
 import org.jglrxavpok.hephaistos.collections.ImmutableByteArray
+import org.jglrxavpok.hephaistos.collections.ImmutableIntArray
 import org.jglrxavpok.hephaistos.mca.AnvilException.Companion.missing
 import org.jglrxavpok.hephaistos.mca.readers.ChunkReader
 import org.jglrxavpok.hephaistos.mca.readers.*
+import org.jglrxavpok.hephaistos.mca.writer.ChunkWriter
 import org.jglrxavpok.hephaistos.mcdata.Biome
 import org.jglrxavpok.hephaistos.mcdata.*
 import org.jglrxavpok.hephaistos.nbt.*
@@ -126,8 +128,8 @@ class ChunkColumn {
 
         if(generationStatus.ordinal >= GenerationStatus.Heightmaps.ordinal) {
             if(chunkReader.hasHeightmaps()) {
-                motionBlockingHeightMap = Heightmap(chunkReader.getMotionBlockingHeightmap() ?: missing("MOTION_BLOCKING"), version)
-                worldSurfaceHeightMap = Heightmap(chunkReader.getWorldSurfaceHeightmap() ?: missing("WORLD_SURFACE"), version)
+                motionBlockingHeightMap = Heightmap(chunkReader.getMotionBlockingHeightmap() ?: missing("HeightMaps/MOTION_BLOCKING"), version)
+                worldSurfaceHeightMap = Heightmap(chunkReader.getWorldSurfaceHeightmap() ?: missing("HeightMaps/WORLD_SURFACE"), version)
                 motionBlockingNoLeavesHeightMap = chunkReader.getMotionBlockingNoLeavesHeightmap()?.let { Heightmap(it, version) }
                 worldSurfaceWorldGenHeightMap = chunkReader.getWorldSurfaceWorldGenHeightmap()?.let { Heightmap(it, version) }
                 oceanFloorHeightMap = chunkReader.getOceanFloorHeightmap()?.let { Heightmap(it, version) }
@@ -257,114 +259,101 @@ class ChunkColumn {
      */
     @JvmOverloads
     @Throws(IllegalArgumentException::class)
-    fun toNBT(version: SupportedVersion = this.version): NBTCompound = NBT.Kompound {
+    fun toNBT(version: SupportedVersion = this.version): NBTCompound = ChunkWriter(version).apply {
         if(version < SupportedVersion.MC_1_17_0) {
             if(minY != 0 || maxY != 255)
                 throw IllegalArgumentException("Versions prior to 1.17 do not support chunks with Y outside of 0-255 range. Current is $minY - ${maxY}")
         }
-        this["DataVersion"] = NBT.Int(version.lowestDataVersion)
 
-        val writeLevelData = { mutableCompound: MutableNBTCompound ->
-            mutableCompound.apply {
-                this["xPos"] = NBT.Int(x)
-                this["zPos"] = NBT.Int(z)
+        setCoordinates(x, z)
+        setLastUpdate(lastUpdate)
+        setInhabitedTime(inhabitedTime)
+        setStatus(generationStatus)
 
-                this["LastUpdate"] = NBT.Long(lastUpdate)
-                this["InhabitedTime"] = NBT.Long(inhabitedTime)
-                this["Status"] = NBT.String(generationStatus.id)
-
-                if(version >= SupportedVersion.MC_1_18_PRE_4) {
-                    this["yPos"] = NBT.Int(minY.blockToSection().toInt())
-                    for (sectionY in minY.blockToSection() .. maxY.blockToSection()) {
-                        getSection(sectionY.toByte()) // 1.18+ always saves all sections to know the chunk height
+        if(version >= SupportedVersion.MC_1_18_PRE_4) {
+            setYPos(minY.blockToSection().toInt())
+            for (sectionY in minY.blockToSection() .. maxY.blockToSection()) {
+                getSection(sectionY.toByte()) // 1.18+ always saves all sections to know the chunk height
+            }
+        } else {
+            var biomes: IntArray? = null
+            for(section in sections.values) {
+                if(section.hasBiomeData()) {
+                    if(biomes == null) {
+                        biomes = IntArray(biomeArraySize)
                     }
-                } else {
-                    var biomes: IntArray? = null
-                    for(section in sections.values) {
-                        if(section.hasBiomeData()) {
-                            if(biomes == null) {
-                                biomes = IntArray(biomeArraySize)
-                            }
 
-                            val offset = section.y * 4 * 4 *4
-                            section.biomes!!.forEachIndexed { index, id ->
-                                val oldBiome = Biome.fromNamespaceID(id)
-                                biomes[offset + index] = oldBiome.numericalID
-                            }
-                        }
-                    }
-                    if(biomes != null) {
-                        this["Biomes"] = NBT.IntArray(*biomes)
-                    } else {
-                        this["Biomes"] = NBT.IntArray(*IntArray(biomeArraySize) { Biome.TheVoid.numericalID })
+                    val offset = section.y * 4 * 4 *4
+                    section.biomes!!.forEachIndexed { index, id ->
+                        val oldBiome = Biome.fromNamespaceID(id)
+                        biomes[offset + index] = oldBiome.numericalID
                     }
                 }
-
-                this["Heightmaps"] = NBT.Kompound {
-                    this["MOTION_BLOCKING"] = NBT.LongArray(motionBlockingHeightMap.compact(version))
-                    motionBlockingNoLeavesHeightMap?.let { this["MOTION_BLOCKING_NO_LEAVES"] = NBT.LongArray(it.compact(version)) }
-                    oceanFloorHeightMap?.let { this["OCEAN_FLOOR"] = NBT.LongArray(it.compact(version)) }
-                    oceanFloorWorldGenHeightMap?.let { this["OCEAN_FLOOR_WG"] = NBT.LongArray(it.compact(version)) }
-                    this["WORLD_SURFACE"] = NBT.LongArray(worldSurfaceHeightMap.compact(version))
-                    worldSurfaceWorldGenHeightMap?.let { this["WORLD_SURFACE_WG"] = NBT.LongArray(it.compact(version)) }
-                }
-                val allSections: MutableList<NBTCompound> = this@ChunkColumn.sections.values
-                    .filter { version >= SupportedVersion.MC_1_18_PRE_4 || !it.empty }
-                    .map { it.toNBT(version) }
-                    .toMutableList()
-
-                if(version < SupportedVersion.MC_1_18_PRE_4) {
-                    allSections += ChunkSection((minY.blockToSection()-1).toByte()).toNBT(version)
-                }
-                val sections = NBT.List(
-                    NBTType.TAG_Compound,
-                    allSections
-                )
-
-                this[SectionName(version)] = sections
-                this[EntitiesName(version)] = entities
-                this[BlockEntitiesName(version)] = tileEntities
-
-                this[BlockTicksName(version)] = tileTicks
-                this[FluidTicksName(version)] = liquidTicks
-
-                if(structures != null) {
-                    this[StructuresName(version)] = structures!!
-                }
-                if(airCarvingMask != null || liquidCarvingMask != null) {
-                    this["CarvingMasks"] = NBT.Kompound {
-                        airCarvingMask?.let { this["AIR"] = NBT.ByteArray(it) }
-                        liquidCarvingMask?.let { this["LIQUID"] = NBT.ByteArray(it) }
-                    }
-                }
-                if(lights != null) {
-                    this["Lights"] = lights!!
-                }
-
-                @Suppress("DEPRECATION")
-                if(version < SupportedVersion.MC_1_18_PRE_4) {
-                    if(liquidsToBeTicked != null) {
-                        this["LiquidsToBeTicked"] = liquidsToBeTicked!!
-                    }
-                    if(toBeTicked != null) {
-                        this["ToBeTicked"] = toBeTicked!!
-                    }
-                } else {
-                    this["isLightOn"] = NBT.Boolean(lightOn)
-                }
-
-                if(postProcessing != null) {
-                    this["PostProcessing"] = postProcessing!!
-                }
+            }
+            if(biomes != null) {
+                setOldBiomes(ImmutableIntArray(*biomes))
+            } else {
+                setOldBiomes(ImmutableIntArray(biomeArraySize) { Biome.TheVoid.numericalID })
             }
         }
 
+        setMotionBlockingHeightMap(NBT.LongArray(motionBlockingHeightMap.compact(version)))
+        motionBlockingNoLeavesHeightMap?.let { setMotionBlockingNoLeavesHeightMap(NBT.LongArray(it.compact(version))) }
+        oceanFloorHeightMap?.let { setOceanFloorHeightMap(NBT.LongArray(it.compact(version))) }
+        oceanFloorWorldGenHeightMap?.let { setOceanFloorWorldGenHeightMap(NBT.LongArray(it.compact(version))) }
+        setWorldSurfaceHeightMap(NBT.LongArray(worldSurfaceHeightMap.compact(version)))
+        worldSurfaceWorldGenHeightMap?.let { setWorldSurfaceWorldGenHeightMap(NBT.LongArray(it.compact(version))) }
+
+        val allSections: MutableList<NBTCompound> = this@ChunkColumn.sections.values
+            .filter { version >= SupportedVersion.MC_1_18_PRE_4 || !it.empty }
+            .map { it.toNBT(version) }
+            .toMutableList()
+
         if(version < SupportedVersion.MC_1_18_PRE_4) {
-            this["Level"] = NBT.Kompound { writeLevelData(this) }
-        } else {
-            writeLevelData(this)
+            allSections += ChunkSection((minY.blockToSection()-1).toByte()).toNBT(version)
         }
-    }
+        val sections = NBT.List(
+            NBTType.TAG_Compound,
+            allSections
+        )
+
+        setSectionsData(sections)
+        setOldEntityData(entities)
+        setBlockEntityData(tileEntities)
+
+        setBlockTicks(tileTicks)
+        setFluidTicks(liquidTicks)
+
+        if(structures != null) {
+            setStructures(structures!!)
+        }
+        if(airCarvingMask != null) {
+            setAirCarvingMask(airCarvingMask!!)
+        }
+        if(liquidCarvingMask != null) {
+            setLiquidCarvingMask(liquidCarvingMask!!)
+        }
+        if(lights != null) {
+            setLights(lights!!)
+        }
+
+        @Suppress("DEPRECATION")
+        if(version < SupportedVersion.MC_1_18_PRE_4) {
+            if(liquidsToBeTicked != null) {
+                setOldLiquidsToBeTicked(liquidsToBeTicked!!)
+            }
+            if(toBeTicked != null) {
+                setOldToBeTicked(toBeTicked!!)
+            }
+        } else {
+            setLightOn(lightOn)
+        }
+
+        if(postProcessing != null) {
+            setPostProcessing(postProcessing!!)
+        }
+
+    }.toNBT()
 
     /**
      * Updates this chunk version, both the 'version' field and the DataVersion
