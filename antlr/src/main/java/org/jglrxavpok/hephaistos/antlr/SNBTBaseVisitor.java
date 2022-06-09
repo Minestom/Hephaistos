@@ -1,4 +1,4 @@
-// Generated from C:/Users/jglrxavpok/Documents/Programmation/MCModding/NBTMCALib/src/antlr/resources\SNBT.g4 by ANTLR 4.8
+// Generated from C:/Users/jglrxavpok/Documents/Programmation/MCModding/NBTMCALib/antlr/src/main/resources\SNBT.g4 by ANTLR 4.10.1
 package org.jglrxavpok.hephaistos.antlr;
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 

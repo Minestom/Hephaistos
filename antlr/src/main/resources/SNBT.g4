@@ -48,4 +48,4 @@ LONG: '-'? [0-9]+ ('l'|'L');
 BYTE: '-'? [0-9]+ ('b'|'B');
 SHORT: '-'? [0-9]+ ('s'|'S');
 WS: (' ' | '\t' | '\r' | '\n')+ -> channel(HIDDEN);
-IDENTIFIER_LETTERS: [a-zA-Z0-9_ ]+;
+IDENTIFIER_LETTERS: [a-zA-Z0-9_]+;
