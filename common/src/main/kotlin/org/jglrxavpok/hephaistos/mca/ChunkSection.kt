@@ -11,6 +11,7 @@ import org.jglrxavpok.hephaistos.nbt.NBTString
 import kotlin.experimental.and
 import kotlin.experimental.or
 import kotlin.math.ceil
+import kotlin.math.log2
 
 /**
  * 16x16x16 subchunk.
@@ -136,7 +137,6 @@ class ChunkSection(val y: Byte) {
 
         if(version >= SupportedVersion.MC_1_18_PRE_4) {
             if("biomes" in nbt) {
-                biomes = Array<String>(biomeArraySize) { Biome.UnknownBiome }
                 val biomesNBT = nbt.getCompound("biomes")!!
                 val paletteNBT = biomesNBT.getList<NBTString>("palette") ?: missing("biomes.palette")
                 val biomePalette = BiomePalette(paletteNBT)
@@ -145,9 +145,10 @@ class ChunkSection(val y: Byte) {
                         baseBiome = biomePalette.elements[0]
                     }
                 } else {
+                    biomes = Array<String>(biomeArraySize) { Biome.UnknownBiome }
                     val compressedBiomes = biomesNBT.getLongArray("data")!!
 
-                    val sizeInBits = compressedBiomes.size * 64 / biomeArraySize
+                    val sizeInBits = ceil(log2(biomePalette.elements.size.toDouble())).toInt()
                     val intPerLong = 64 / sizeInBits
                     val expectedCompressedLength = ceil(biomeArraySize.toDouble() / intPerLong).toInt()
                     if (compressedBiomes.size != expectedCompressedLength) {
