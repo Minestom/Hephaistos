@@ -152,8 +152,10 @@ class ChunkColumn {
         if(minY > maxY)
             throw AnvilException("minY must be <= maxY")
 
-        lastUpdate = levelData.getLong("LastUpdate") ?: missing("LastUpdate")
-        inhabitedTime = levelData.getLong("InhabitedTime") ?: missing("InhabitedTime")
+        // Vanilla defaults both of these to 0L if not present (despite always creating them).
+        lastUpdate = levelData.getLong("LastUpdate") ?: 0L
+        inhabitedTime = levelData.getLong("InhabitedTime") ?: 0L
+
         generationStatus = GenerationStatus.fromID(levelData.getString("Status") ?: missing("Status"))
 
         if(generationStatus.ordinal >= GenerationStatus.Heightmaps.ordinal) {
