@@ -148,15 +148,20 @@ class ChunkSection(val y: Byte) {
                     biomes = Array<String>(biomeArraySize) { Biome.UnknownBiome }
                     val compressedBiomes = biomesNBT.getLongArray("data")!!
 
-                    val sizeInBits = ceil(log2(biomePalette.elements.size.toDouble())).toInt()
-                    val intPerLong = 64 / sizeInBits
-                    val expectedCompressedLength = ceil(biomeArraySize.toDouble() / intPerLong).toInt()
-                    if (compressedBiomes.size != expectedCompressedLength) {
-                        throw AnvilException("Invalid compressed biomes length (${compressedBiomes.size}). At $sizeInBits bit per value, expected $expectedCompressedLength bytes")
-                    }
-                    val ids = unpack(compressedBiomes, sizeInBits).sliceArray(0 until biomeArraySize)
-                    for ((index, id) in ids.withIndex()) {
-                        biomes!![index] = biomePalette.elements[id]
+                    check(biomePalette.elements.isNotEmpty()) { "Cannot have an empty biome palette with biome data!" }
+                    if(biomePalette.elements.size == 1) {
+                        biomes!!.fill(biomePalette.elements[0])
+                    } else {
+                        val sizeInBits = ceil(log2(biomePalette.elements.size.toDouble())).toInt()
+                        val intPerLong = 64 / sizeInBits
+                        val expectedCompressedLength = ceil(biomeArraySize.toDouble() / intPerLong).toInt()
+                        if (compressedBiomes.size != expectedCompressedLength) {
+                            throw AnvilException("Invalid compressed biomes length (${compressedBiomes.size}). At $sizeInBits bit per value, expected $expectedCompressedLength bytes")
+                        }
+                        val ids = unpack(compressedBiomes, sizeInBits).sliceArray(0 until biomeArraySize)
+                        for ((index, id) in ids.withIndex()) {
+                            biomes!![index] = biomePalette.elements[id]
+                        }
                     }
                 }
             }
