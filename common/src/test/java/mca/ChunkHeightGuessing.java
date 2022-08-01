@@ -86,7 +86,7 @@ public class ChunkHeightGuessing {
                     level.setString("Status", ChunkColumn.GenerationStatus.Spawn.getId()); // don't have to do the heightmaps
                     level.setByte("isLightOn", (byte) 1);
 
-                    int[] biomes = new int[4*4*4* worldHeight];
+                    int[] biomes = new int[4* worldHeight];
                     level.setIntArray("Biomes", biomes);
                 }));
             });

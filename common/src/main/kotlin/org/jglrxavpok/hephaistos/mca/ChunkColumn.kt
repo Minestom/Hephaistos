@@ -94,7 +94,7 @@ class ChunkColumn {
     var lightOn = true
 
     val logicalHeight get()= maxY - minY +1
-    private val biomeArraySize get()= logicalHeight * 4 * 4 * 4
+    private val biomeArraySize get()= logicalHeight * 4 // (4x4x4 per *section*, so height x 4x4x4 / 16 = height x 4)
 
     @JvmOverloads
     constructor(x: Int, z: Int, minY: Int = VanillaMinY, maxY: Int = VanillaMaxY) {
@@ -143,7 +143,7 @@ class ChunkColumn {
             val biomes = levelData.getIntArray("Biomes") ?: throw AnvilException("Cannot guess minY-maxY of chunk without biome information for 1.17 worlds")
 
             this.minY = (minSectionY.toInt()+1).sectionToBlock()
-            this.maxY = biomes.size / (4 * 4 * 4) + minY -1
+            this.maxY = biomes.size / 4 + minY -1
         } else {
             this.minY = (levelData.getInt("yPos") ?: missing("yPos")).sectionToBlock()
             this.maxY = minY
@@ -284,7 +284,7 @@ class ChunkColumn {
      * Returns the biome stored inside this column at the given position, looking into the corresponding section
      * Be aware that biome data may not be present inside the section, in that case, this method returns UnknownBiome
      */
-    fun getBiome(x: Int, y:Int, z: Int): String {
+    fun getBiome(x: Int, y: Int, z: Int): String {
         checkBounds(x, y, z)
         val section = getSection(y.blockToSection())
         return section.getBiome(x.blockInsideSection(), y.blockInsideSection(), z.blockInsideSection())

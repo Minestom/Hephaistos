@@ -110,6 +110,33 @@ class ViewerApp : Application() {
                 ImGui.dragInt("##value", value, 1.0f, -128f, 128f)
                 // TODO: make it modifiable
             }
+            NBTType.TAG_Int_Array -> {
+                val asArray = nbt as NBTIntArray
+                if(ImGui.treeNode(name + " Int[${asArray.size}]")) {
+                    for ((i, entry) in asArray.withIndex()) {
+                        ImGui.bulletText("[$i] = $entry")
+                    }
+                    ImGui.treePop()
+                }
+            }
+            NBTType.TAG_Long_Array -> {
+                val asArray = nbt as NBTLongArray
+                if(ImGui.treeNode(name + " Long[${asArray.size}]")) {
+                    for ((i, entry) in asArray.withIndex()) {
+                        ImGui.bulletText("[$i] = $entry")
+                    }
+                    ImGui.treePop()
+                }
+            }
+            NBTType.TAG_Byte_Array -> {
+                val asArray = nbt as NBTByteArray
+                if(ImGui.treeNode(name + " Byte[${asArray.size}]")) {
+                    for ((i, entry) in asArray.withIndex()) {
+                        ImGui.bulletText("[$i] = $entry")
+                    }
+                    ImGui.treePop()
+                }
+            }
             else -> {
                 ImGui.bulletText(name)
                 ImGui.sameLine()
