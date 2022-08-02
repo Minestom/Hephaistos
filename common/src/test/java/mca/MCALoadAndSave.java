@@ -6,6 +6,8 @@ import org.jglrxavpok.hephaistos.data.RandomAccessFileSource;
 import org.jglrxavpok.hephaistos.mca.AnvilException;
 import org.jglrxavpok.hephaistos.mca.ChunkColumn;
 import org.jglrxavpok.hephaistos.mca.RegionFile;
+import org.jglrxavpok.hephaistos.mca.readers.ChunkReader;
+import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -55,6 +57,24 @@ public class MCALoadAndSave {
             ChunkColumn reloaded = r.getChunk(0, 0); // reload
 
             assertEquals(c.toNBT(), reloaded.toNBT());
+        }
+        Files.delete(tmpFile);
+    }
+
+    @ParameterizedTest
+    @ArgumentsSource(PathProvider.class)
+    public void loadAndSaveCheckBiomeEquality(Path path) throws IOException, AnvilException {
+        Path tmpFile = Files.createTempFile("tmp_save_r", ".mca");
+        Files.copy(path, tmpFile, REPLACE_EXISTING);
+        RandomAccessFile file = new RandomAccessFile(tmpFile.toFile(), "rw");
+        try(RegionFile r = new RegionFile(file, 0, 0)) {
+            NBTCompound cData = r.getChunkData(0, 0);
+            ChunkColumn c = new ChunkColumn(cData);
+            NBTCompound reloadedNBT = c.toNBT(c.getVersion());
+
+            ChunkReader readerOriginal = new ChunkReader(cData);
+            ChunkReader readerReloaded = new ChunkReader(reloadedNBT);
+            assertEquals(readerOriginal.getOldBiomes(), readerReloaded.getOldBiomes());
         }
         Files.delete(tmpFile);
     }

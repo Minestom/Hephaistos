@@ -176,11 +176,9 @@ class ChunkColumn {
             val biomes = chunkReader.getOldBiomes()
             if(biomes != null) {
                 val biomeNamespaces = biomes.map(Biome::numericalIDToNamespaceID).toTypedArray()
-                for ((sectionY, section) in sections) {
-                    if(sectionY*16 < this.minY || sectionY*16 > this.maxY) {
-                        continue
-                    }
-                    val offset = sectionY * 4 * 4 * 4
+                for (sectionY in minY.blockToSection() .. maxY.blockToSection()) {
+                    val offset = (sectionY - minY.blockToSection()) * 4 * 4 * 4
+                    val section = getSection(sectionY.toByte())
                     section.biomes = Array<String>(4*4*4) { Biome.UnknownBiome }
                     biomeNamespaces.copyInto(section.biomes!!, startIndex = offset, endIndex = offset + 4 * 4 * 4)
                 }
@@ -283,7 +281,7 @@ class ChunkColumn {
                         biomes = IntArray(biomeArraySize)
                     }
 
-                    val offset = section.y * 4 * 4 *4
+                    val offset = (section.y - minY.blockToSection()) * 4 * 4 *4
                     section.biomes!!.forEachIndexed { index, id ->
                         val oldBiome = Biome.fromNamespaceID(id)
                         biomes[offset + index] = oldBiome.numericalID
