@@ -13,7 +13,7 @@ import org.jglrxavpok.hephaistos.nbt.mutable.MutableNBTCompound
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * 16x256x16 (XYZ) area of the world. Consists of 16 ChunkSections vertically stacked.
+ * 16x16 (XZ) vertical slice of the world. Consists of ChunkSections vertically stacked (each of height 16 blocks).
  *
  */
 class ChunkColumn {
@@ -271,7 +271,7 @@ class ChunkColumn {
         setStatus(generationStatus)
 
         if(version >= SupportedVersion.MC_1_18_PRE_4) {
-            setYPos(minY.blockToSection().toInt())
+            setYPos(minY)
             for (sectionY in minY.blockToSection() .. maxY.blockToSection()) {
                 getSection(sectionY.toByte()) // 1.18+ always saves all sections to know the chunk height
             }
