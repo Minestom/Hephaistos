@@ -68,6 +68,7 @@ public class ChunkHeightGuessing {
     public void test1_17() throws AnvilException {
         Checker checker = (int minY, int maxY) -> {
             final int worldHeight = maxY - minY +1;
+            final int sectionCount = (int) Math.ceil((double)worldHeight/CoordinatesKt.sectionToBlock(1));
             NBTCompound data = NBT.Compound(nbt -> {
                 nbt.setInt("DataVersion", SupportedVersion.MC_1_17_0.getLowestDataVersion());
 

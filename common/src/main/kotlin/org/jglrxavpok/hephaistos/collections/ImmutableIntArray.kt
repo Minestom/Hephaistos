@@ -32,6 +32,10 @@ class ImmutableIntArray(private vararg val numbers: Int): Iterable<Int> {
         return numbers.joinTo(StringBuilder(), separator, prefix, postfix, limit, truncated, transform).toString()
     }
 
+    override fun toString(): String {
+        return joinToString(prefix = "[", postfix = "]")
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

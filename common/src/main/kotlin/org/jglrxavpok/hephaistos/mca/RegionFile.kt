@@ -185,26 +185,18 @@ class RegionFile @Throws(AnvilException::class, IOException::class) @JvmOverload
     }
 
     /**
-     * Writes a column to the file. The X,Z coordinates are based on the ones inside the given column.
+     * Writes raw NBT data to the file for a given column.
      * The column does not have to be loaded from this file, but not doing so may generate inconsistencies in the world
      * (ie chunks that look out of place). That means that "handcrafting" a ChunkColumn from one
      * one instanced on their own, and passing it to writeColumn *is* valid.
      */
     @Throws(IOException::class)
-    @JvmOverloads
-    fun writeColumn(column: ChunkColumn, version: SupportedVersion = SupportedVersion.Latest) {
-        if(column.minY < minY)
-            throw AnvilException("ChunkColumn minY must be >= to RegionFile minY")
-        if(column.maxY > maxY)
-            throw AnvilException("ChunkColumn maxY must be <= to RegionFile maxY")
-        val x = column.x
-        val z = column.z
+    fun writeColumnData(data: NBTCompound, x: Int, z: Int) {
         if(out(x, z)) throw AnvilException("Out of RegionFile: $x,$z (chunk)")
 
-        val nbt = column.toNBT(version)
         val dataOut = ByteArrayOutputStream()
         NBTWriter(dataOut, CompressedProcesser.ZLIB).use {
-            it.writeNamed("", nbt)
+            it.writeNamed("", data)
         }
         val dataSize = dataOut.size()
         val sectorCount = ceil(dataSize.toDouble() / SectorSize).toInt()
@@ -212,7 +204,7 @@ class RegionFile @Throws(AnvilException::class, IOException::class) @JvmOverload
             throw AnvilException("Sorry, but your ChunkColumn totals over 1MB of data, impossible to save it inside a RegionFile.")
         }
 
-        val location = index(column.x, column.z)
+        val location = index(x, z)
         val previousSectorCount = sizeInSectors(locations[index(x, z)])
         val previousSectorStart = sectorOffset(locations[index(x, z)])
         // start by saving to free sectors, before cleaning up the old data
@@ -251,15 +243,33 @@ class RegionFile @Throws(AnvilException::class, IOException::class) @JvmOverload
             }
 
             locations[location] = buildLocation(sectorStart, sectorCount)
-            writeLocation(column.x, column.z)
+            writeLocation(x, z)
             timestamps[location] = System.currentTimeMillis().toInt()
-            writeTimestamp(column.x, column.z)
+            writeTimestamp(x, z)
 
             // the data has been written, now free previous storage
             for (i in previousSectorStart until previousSectorStart+previousSectorCount) {
                 freeSectors[i] = true
             }
         }
+    }
+
+    /**
+     * Writes a column to the file. The X,Z coordinates are based on the ones inside the given column.
+     * The column does not have to be loaded from this file, but not doing so may generate inconsistencies in the world
+     * (ie chunks that look out of place). That means that "handcrafting" a ChunkColumn from one
+     * one instanced on their own, and passing it to writeColumn *is* valid.
+     */
+    @Throws(IOException::class)
+    @JvmOverloads
+    fun writeColumn(column: ChunkColumn, version: SupportedVersion = SupportedVersion.Latest) {
+        if(column.minY < minY)
+            throw AnvilException("ChunkColumn minY must be >= to RegionFile minY")
+        if(column.maxY > maxY)
+            throw AnvilException("ChunkColumn maxY must be <= to RegionFile maxY")
+
+        val nbt = column.toNBT(version)
+        writeColumnData(nbt, column.x, column.z)
     }
 
     private fun addPadding() {

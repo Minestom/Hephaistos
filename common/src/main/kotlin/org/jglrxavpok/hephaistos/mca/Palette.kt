@@ -63,6 +63,31 @@ sealed class Palette<ElementType>(private val nbtType: NBTType<out NBT>, private
         NBT.List(nbtType, elements.map { writer(it) })
 
     /**
+     * Index of the given element inside the palette. Returns -1 if none
+     */
+    fun getPaletteIndex(obj: ElementType): Int = elements.indexOf(obj)
+
+    /**
+     * Produces a long array with the compacted IDs based on this palette. The 'indices' array is supposed to be the states already paletted (ie a value inside the 'indices' array is an index into the palette already)
+     * Bit length is selected on the size of this palette (`ceil(log2(size))`), ID correspond to the index inside this palette
+     */
+    @JvmOverloads
+    fun compactPreProcessedIDs(indices: IntArray, version: SupportedVersion = SupportedVersion.Latest, minimumBitSize: Int = 1): ImmutableLongArray {
+        if(minimumBitSize <= 0) {
+            error("Minimum bit size cannot be 0 or negative")
+        }
+
+        // convert state list into uncompressed data
+        val bitLength = ceil(log2(elements.size.toFloat())).toInt().coerceAtLeast(minimumBitSize) // at least one bit
+        return when {
+            version == SupportedVersion.MC_1_15 -> compress(indices, bitLength)
+            version >= SupportedVersion.MC_1_16 -> pack(indices, bitLength)
+
+            else -> throw AnvilException("Unsupported version for compacting palette: $version")
+        }
+    }
+
+    /**
      * Produces a long array with the compacted IDs based on this palette.
      * Bit length is selected on the size of this palette (`ceil(log2(size))`), ID correspond to the index inside this palette
      */

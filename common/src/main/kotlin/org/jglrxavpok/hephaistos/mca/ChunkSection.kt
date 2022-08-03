@@ -1,13 +1,10 @@
 package org.jglrxavpok.hephaistos.mca
 
 import org.jglrxavpok.hephaistos.Options
-import org.jglrxavpok.hephaistos.collections.ImmutableLongArray
-import org.jglrxavpok.hephaistos.mca.AnvilException.Companion.missing
+import org.jglrxavpok.hephaistos.mca.readers.ChunkSectionReader
+import org.jglrxavpok.hephaistos.mca.writer.ChunkSectionWriter
 import org.jglrxavpok.hephaistos.mcdata.Biome
-import org.jglrxavpok.hephaistos.nbt.NBT
 import org.jglrxavpok.hephaistos.nbt.NBTCompound
-import org.jglrxavpok.hephaistos.nbt.NBTLongArray
-import org.jglrxavpok.hephaistos.nbt.NBTString
 import kotlin.experimental.and
 import kotlin.experimental.or
 import kotlin.math.ceil
@@ -17,6 +14,10 @@ import kotlin.math.log2
  * 16x16x16 subchunk.
  */
 class ChunkSection(val y: Byte) {
+
+    companion object {
+        val BiomeArraySize = 4*4*4
+    }
 
     /**
      * Palette used by this section, best not to touch if you don't know what you are doing
@@ -34,8 +35,6 @@ class ChunkSection(val y: Byte) {
      */
     var biomes: Array<String>? = null
 
-    private val biomeArraySize get()= 4*4*4
-
     private var baseBiome = Biome.UnknownBiome
 
     /**
@@ -44,80 +43,26 @@ class ChunkSection(val y: Byte) {
      */
     @Throws(AnvilException::class)
     @JvmOverloads
-    constructor(nbt: NBTCompound, version: SupportedVersion = SupportedVersion.Latest): this(nbt.getByte("Y") ?: missing("Y")) {
+    constructor(nbt: NBTCompound, version: SupportedVersion = SupportedVersion.Latest): this(ChunkSectionReader.getY(nbt)) {
         if(version < SupportedVersion.MC_1_17_0) {
             if(y !in 0..15)
                 throw AnvilException("Invalid section Y: $y. Must be in 0..15 for pre-1.17 sections")
         }
 
+        val reader = ChunkSectionReader(version, nbt)
+
         // empty palette can happen if the section exist but requires more than 8 bits to save the block IDs (in that case, the global ID is directly used)
-        val blockPaletteNBT =
-            when {
-                version < SupportedVersion.MC_1_18_PRE_4 -> nbt.getList<NBTCompound>("Palette")
-                else -> nbt.getCompound("block_states")?.getList<NBTCompound>("palette")
-            }
+        val blockPaletteNBT = reader.getBlockPalette()
         blockPalette = blockPaletteNBT?.let { BlockPalette(it) } // We consider that there are no blocks inside this section if the palette is null (because we cannot interpret IDs)
 
         if(Options.WarnWhenLoadingSectionWithNoPaletteButWithBlocks.active && blockPalette == null) {
-            val hasBlockStates = if(version < SupportedVersion.MC_1_18_PRE_4) {
-                nbt.containsKey("BlockStates")
-            } else {
-                nbt.getCompound("block_states")?.containsKey("data") ?: false
-            }
-
-            if(hasBlockStates) {
+            if(reader.hasBlockStates()) {
                 System.err.println("[Hephaistos] Attempted to load a ChunkSection with no palette but with block states. Because Hephaistos cannot interpret global IDs, block states will be skipped")
             }
         }
 
         if(blockPalette != null) {
-            val compactedBlockStates =
-                when {
-                    version < SupportedVersion.MC_1_18_PRE_4 -> nbt.getLongArray("BlockStates") ?: missing("BlockStates")
-
-                    /* no data is seemingly allowed and represents a section which is full of the block at palette index 0
-                    * + path has changed
-                    * */
-                    else -> (nbt.getCompound("block_states") ?: missing("block_states")).getLongArray("data") ?: ImmutableLongArray()
-                }
-
-            val sizeInBits = compactedBlockStates.size*64 / 4096
-            val ids: IntArray
-            when {
-                version == SupportedVersion.MC_1_15 -> {
-                    ids = decompress(compactedBlockStates, sizeInBits)
-                    if(ids.size != 16*16*16) {
-                        throw AnvilException("Invalid decompressed BlockStates length (${ids.size}). Must be 4096 (16x16x16)")
-                    }
-                }
-
-                version >= SupportedVersion.MC_1_16 -> {
-                    val expectedCompressedLength =
-                        if(compactedBlockStates.size == 0) {
-                            -1 /* force invalid value */
-                        } else {
-                            val intPerLong = 64 / sizeInBits
-                            ceil(4096.0 / intPerLong).toInt()
-                        }
-                    var unpack = true
-                    if(compactedBlockStates.size != expectedCompressedLength) {
-                        if(version >= SupportedVersion.MC_1_18_PRE_4 && compactedBlockStates.size == 0) {
-                            // palette only has a single element
-                            unpack = false
-                        } else {
-                            throw AnvilException("Invalid compressed BlockStates length (${compactedBlockStates.size}). At $sizeInBits bit per value, expected $expectedCompressedLength bytes. Note that 0 length is not allowed with pre 1.18 formats.")
-                        }
-                    }
-
-                    ids = if(unpack) {
-                        unpack(compactedBlockStates, sizeInBits).sliceArray(0 until 4096)
-                    } else {
-                        IntArray(4096) { 0 }
-                    }
-                }
-
-                else -> throw AnvilException("Unsupported version for compressed block states: $version")
-            }
+            val ids = reader.getUncompressedBlockStateIDs()
 
             for((index, id) in ids.withIndex()) {
                 blockStates[index] = blockPalette!!.elements[id]
@@ -126,46 +71,18 @@ class ChunkSection(val y: Byte) {
             blockPalette!!.loadReferences(blockStates.asIterable())
         }
 
-        nbt.getByteArray("BlockLight")?.let {
+        reader.getBlockLight()?.let {
             blockLights = ByteArray(it.size)
             it.copyInto(blockLights)
         }
-        nbt.getByteArray("SkyLight")?.let {
+        reader.getSkyLight()?.let {
             skyLights = ByteArray(it.size)
             it.copyInto(skyLights)
         }
 
-        if(version >= SupportedVersion.MC_1_18_PRE_4) {
-            if("biomes" in nbt) {
-                val biomesNBT = nbt.getCompound("biomes")!!
-                val paletteNBT = biomesNBT.getList<NBTString>("palette") ?: missing("biomes.palette")
-                val biomePalette = BiomePalette(paletteNBT)
-                if("data" !in biomesNBT) {
-                    if(biomePalette.elements.size > 0) {
-                        baseBiome = biomePalette.elements[0]
-                    }
-                } else {
-                    biomes = Array<String>(biomeArraySize) { Biome.UnknownBiome }
-                    val compressedBiomes = biomesNBT.getLongArray("data")!!
-
-                    check(biomePalette.elements.isNotEmpty()) { "Cannot have an empty biome palette with biome data!" }
-                    if(biomePalette.elements.size == 1) {
-                        biomes!!.fill(biomePalette.elements[0])
-                    } else {
-                        val sizeInBits = ceil(log2(biomePalette.elements.size.toDouble())).toInt()
-                        val intPerLong = 64 / sizeInBits
-                        val expectedCompressedLength = ceil(biomeArraySize.toDouble() / intPerLong).toInt()
-                        if (compressedBiomes.size != expectedCompressedLength) {
-                            throw AnvilException("Invalid compressed biomes length (${compressedBiomes.size}). At $sizeInBits bit per value, expected $expectedCompressedLength bytes")
-                        }
-                        val ids = unpack(compressedBiomes, sizeInBits).sliceArray(0 until biomeArraySize)
-                        for ((index, id) in ids.withIndex()) {
-                            biomes!![index] = biomePalette.elements[id]
-                        }
-                    }
-                }
-            }
-        }
+        val (biomesArray, baseBiomeValue) = reader.getBiomeInformation()
+        biomes = biomesArray
+        baseBiome = baseBiomeValue ?: Biome.UnknownBiome
     }
 
     /**
@@ -316,7 +233,7 @@ class ChunkSection(val y: Byte) {
         if(biomes == null) {
             return baseBiome
         }
-        val index = x/4+(z/4)*4+(y/4)*16
+        val index = x/4 + (z/4) * 4 + (y/4) * 16
         return biomes!![index]
     }
 
@@ -330,9 +247,9 @@ class ChunkSection(val y: Byte) {
         checkBounds(x, y, z)
         fillInIfEmpty()
         if(biomes == null) {
-            biomes = Array<String>(biomeArraySize) { Biome.UnknownBiome }
+            biomes = Array<String>(BiomeArraySize) { Biome.UnknownBiome }
         }
-        biomes?.set(x/4+(z/4)*4+(y/4)*16, biomeID)
+        biomes?.set(x/4 + (z/4) * 4 + (y/4) * 16, biomeID)
     }
 
     /**
@@ -340,44 +257,21 @@ class ChunkSection(val y: Byte) {
      */
     fun hasBiomeData() = biomes != null
 
-    private fun index(x: Int, y: Int, z: Int) = y*16*16+z*16+x
+    private fun index(x: Int, y: Int, z: Int) = y * 16 * 16 + z * 16 + x
 
     /**
      * Converts this ChunkSection into its NBT representation
      */
     @JvmOverloads
-    fun toNBT(version: SupportedVersion = SupportedVersion.Latest): NBTCompound = NBT.Kompound {
-        this["Y"] = NBT.Byte(y)
-        if(blockLights.isNotEmpty()) {
-            this["BlockLight"] = NBT.ByteArray(*blockLights)
+    fun toNBT(version: SupportedVersion = SupportedVersion.Latest): NBTCompound = ChunkSectionWriter(version, y).apply {
+        if(biomes != null) {
+            setAllBiomes(biomes!!)
         }
-        if(skyLights.isNotEmpty()) {
-            this["SkyLight"] = NBT.ByteArray(*skyLights)
-        }
-        if(!empty) {
-            if(version < SupportedVersion.MC_1_18_PRE_4) {
-                this["Palette"] = blockPalette!!.toNBT()
-                this["BlockStates"] = NBT.LongArray(blockPalette!!.compactIDs(blockStates, version, 4))
-            } else {
-                this["block_states"] = NBT.Kompound {
-                    this["palette"] = blockPalette!!.toNBT()
-                    this["data"] = NBT.LongArray(blockPalette!!.compactIDs(blockStates, version, 4))
-                }
+        setBlockLights(blockLights)
+        setSkyLights(skyLights)
 
-
-                if(biomes != null) {
-                    val biomePalette = BiomePalette()
-                    for(b in biomes!!) {
-                        biomePalette.increaseReference(b)
-                    }
-                    this["biomes"] = NBT.Kompound {
-                        this["palette"] = biomePalette.toNBT()
-                        this["data"] = NBT.LongArray(biomePalette.compactIDs(biomes!!, version))
-                    }
-                }
-            }
-        }
-    }
+        setAllBlockStates(blockStates)
+    }.toNBT()
 
 
 }
