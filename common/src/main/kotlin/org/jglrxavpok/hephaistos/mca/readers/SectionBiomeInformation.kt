@@ -2,7 +2,7 @@ package org.jglrxavpok.hephaistos.mca.readers
 
 /**
  * Holds the information about biomes for a single section.
- * There are 3 possible: scenarii:
+ * There are 3 possible scenarii:
  * 1. biomes = null and baseBiome = null
  *      This means
  *          either the section is from before 1.18, so no biome information exists in the section

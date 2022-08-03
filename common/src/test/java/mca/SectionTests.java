@@ -20,7 +20,8 @@ public class SectionTests {
         NBTCompound nbt = section.toNBT(SupportedVersion.MC_1_17_0);
         NBTList<NBTCompound> palette = nbt.getList("Palette");
         assertEquals(2, palette.getSize());
-        assertEquals(BlockState.AIR.getName(), palette.get(0).getString("Name"));
-        assertEquals("minecraft:stone", palette.get(1).getString("Name"));
+
+        assertEquals(BlockState.AIR.getName(), palette.get(1).getString("Name"));
+        assertEquals("minecraft:stone", palette.get(0).getString("Name"));
     }
 }

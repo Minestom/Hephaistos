@@ -1,22 +1,21 @@
 package org.jglrxavpok.hephaistos.mca
 
 import org.jglrxavpok.hephaistos.Options
-import org.jglrxavpok.hephaistos.collections.ImmutableLongArray
-import org.jglrxavpok.hephaistos.mca.AnvilException.Companion.missing
 import org.jglrxavpok.hephaistos.mca.readers.ChunkSectionReader
+import org.jglrxavpok.hephaistos.mca.writer.ChunkSectionWriter
 import org.jglrxavpok.hephaistos.mcdata.Biome
-import org.jglrxavpok.hephaistos.nbt.NBT
 import org.jglrxavpok.hephaistos.nbt.NBTCompound
-import org.jglrxavpok.hephaistos.nbt.NBTLongArray
-import org.jglrxavpok.hephaistos.nbt.NBTString
 import kotlin.experimental.and
 import kotlin.experimental.or
-import kotlin.math.ceil
 
 /**
  * 16x16x16 subchunk.
  */
 class ChunkSection(val y: Byte) {
+
+    companion object {
+        val BiomeArraySize = 4*4*4
+    }
 
     /**
      * Palette used by this section, best not to touch if you don't know what you are doing
@@ -33,8 +32,6 @@ class ChunkSection(val y: Byte) {
      * Arranged by X, Z and then Y.
      */
     var biomes: Array<String>? = null
-
-    private val biomeArraySize get()= 4*4*4
 
     private var baseBiome = Biome.UnknownBiome
 
@@ -248,7 +245,7 @@ class ChunkSection(val y: Byte) {
         checkBounds(x, y, z)
         fillInIfEmpty()
         if(biomes == null) {
-            biomes = Array<String>(biomeArraySize) { Biome.UnknownBiome }
+            biomes = Array<String>(BiomeArraySize) { Biome.UnknownBiome }
         }
         biomes?.set(x/4 + (z/4) * 4 + (y/4) * 16, biomeID)
     }
@@ -264,38 +261,15 @@ class ChunkSection(val y: Byte) {
      * Converts this ChunkSection into its NBT representation
      */
     @JvmOverloads
-    fun toNBT(version: SupportedVersion = SupportedVersion.Latest): NBTCompound = NBT.Kompound {
-        this["Y"] = NBT.Byte(y)
-        if(blockLights.isNotEmpty()) {
-            this["BlockLight"] = NBT.ByteArray(*blockLights)
+    fun toNBT(version: SupportedVersion = SupportedVersion.Latest): NBTCompound = ChunkSectionWriter(version, y).apply {
+        if(biomes != null) {
+            setAllBiomes(biomes!!)
         }
-        if(skyLights.isNotEmpty()) {
-            this["SkyLight"] = NBT.ByteArray(*skyLights)
-        }
-        if(!empty) {
-            if(version < SupportedVersion.MC_1_18_PRE_4) {
-                this["Palette"] = blockPalette!!.toNBT()
-                this["BlockStates"] = NBT.LongArray(blockPalette!!.compactIDs(blockStates, version, 4))
-            } else {
-                this["block_states"] = NBT.Kompound {
-                    this["palette"] = blockPalette!!.toNBT()
-                    this["data"] = NBT.LongArray(blockPalette!!.compactIDs(blockStates, version, 4))
-                }
+        setBlockLights(blockLights)
+        setSkyLights(skyLights)
 
-
-                if(biomes != null) {
-                    val biomePalette = BiomePalette()
-                    for(b in biomes!!) {
-                        biomePalette.increaseReference(b)
-                    }
-                    this["biomes"] = NBT.Kompound {
-                        this["palette"] = biomePalette.toNBT()
-                        this["data"] = NBT.LongArray(biomePalette.compactIDs(biomes!!, version))
-                    }
-                }
-            }
-        }
-    }
+        setAllBlockStates(blockStates)
+    }.toNBT()
 
 
 }

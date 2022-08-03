@@ -101,6 +101,7 @@ class ChunkReader @Throws(AnvilException::class) constructor(val chunkData: NBTC
     /**
      * Alternative name for getBlockEntities
      */
+    @Deprecated(message = "Tile entities is the old name", replaceWith = ReplaceWith("ChunkReader#getBlockEntities()"))
     fun getTileEntities() = getBlockEntities()
 
     fun getTileTicks() = levelData.getList(BlockTicksName(minecraftVersion)) ?: NBT.List(NBTType.TAG_Compound)
