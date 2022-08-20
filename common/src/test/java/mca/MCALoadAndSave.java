@@ -7,7 +7,7 @@ import org.jglrxavpok.hephaistos.mca.AnvilException;
 import org.jglrxavpok.hephaistos.mca.ChunkColumn;
 import org.jglrxavpok.hephaistos.mca.RegionFile;
 import org.jglrxavpok.hephaistos.mca.readers.ChunkReader;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
+import org.jglrxavpok.hephaistos.nbt.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -15,6 +15,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -77,5 +78,51 @@ public class MCALoadAndSave {
             assertEquals(readerOriginal.getOldBiomes(), readerReloaded.getOldBiomes());
         }
         Files.delete(tmpFile);
+    }
+
+    @Test
+    public void saveAlmostFullChunk() throws IOException, AnvilException {
+        Path tmpFile = Files.createTempFile("tmp_save_r", ".mca");
+        RandomAccessFile file = new RandomAccessFile(tmpFile.toFile(), "rw");
+
+        try (RegionFile r = new RegionFile(file, 0, 0)) {
+            int bigChunkIndex = 0;
+            int overlappedChunkIndex = 1;
+            // allocate one sector for chunk which will have big data size
+            ChunkColumn emptyBigChunk = r.getOrCreateChunk(bigChunkIndex, bigChunkIndex);
+            r.writeColumn(emptyBigChunk);
+            r.forget(emptyBigChunk);
+
+            // allocate one sector for chunk which will be overlapped by another chunk
+            ChunkColumn initialChunk = r.getOrCreateChunk(overlappedChunkIndex, overlappedChunkIndex);
+            r.writeColumn(initialChunk);
+            r.forget(initialChunk);
+
+            // write some NBT data so that dataSize is in [4092, 4096] range (4094 in this case)
+            NBTCompound chunkData = NBT.Compound(builder -> {
+                int[] intData = new int[2230];
+                for (int i = 0; i < intData.length; i++) {
+                    intData[i] = i;
+                }
+                NBTIntArray data = NBT.IntArray(intData);
+                builder.put("v", data);
+            });
+            ByteArrayOutputStream dataOut = new ByteArrayOutputStream();
+            try (NBTWriter writer = new NBTWriter(dataOut, CompressedProcesser.ZLIB)) {
+                writer.writeNamed("", chunkData);
+            }
+
+            // free previous big chunk position (which is before overlapped chunk)
+            r.writeColumnData(chunkData, bigChunkIndex, bigChunkIndex);
+            // write big chunk before overlapped chunk
+            r.writeColumnData(chunkData, bigChunkIndex, bigChunkIndex);
+
+            // load chunk after possible overlapping (should not happen)
+            ChunkColumn oldChunk = r.getChunk(overlappedChunkIndex, overlappedChunkIndex);
+            assertNotNull(oldChunk);
+            assertEquals(oldChunk.toNBT(), initialChunk.toNBT());
+        } finally {
+            Files.delete(tmpFile);
+        }
     }
 }
