@@ -52,8 +52,8 @@ sealed class Palette<ElementType>(private val nbtType: NBTType<out NBT>, private
      * removes an expensive calculation which significantly slows down palette functionality.
      */
     fun decreaseReference(block: ElementType) {
-        if (!breakForPerformance) {
-            if (!referenceCounts.containsKey(block)) {
+        if(!breakForPerformance) {
+            if(!referenceCounts.containsKey(block)) {
                 throw IllegalArgumentException("Tried to remove a reference counter to $block which is not in this palette")
             }
         }
@@ -111,6 +111,7 @@ sealed class Palette<ElementType>(private val nbtType: NBTType<out NBT>, private
 
             else -> throw AnvilException("Unsupported version for compacting palette: $version")
         }
+        
     }
 
     /**
@@ -128,7 +129,6 @@ class BlockPalette(): Palette<BlockState>(NBTType.TAG_Compound, BlockState.AIR, 
         }
     }
 }
-
 class BiomePalette(): Palette<String>(NBTType.TAG_String, Biome.UnknownBiome, { str -> NBT.String(str) }) {
     constructor(elements: NBTList<NBTString>): this() {
         elements.forEach { this.elements += it.value }
