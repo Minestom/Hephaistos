@@ -15,11 +15,7 @@ import kotlin.math.log2
  * Represents the palette of elements used in a chunk section. This palette allows to save space when saving to disk or transferring over network,
  * as it lowers the required number of bits used to represent an element, by remapping global IDs to local IDs, with fewer bits per entry.
  */
-sealed class Palette<ElementType>(
-    private val nbtType: NBTType<out NBT>,
-    private val defaultValue: ElementType,
-    private val writer: (ElementType) -> NBT
-) {
+sealed class Palette<ElementType>(private val nbtType: NBTType<out NBT>, private val defaultValue: ElementType, private val writer: (ElementType) -> NBT) {
     val elements = arrayListOf<ElementType>()
 
     internal val referenceCounts = Object2IntOpenHashMap<ElementType>()
@@ -27,7 +23,7 @@ sealed class Palette<ElementType>(
     internal fun loadReferences(states: Array<ElementType>) {
         // Somehow this is faster
         states.groupBy { it }.forEach { (element, list) ->
-            if (element !in elements) {
+            if(element !in elements) {
                 throw IllegalArgumentException("Tried to add a reference counter to $element which is not in this palette")
             }
 
@@ -40,7 +36,7 @@ sealed class Palette<ElementType>(
      * If the element was not referenced, it is added to this palette and its reference becomes 1.
      */
     fun increaseReference(block: ElementType) {
-        if (referenceCounts.addTo(block, 1) == 0) {
+        if(referenceCounts.addTo(block, 1) == 0) {
             elements.add(block)
             referenceCounts[block] = 1
         }
@@ -55,7 +51,7 @@ sealed class Palette<ElementType>(
      */
     fun decreaseReference(block: ElementType) {
         val old = referenceCounts.addTo(block, -1)
-        if (old - 1 <= 0) {
+        if(old - 1 <= 0) {
             elements.remove(block)
             referenceCounts.removeInt(block)
         }
@@ -70,7 +66,6 @@ sealed class Palette<ElementType>(
     /**
      * Index of the given element inside the palette. Returns -1 if none
      */
-    @Suppress("unused")
     fun getPaletteIndex(obj: ElementType): Int = elements.indexOf(obj)
 
     /**
@@ -78,11 +73,7 @@ sealed class Palette<ElementType>(
      * Bit length is selected on the size of this palette (`ceil(log2(size))`), ID correspond to the index inside this palette
      */
     @JvmOverloads
-    fun compactPreProcessedIDs(
-        indices: IntArray,
-        version: SupportedVersion = SupportedVersion.Latest,
-        minimumBitSize: Int = 1
-    ): ImmutableLongArray {
+    fun compactPreProcessedIDs(indices: IntArray, version: SupportedVersion = SupportedVersion.Latest, minimumBitSize: Int = 1): ImmutableLongArray {
         check(minimumBitSize > 0) { "Minimum bit size cannot be 0 or negative" }
 
         // convert state list into uncompressed data
@@ -100,11 +91,7 @@ sealed class Palette<ElementType>(
      * Bit length is selected on the size of this palette (`ceil(log2(size))`), ID correspond to the index inside this palette
      */
     @JvmOverloads
-    fun compactIDs(
-        states: Array<ElementType>,
-        version: SupportedVersion = SupportedVersion.Latest,
-        minimumBitSize: Int = 1
-    ): ImmutableLongArray {
+    fun compactIDs(states: Array<ElementType>, version: SupportedVersion = SupportedVersion.Latest, minimumBitSize: Int = 1): ImmutableLongArray {
         check(minimumBitSize > 0) { "Minimum bit size cannot be 0 or negative" }
 
         // convert state list into uncompressed data
@@ -126,16 +113,16 @@ sealed class Palette<ElementType>(
     }
 }
 
-class BlockPalette() : Palette<BlockState>(NBTType.TAG_Compound, BlockState.AIR, BlockState::toNBT) {
-    constructor(elements: NBTList<NBTCompound>) : this() {
-        for (b in elements) {
+class BlockPalette(): Palette<BlockState>(NBTType.TAG_Compound, BlockState.AIR, BlockState::toNBT) {
+    constructor(elements: NBTList<NBTCompound>): this() {
+        for(b in elements) {
             this.elements += BlockState(b)
         }
     }
 }
 
-class BiomePalette() : Palette<String>(NBTType.TAG_String, Biome.UnknownBiome, { str -> NBT.String(str) }) {
-    constructor(elements: NBTList<NBTString>) : this() {
+class BiomePalette(): Palette<String>(NBTType.TAG_String, Biome.UnknownBiome, { str -> NBT.String(str) }) {
+    constructor(elements: NBTList<NBTString>): this() {
         elements.forEach { this.elements += it.value }
     }
 }

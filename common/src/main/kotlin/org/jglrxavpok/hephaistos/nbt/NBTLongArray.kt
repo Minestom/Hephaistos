@@ -11,7 +11,7 @@ class NBTLongArray constructor(override val value: ImmutableLongArray) : NBT, It
 
     override val ID = NBTType.TAG_Long_Array
 
-    constructor(vararg numbers: Long) : this(ImmutableLongArray(*numbers))
+    constructor(vararg numbers: Long): this(ImmutableLongArray(*numbers))
 
     override fun writeContents(destination: DataOutputStream) {
         destination.writeInt(size)
