@@ -3,6 +3,7 @@ package org.jglrxavpok.hephaistos.nbt
 import org.jglrxavpok.hephaistos.collections.ImmutableLongArray
 import java.io.DataInputStream
 import java.io.DataOutputStream
+import java.nio.ByteBuffer
 
 class NBTLongArray constructor(override val value: ImmutableLongArray) : NBT, Iterable<Long> {
 
@@ -10,11 +11,16 @@ class NBTLongArray constructor(override val value: ImmutableLongArray) : NBT, It
 
     override val ID = NBTType.TAG_Long_Array
 
-    constructor(vararg numbers: Long): this(ImmutableLongArray(*numbers))
+    constructor(vararg numbers: Long) : this(ImmutableLongArray(*numbers))
 
     override fun writeContents(destination: DataOutputStream) {
         destination.writeInt(size)
-        value.forEach(destination::writeLong)
+
+        val buffer = ByteBuffer.allocate(size * 8)
+        val longBuffer = buffer.asLongBuffer()
+        value.forEach { longBuffer.put(it) }
+
+        destination.write(buffer.array())
     }
 
     operator fun get(index: Int) = value[index]
@@ -47,7 +53,15 @@ class NBTLongArray constructor(override val value: ImmutableLongArray) : NBT, It
 
         override fun readContents(source: DataInputStream): NBTLongArray {
             val length = source.readInt()
-            val value = ImmutableLongArray(length) { source.readLong() }
+            val inArray = source.readNBytes(length * 8)
+            val outArray = LongArray(length)
+
+            val padding = outArray.size * 8 - inArray.size
+            val buffer = ByteBuffer.allocate(inArray.size + padding).put(ByteArray(padding)).put(inArray)
+            buffer.flip()
+            buffer.asLongBuffer().get(outArray)
+
+            val value = ImmutableLongArray(*outArray)
             return NBTLongArray(value)
         }
     }

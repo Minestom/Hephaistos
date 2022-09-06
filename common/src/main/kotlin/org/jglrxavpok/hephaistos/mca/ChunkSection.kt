@@ -7,8 +7,6 @@ import org.jglrxavpok.hephaistos.mcdata.Biome
 import org.jglrxavpok.hephaistos.nbt.NBTCompound
 import kotlin.experimental.and
 import kotlin.experimental.or
-import kotlin.math.ceil
-import kotlin.math.log2
 
 /**
  * 16x16x16 subchunk.
@@ -16,6 +14,7 @@ import kotlin.math.log2
 class ChunkSection(val y: Byte) {
 
     companion object {
+        private val EmptyBlockStates = Array(16*16*16) { BlockState.AIR }
         val BiomeArraySize = 4*4*4
     }
 
@@ -68,7 +67,7 @@ class ChunkSection(val y: Byte) {
                 blockStates[index] = blockPalette!!.elements[id]
             }
 
-            blockPalette!!.loadReferences(blockStates.asIterable())
+            blockPalette!!.initialize()
         }
 
         reader.getBlockLight()?.let {
@@ -97,7 +96,7 @@ class ChunkSection(val y: Byte) {
         if(blockPalette == null) {
             blockPalette = BlockPalette() // initialize new palette
             blockPalette!!.elements += BlockState.AIR
-            blockPalette!!.loadReferences(blockStates.asIterable()) // load as all air
+            blockPalette!!.initialize() // load as all air
             blockPalette!!.increaseReference(block)
             blockPalette!!.decreaseReference(BlockState.AIR)
             blockStates[index(x, y, z)] = block
@@ -113,6 +112,15 @@ class ChunkSection(val y: Byte) {
         if(x !in 0..15) throw IllegalArgumentException("x ($x) is not in 0..15")
         if(y !in 0..15) throw IllegalArgumentException("y ($y) is not in 0..15")
         if(z !in 0..15) throw IllegalArgumentException("z ($z) is not in 0..15")
+    }
+
+    private fun BlockPalette.initialize() {
+        if (empty || blockStates.contentEquals(EmptyBlockStates)) {
+            referenceCounts.clear()
+            referenceCounts[BlockState.AIR] = 4096
+        } else {
+            loadReferences(blockStates)
+        }
     }
 
     /**
@@ -201,7 +209,7 @@ class ChunkSection(val y: Byte) {
         if(empty) {
             blockPalette = BlockPalette() // initialize new palette
             blockPalette!!.elements += BlockState.AIR
-            blockPalette!!.loadReferences(blockStates.asIterable()) // load as all air
+            blockPalette!!.initialize() // load as all air
         }
     }
 

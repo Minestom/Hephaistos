@@ -1,9 +1,13 @@
 package org.jglrxavpok.hephaistos.mca
 
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
 import org.jglrxavpok.hephaistos.collections.ImmutableLongArray
-import org.jglrxavpok.hephaistos.mca.AnvilException.Companion.missing
 import org.jglrxavpok.hephaistos.mcdata.Biome
-import org.jglrxavpok.hephaistos.nbt.*
+import org.jglrxavpok.hephaistos.nbt.NBT
+import org.jglrxavpok.hephaistos.nbt.NBTCompound
+import org.jglrxavpok.hephaistos.nbt.NBTList
+import org.jglrxavpok.hephaistos.nbt.NBTString
+import org.jglrxavpok.hephaistos.nbt.NBTType
 import kotlin.math.ceil
 import kotlin.math.log2
 
@@ -11,18 +15,23 @@ import kotlin.math.log2
  * Represents the palette of elements used in a chunk section. This palette allows to save space when saving to disk or transferring over network,
  * as it lowers the required number of bits used to represent an element, by remapping global IDs to local IDs, with fewer bits per entry.
  */
-sealed class Palette<ElementType>(private val nbtType: NBTType<out NBT>, private val defaultValue: ElementType, private val writer: (ElementType) -> NBT) {
+sealed class Palette<ElementType>(
+    private val nbtType: NBTType<out NBT>,
+    private val defaultValue: ElementType,
+    private val writer: (ElementType) -> NBT
+) {
+    val elements = arrayListOf<ElementType>()
 
-    val elements = mutableListOf<ElementType>()
-    private val referenceCounts = HashMap<ElementType, Int>()
+    internal val referenceCounts = Object2IntOpenHashMap<ElementType>()
 
-    internal fun loadReferences(states: Iterable<ElementType>) {
-        for(state in states) {
-            if(state !in elements) {
-                throw IllegalArgumentException("Tried to add a reference counter to $state which is not in this palette")
+    internal fun loadReferences(states: Array<ElementType>) {
+        // Somehow this is faster
+        states.groupBy { it }.forEach { (element, list) ->
+            if (element !in elements) {
+                throw IllegalArgumentException("Tried to add a reference counter to $element which is not in this palette")
             }
-            val ref = referenceCounts.computeIfAbsent(state) {0}
-            referenceCounts[state] = ref+1
+
+            referenceCounts[element] = list.size
         }
     }
 
@@ -31,28 +40,24 @@ sealed class Palette<ElementType>(private val nbtType: NBTType<out NBT>, private
      * If the element was not referenced, it is added to this palette and its reference becomes 1.
      */
     fun increaseReference(block: ElementType) {
-        if(referenceCounts.containsKey(block)) {
-            referenceCounts[block] = referenceCounts[block]!!+1
-        } else {
-            referenceCounts[block] = 1
+        if (referenceCounts.addTo(block, 1) == 0) {
             elements.add(block)
+            referenceCounts[block] = 1
         }
     }
 
     /**
      * Decreases the number of references to the given element.
      * If the reference becomes <= 0, the element is removed from this palette, and its reference becomes 0.
-     * @throws IllegalArgumentException if the element was not referenced or was not in this palette
+     *
+     * We don't throw an exception if the reference doesn't exist anymore as that check
+     * removes an expensive calculation which significantly slows down palette functionality.
      */
     fun decreaseReference(block: ElementType) {
-        if(referenceCounts.containsKey(block)) {
-            referenceCounts[block] = referenceCounts[block]!!-1
-            if(referenceCounts[block]!! <= 0) {
-                elements.remove(block)
-                referenceCounts.remove(block)
-            }
-        } else {
-            throw IllegalArgumentException("Element $block was not in the palette when trying to decrease its reference count")
+        val old = referenceCounts.addTo(block, -1)
+        if (old - 1 <= 0) {
+            elements.remove(block)
+            referenceCounts.removeInt(block)
         }
     }
 
@@ -65,6 +70,7 @@ sealed class Palette<ElementType>(private val nbtType: NBTType<out NBT>, private
     /**
      * Index of the given element inside the palette. Returns -1 if none
      */
+    @Suppress("unused")
     fun getPaletteIndex(obj: ElementType): Int = elements.indexOf(obj)
 
     /**
@@ -72,10 +78,12 @@ sealed class Palette<ElementType>(private val nbtType: NBTType<out NBT>, private
      * Bit length is selected on the size of this palette (`ceil(log2(size))`), ID correspond to the index inside this palette
      */
     @JvmOverloads
-    fun compactPreProcessedIDs(indices: IntArray, version: SupportedVersion = SupportedVersion.Latest, minimumBitSize: Int = 1): ImmutableLongArray {
-        if(minimumBitSize <= 0) {
-            error("Minimum bit size cannot be 0 or negative")
-        }
+    fun compactPreProcessedIDs(
+        indices: IntArray,
+        version: SupportedVersion = SupportedVersion.Latest,
+        minimumBitSize: Int = 1
+    ): ImmutableLongArray {
+        check(minimumBitSize > 0) { "Minimum bit size cannot be 0 or negative" }
 
         // convert state list into uncompressed data
         val bitLength = ceil(log2(elements.size.toFloat())).toInt().coerceAtLeast(minimumBitSize) // at least one bit
@@ -92,10 +100,12 @@ sealed class Palette<ElementType>(private val nbtType: NBTType<out NBT>, private
      * Bit length is selected on the size of this palette (`ceil(log2(size))`), ID correspond to the index inside this palette
      */
     @JvmOverloads
-    fun compactIDs(states: Array<ElementType>, version: SupportedVersion = SupportedVersion.Latest, minimumBitSize: Int = 1): ImmutableLongArray {
-        if(minimumBitSize <= 0) {
-            error("Minimum bit size cannot be 0 or negative")
-        }
+    fun compactIDs(
+        states: Array<ElementType>,
+        version: SupportedVersion = SupportedVersion.Latest,
+        minimumBitSize: Int = 1
+    ): ImmutableLongArray {
+        check(minimumBitSize > 0) { "Minimum bit size cannot be 0 or negative" }
 
         // convert state list into uncompressed data
         val indices = states.map(elements::indexOf).toIntArray()
@@ -112,22 +122,20 @@ sealed class Palette<ElementType>(private val nbtType: NBTType<out NBT>, private
      * Returns true iif the only referenced block inside this palette is "minecraft:air"
      */
     fun isEmpty(): Boolean {
-        return elements.size == 1 && elements[0] == defaultValue
+        return elements.size == 1 && elements.first() == defaultValue
     }
-
 }
 
-class BlockPalette(): Palette<BlockState>(NBTType.TAG_Compound, BlockState.AIR, BlockState::toNBT) {
-    constructor(elements: NBTList<NBTCompound>): this() {
-        for(b in elements) {
+class BlockPalette() : Palette<BlockState>(NBTType.TAG_Compound, BlockState.AIR, BlockState::toNBT) {
+    constructor(elements: NBTList<NBTCompound>) : this() {
+        for (b in elements) {
             this.elements += BlockState(b)
         }
     }
 }
-class BiomePalette(): Palette<String>(NBTType.TAG_String, Biome.UnknownBiome, { str -> NBT.String(str)}) {
-    constructor(elements: NBTList<NBTString>): this() {
-        elements.forEachIndexed { index, b ->
-            this.elements += b.value
-        }
+
+class BiomePalette() : Palette<String>(NBTType.TAG_String, Biome.UnknownBiome, { str -> NBT.String(str) }) {
+    constructor(elements: NBTList<NBTString>) : this() {
+        elements.forEach { this.elements += it.value }
     }
 }
