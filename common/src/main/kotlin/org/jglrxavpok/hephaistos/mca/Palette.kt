@@ -122,7 +122,7 @@ sealed class Palette<ElementType>(
      * Returns true iif the only referenced block inside this palette is "minecraft:air"
      */
     fun isEmpty(): Boolean {
-        return elements.size == 1 && elements.first() == defaultValue
+        return elements.size == 1 && elements[0] == defaultValue
     }
 }
 
