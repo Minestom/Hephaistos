@@ -1,6 +1,7 @@
 package org.jglrxavpok.hephaistos.mca
 
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
+import org.jglrxavpok.hephaistos.Options
 import org.jglrxavpok.hephaistos.collections.ImmutableLongArray
 import org.jglrxavpok.hephaistos.mcdata.Biome
 import org.jglrxavpok.hephaistos.nbt.NBT
@@ -10,8 +11,6 @@ import org.jglrxavpok.hephaistos.nbt.NBTString
 import org.jglrxavpok.hephaistos.nbt.NBTType
 import kotlin.math.ceil
 import kotlin.math.log2
-
-private val breakForPerformance = System.getProperty("hephaistos.iReallyKnowWhatImDoingTrustMe")?.toBoolean() ?: false
 
 /**
  * Represents the palette of elements used in a chunk section. This palette allows to save space when saving to disk or transferring over network,
@@ -52,7 +51,7 @@ sealed class Palette<ElementType>(private val nbtType: NBTType<out NBT>, private
      * removes an expensive calculation which significantly slows down palette functionality.
      */
     fun decreaseReference(block: ElementType) {
-        if(!breakForPerformance) {
+        if(!Options.BreakPalettesForPerformance.active) {
             if(!referenceCounts.containsKey(block)) {
                 throw IllegalArgumentException("Tried to remove a reference counter to $block which is not in this palette")
             }
