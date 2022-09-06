@@ -17,8 +17,7 @@ class NBTIntArray constructor(override val value: ImmutableIntArray) : NBT, Iter
         destination.writeInt(size)
 
         val buffer = ByteBuffer.allocate(size * 4)
-        val intBuffer = buffer.asIntBuffer()
-        value.forEach { intBuffer.put(it) }
+        buffer.asIntBuffer().put(value.numbers)
 
         destination.write(buffer.array())
     }
@@ -56,10 +55,9 @@ class NBTIntArray constructor(override val value: ImmutableIntArray) : NBT, Iter
             val inArray = source.readNBytes(length * 4)
             val outArray = IntArray(length)
 
-            val padding = outArray.size * 4 - inArray.size
-            val buffer = ByteBuffer.allocate(inArray.size + padding).put(ByteArray(padding)).put(inArray)
-            buffer.flip()
-            buffer.asIntBuffer().get(outArray)
+            ByteBuffer.allocate(inArray.size).put(inArray)
+                .also { it.flip() }
+                .asIntBuffer().get(outArray)
 
             val value = ImmutableIntArray(*outArray)
             return NBTIntArray(value)

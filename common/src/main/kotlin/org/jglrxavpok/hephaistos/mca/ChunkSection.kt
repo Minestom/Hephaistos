@@ -67,7 +67,7 @@ class ChunkSection(val y: Byte) {
                 blockStates[index] = blockPalette!!.elements[id]
             }
 
-            blockPalette!!.initialize()
+            initializePalette(blockPalette!!)
         }
 
         reader.getBlockLight()?.let {
@@ -99,7 +99,7 @@ class ChunkSection(val y: Byte) {
         if(blockPalette == null) {
             blockPalette = BlockPalette() // initialize new palette
             blockPalette!!.elements += BlockState.AIR
-            blockPalette!!.initialize() // load as all air
+            initializePalette(blockPalette!!) // load as all air
             blockPalette!!.increaseReference(block)
             blockPalette!!.decreaseReference(BlockState.AIR)
             blockStates[index(x, y, z)] = block
@@ -117,12 +117,12 @@ class ChunkSection(val y: Byte) {
         if(z !in 0..15) throw IllegalArgumentException("z ($z) is not in 0..15")
     }
 
-    private fun BlockPalette.initialize() {
+    private fun initializePalette(palette: BlockPalette) {
         if (empty || blockStates.contentEquals(EmptyBlockStates)) {
-            referenceCounts.clear()
-            referenceCounts[BlockState.AIR] = 4096
+            palette.referenceCounts.clear()
+            palette.referenceCounts[BlockState.AIR] = 4096
         } else {
-            loadReferences(blockStates)
+            palette.loadReferences(blockStates)
         }
     }
 
@@ -212,7 +212,7 @@ class ChunkSection(val y: Byte) {
         if(empty) {
             blockPalette = BlockPalette() // initialize new palette
             blockPalette!!.elements += BlockState.AIR
-            blockPalette!!.initialize() // load as all air
+            initializePalette(blockPalette!!) // load as all air
         }
     }
 

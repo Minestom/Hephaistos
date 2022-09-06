@@ -17,8 +17,7 @@ class NBTLongArray constructor(override val value: ImmutableLongArray) : NBT, It
         destination.writeInt(size)
 
         val buffer = ByteBuffer.allocate(size * 8)
-        val longBuffer = buffer.asLongBuffer()
-        value.forEach { longBuffer.put(it) }
+        buffer.asLongBuffer().put(value.numbers)
 
         destination.write(buffer.array())
     }
@@ -56,10 +55,9 @@ class NBTLongArray constructor(override val value: ImmutableLongArray) : NBT, It
             val inArray = source.readNBytes(length * 8)
             val outArray = LongArray(length)
 
-            val padding = outArray.size * 8 - inArray.size
-            val buffer = ByteBuffer.allocate(inArray.size + padding).put(ByteArray(padding)).put(inArray)
-            buffer.flip()
-            buffer.asLongBuffer().get(outArray)
+            ByteBuffer.allocate(inArray.size).put(inArray)
+                .also { it.flip() }
+                .asLongBuffer().get(outArray)
 
             val value = ImmutableLongArray(*outArray)
             return NBTLongArray(value)
