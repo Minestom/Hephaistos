@@ -30,6 +30,14 @@ public class PaletteTests {
     }
 
     @Test
+    public void decreaseReferenceOfNonExistentBlock() {
+        assertThrows(IllegalArgumentException.class, () ->
+            palette.decreaseReference(BlockState.AIR)
+        );
+
+    }
+
+    @Test
     public void decreaseReferenceOfExistentBlock() {
         assertEquals(0, palette.getElements().size());
         palette.increaseReference(BlockState.AIR);

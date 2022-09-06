@@ -11,6 +11,8 @@ import org.jglrxavpok.hephaistos.nbt.NBTType
 import kotlin.math.ceil
 import kotlin.math.log2
 
+private val breakForPerformance = System.getProperty("hephaistos.iReallyKnowWhatImDoingTrustMe")?.toBoolean() ?: false
+
 /**
  * Represents the palette of elements used in a chunk section. This palette allows to save space when saving to disk or transferring over network,
  * as it lowers the required number of bits used to represent an element, by remapping global IDs to local IDs, with fewer bits per entry.
@@ -46,10 +48,16 @@ sealed class Palette<ElementType>(private val nbtType: NBTType<out NBT>, private
      * Decreases the number of references to the given element.
      * If the reference becomes <= 0, the element is removed from this palette, and its reference becomes 0.
      *
-     * We don't throw an exception if the reference doesn't exist anymore as that check
+     * We optionally don't throw an exception if the reference doesn't exist anymore as that check
      * removes an expensive calculation which significantly slows down palette functionality.
      */
     fun decreaseReference(block: ElementType) {
+        if (!breakForPerformance) {
+            if (!referenceCounts.containsKey(block)) {
+                throw IllegalArgumentException("Tried to remove a reference counter to $block which is not in this palette")
+            }
+        }
+
         val old = referenceCounts.addTo(block, -1)
         if(old - 1 <= 0) {
             elements.remove(block)
