@@ -22,14 +22,15 @@ sealed class Palette<ElementType>(private val nbtType: NBTType<out NBT>, private
     internal val referenceCounts = Object2IntOpenHashMap<ElementType>()
 
     internal fun loadReferences(states: Array<ElementType>) {
-        // Somehow this is faster
-        states.groupBy { it }.forEach { (element, list) ->
-            if(element !in elements) {
-                throw IllegalArgumentException("Tried to add a reference counter to $element which is not in this palette")
+        if(!Options.BreakPalettesForPerformance.active) {
+            for(element in states.distinct()) {
+                if(element !in elements) {
+                    throw IllegalArgumentException("Tried to add a reference counter to $element which is not in this palette")
+                }
             }
-
-            referenceCounts[element] = list.size
         }
+
+        for(state in states) referenceCounts.addTo(state, 1)
     }
 
     /**

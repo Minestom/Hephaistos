@@ -92,7 +92,10 @@ class ChunkSection(val y: Byte) {
      * X,Y,Z must be inside this section (ie in a 16x16x16 cube)
      */
     operator fun set(x: Int, y: Int, z: Int, block: BlockState) {
-        checkBounds(x, y, z)
+        if(!Options.BreakPalettesForPerformance.active) {
+            checkBounds(x, y, z)
+        }
+
         if(blockPalette == null) {
             blockPalette = BlockPalette() // initialize new palette
             blockPalette!!.elements += BlockState.AIR

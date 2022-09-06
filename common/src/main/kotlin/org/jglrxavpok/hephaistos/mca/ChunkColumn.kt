@@ -1,16 +1,14 @@
 package org.jglrxavpok.hephaistos.mca
 
+import it.unimi.dsi.fastutil.bytes.Byte2ObjectOpenHashMap
 import org.jglrxavpok.hephaistos.collections.ImmutableByteArray
 import org.jglrxavpok.hephaistos.collections.ImmutableIntArray
 import org.jglrxavpok.hephaistos.mca.AnvilException.Companion.missing
-import org.jglrxavpok.hephaistos.mca.readers.ChunkReader
 import org.jglrxavpok.hephaistos.mca.readers.*
 import org.jglrxavpok.hephaistos.mca.writer.ChunkWriter
-import org.jglrxavpok.hephaistos.mcdata.Biome
 import org.jglrxavpok.hephaistos.mcdata.*
+import org.jglrxavpok.hephaistos.mcdata.Biome
 import org.jglrxavpok.hephaistos.nbt.*
-import org.jglrxavpok.hephaistos.nbt.mutable.MutableNBTCompound
-import java.util.concurrent.ConcurrentHashMap
 
 /**
  * 16x16 (XZ) vertical slice of the world. Consists of ChunkSections vertically stacked (each of height 16 blocks).
@@ -80,7 +78,7 @@ class ChunkColumn {
      * Chunk sections of this chunk. Empty sections are non-null but have their 'empty' field set to true.
      * @see ChunkSection
      */
-    val sections = ConcurrentHashMap<Byte, ChunkSection>()
+    val sections = Byte2ObjectOpenHashMap<ChunkSection>()
     var airCarvingMask: ImmutableByteArray? = null
     var liquidCarvingMask: ImmutableByteArray? = null
 
@@ -191,7 +189,7 @@ class ChunkColumn {
      * If no section is present in the column at this position, a new one is created and added
      */
     fun getSection(sectionY: Byte): ChunkSection {
-        return sections.computeIfAbsent(sectionY, ::ChunkSection)
+        return sections.getOrPut(sectionY) { ChunkSection(sectionY) }
     }
 
     /**

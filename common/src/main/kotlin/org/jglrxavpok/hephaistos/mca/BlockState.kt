@@ -35,6 +35,26 @@ data class BlockState @JvmOverloads constructor(val name: String, val properties
             }
         }
     }
+
+    // Ironically, IntelliJ's generator for these produces
+    // faster code than the Kotlin compiler does
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as BlockState
+
+        if (name != other.name) return false
+        if (properties != other.properties) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = name.hashCode()
+        result = 31 * result + properties.hashCode()
+        return result
+    }
 }
 
 private fun loadProperties(properties: NBTCompound): Map<String, String> {
