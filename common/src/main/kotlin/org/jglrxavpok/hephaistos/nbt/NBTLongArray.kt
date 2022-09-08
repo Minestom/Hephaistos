@@ -4,6 +4,7 @@ import org.jglrxavpok.hephaistos.collections.ImmutableLongArray
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.nio.ByteBuffer
+import kotlin.math.min
 
 class NBTLongArray constructor(override val value: ImmutableLongArray) : NBT, Iterable<Long> {
 
@@ -16,10 +17,19 @@ class NBTLongArray constructor(override val value: ImmutableLongArray) : NBT, It
     override fun writeContents(destination: DataOutputStream) {
         destination.writeInt(size)
 
-        val buffer = ByteBuffer.allocate(size * 8)
-        buffer.asLongBuffer().put(value.numbers)
+        val bufferSize = min(size * 8, 8192)
+        val buffer = ByteBuffer.allocate(bufferSize)
+        for(i in 0 until size) {
+            buffer.putLong(value[i])
+            if(buffer.position() >= bufferSize) {
+                destination.write(buffer.array(), 0, buffer.position())
+                buffer.clear()
+            }
+        }
 
-        destination.write(buffer.array())
+        if(buffer.position() > 0) {
+            destination.write(buffer.array(), 0, buffer.position())
+        }
     }
 
     operator fun get(index: Int) = value[index]

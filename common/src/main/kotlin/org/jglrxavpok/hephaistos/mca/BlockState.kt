@@ -17,6 +17,8 @@ data class BlockState @JvmOverloads constructor(val name: String, val properties
         })
     }
 
+    var hashCode = 0
+
     /**
      * Constructs a BlockState from the given TAG_Compound
      * @throws AnvilException if the NBT is malformed
@@ -40,9 +42,7 @@ data class BlockState @JvmOverloads constructor(val name: String, val properties
     // faster code than the Kotlin compiler does
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as BlockState
+        if (other !is BlockState) return false
 
         if (name != other.name) return false
         if (properties != other.properties) return false
@@ -51,9 +51,12 @@ data class BlockState @JvmOverloads constructor(val name: String, val properties
     }
 
     override fun hashCode(): Int {
-        var result = name.hashCode()
-        result = 31 * result + properties.hashCode()
-        return result
+        if (hashCode == 0) {
+            var result = name.hashCode()
+            result = 31 * result + properties.hashCode()
+            hashCode = result
+        }
+        return hashCode
     }
 }
 

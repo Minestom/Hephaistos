@@ -4,6 +4,7 @@ import org.jglrxavpok.hephaistos.collections.ImmutableIntArray
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.nio.ByteBuffer
+import kotlin.math.min
 
 class NBTIntArray constructor(override val value: ImmutableIntArray) : NBT, Iterable<Int> {
 
@@ -16,10 +17,19 @@ class NBTIntArray constructor(override val value: ImmutableIntArray) : NBT, Iter
     override fun writeContents(destination: DataOutputStream) {
         destination.writeInt(size)
 
-        val buffer = ByteBuffer.allocate(size * 4)
-        buffer.asIntBuffer().put(value.numbers)
+        val bufferSize = min(size * 4, 4096)
+        val buffer = ByteBuffer.allocate(bufferSize)
+        for(i in 0 until size) {
+            buffer.putInt(value[i])
+            if(buffer.position() >= bufferSize) {
+                destination.write(buffer.array(), 0, buffer.position())
+                buffer.clear()
+            }
+        }
 
-        destination.write(buffer.array())
+        if(buffer.position() > 0) {
+            destination.write(buffer.array(), 0, buffer.position())
+        }
     }
 
     operator fun get(index: Int) = value[index]

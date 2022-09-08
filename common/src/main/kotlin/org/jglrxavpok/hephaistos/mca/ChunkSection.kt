@@ -14,7 +14,9 @@ import kotlin.experimental.or
 class ChunkSection(val y: Byte) {
 
     companion object {
-        private val EmptyBlockStates = Array(16*16*16) { BlockState.AIR }
+        private const val BlockStateSize = 16*16*16
+        private val EmptyBlockStates = Array(BlockStateSize) { BlockState.AIR }
+
         val BiomeArraySize = 4*4*4
     }
 
@@ -23,7 +25,7 @@ class ChunkSection(val y: Byte) {
      */
     private var blockPalette: BlockPalette? = null
     val empty get()= blockPalette == null
-    private val blockStates: Array<BlockState> = Array(16*16*16) { BlockState.AIR }
+    private val blockStates: Array<BlockState> = Array(BlockStateSize) { BlockState.AIR }
     var blockLights = ByteArray(0)
     var skyLights = ByteArray(0)
 
@@ -63,11 +65,15 @@ class ChunkSection(val y: Byte) {
         if(blockPalette != null) {
             val ids = reader.getUncompressedBlockStateIDs()
 
+            var nonAir = false
+
             for((index, id) in ids.withIndex()) {
-                blockStates[index] = blockPalette!!.elements[id]
+                val state = blockPalette!!.elements[id]
+                blockStates[index] = state
+                if(state !=  BlockState.AIR) nonAir = true
             }
 
-            initializePalette(blockPalette!!)
+            initializePalette(blockPalette!!, !nonAir)
         }
 
         reader.getBlockLight()?.let {
@@ -92,14 +98,11 @@ class ChunkSection(val y: Byte) {
      * X,Y,Z must be inside this section (ie in a 16x16x16 cube)
      */
     operator fun set(x: Int, y: Int, z: Int, block: BlockState) {
-        if(!Options.BreakPalettesForPerformance.active) {
-            checkBounds(x, y, z)
-        }
-
+        checkBounds(x, y, z)
         if(blockPalette == null) {
             blockPalette = BlockPalette() // initialize new palette
             blockPalette!!.elements += BlockState.AIR
-            initializePalette(blockPalette!!) // load as all air
+            initializePalette(blockPalette!!, true) // load as all air
             blockPalette!!.increaseReference(block)
             blockPalette!!.decreaseReference(BlockState.AIR)
             blockStates[index(x, y, z)] = block
@@ -117,10 +120,10 @@ class ChunkSection(val y: Byte) {
         if(z !in 0..15) throw IllegalArgumentException("z ($z) is not in 0..15")
     }
 
-    private fun initializePalette(palette: BlockPalette) {
-        if (empty || blockStates.contentEquals(EmptyBlockStates)) {
+    private fun initializePalette(palette: BlockPalette, isAir: Boolean = false) {
+        if (empty || isAir) {
             palette.referenceCounts.clear()
-            palette.referenceCounts[BlockState.AIR] = 4096
+            palette.referenceCounts[BlockState.AIR] = BlockStateSize
         } else {
             palette.loadReferences(blockStates)
         }

@@ -1,7 +1,6 @@
 package org.jglrxavpok.hephaistos.mca
 
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
-import org.jglrxavpok.hephaistos.Options
 import org.jglrxavpok.hephaistos.collections.ImmutableLongArray
 import org.jglrxavpok.hephaistos.mcdata.Biome
 import org.jglrxavpok.hephaistos.nbt.NBT
@@ -22,11 +21,11 @@ sealed class Palette<ElementType>(private val nbtType: NBTType<out NBT>, private
     internal val referenceCounts = Object2IntOpenHashMap<ElementType>()
 
     internal fun loadReferences(states: Array<ElementType>) {
-        if(!Options.BreakPalettesForPerformance.active) {
-            for(element in states.distinct()) {
-                if(element !in elements) {
-                    throw IllegalArgumentException("Tried to add a reference counter to $element which is not in this palette")
-                }
+        val visited = mutableSetOf<ElementType>()
+        for(element in states) {
+            if(element in visited) continue
+            if(element !in elements) {
+                throw IllegalArgumentException("Tried to add a reference counter to $element which is not in this palette")
             }
         }
 
@@ -40,7 +39,6 @@ sealed class Palette<ElementType>(private val nbtType: NBTType<out NBT>, private
     fun increaseReference(block: ElementType) {
         if(referenceCounts.addTo(block, 1) == 0) {
             elements.add(block)
-            referenceCounts[block] = 1
         }
     }
 
@@ -52,10 +50,8 @@ sealed class Palette<ElementType>(private val nbtType: NBTType<out NBT>, private
      * removes an expensive calculation which significantly slows down palette functionality.
      */
     fun decreaseReference(block: ElementType) {
-        if(!Options.BreakPalettesForPerformance.active) {
-            if(!referenceCounts.containsKey(block)) {
-                throw IllegalArgumentException("Tried to remove a reference counter to $block which is not in this palette")
-            }
+        if(!referenceCounts.containsKey(block)) {
+            throw IllegalArgumentException("Tried to remove a reference counter to $block which is not in this palette")
         }
 
         val old = referenceCounts.addTo(block, -1)
