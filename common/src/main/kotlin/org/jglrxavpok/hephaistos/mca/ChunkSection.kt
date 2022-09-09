@@ -120,7 +120,7 @@ class ChunkSection(val y: Byte) {
         if(z !in 0..15) throw IllegalArgumentException("z ($z) is not in 0..15")
     }
 
-    private fun initializePalette(palette: BlockPalette, isAir: Boolean = false) {
+    private fun initializePalette(palette: BlockPalette, isAir: Boolean) {
         if (empty || isAir) {
             palette.referenceCounts.clear()
             palette.referenceCounts[BlockState.AIR] = BlockStateSize
@@ -215,7 +215,7 @@ class ChunkSection(val y: Byte) {
         if(empty) {
             blockPalette = BlockPalette() // initialize new palette
             blockPalette!!.elements += BlockState.AIR
-            initializePalette(blockPalette!!) // load as all air
+            initializePalette(blockPalette!!, true) // load as all air
         }
     }
 

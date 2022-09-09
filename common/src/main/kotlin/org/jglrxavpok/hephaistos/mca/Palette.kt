@@ -27,6 +27,7 @@ sealed class Palette<ElementType>(private val nbtType: NBTType<out NBT>, private
             if(element !in elements) {
                 throw IllegalArgumentException("Tried to add a reference counter to $element which is not in this palette")
             }
+            visited.add(element)
         }
 
         for(state in states) referenceCounts.addTo(state, 1)

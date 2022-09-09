@@ -17,7 +17,7 @@ data class BlockState @JvmOverloads constructor(val name: String, val properties
         })
     }
 
-    var hashCode = 0
+    private var hashCode = 0
 
     /**
      * Constructs a BlockState from the given TAG_Compound
