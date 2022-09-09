@@ -15,8 +15,6 @@ class ChunkSection(val y: Byte) {
 
     companion object {
         private const val BlockStateSize = 16*16*16
-        private val EmptyBlockStates = Array(BlockStateSize) { BlockState.AIR }
-
         val BiomeArraySize = 4*4*4
     }
 

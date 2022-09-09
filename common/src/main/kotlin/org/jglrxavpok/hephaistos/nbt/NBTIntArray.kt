@@ -10,11 +10,11 @@ class NBTIntArray constructor(override val value: ImmutableIntArray) : NBT, Iter
 
     override val ID = NBTType.TAG_Int_Array
 
-    constructor(vararg numbers: Int) : this(ImmutableIntArray(*numbers))
+    constructor(vararg numbers: Int): this(ImmutableIntArray(*numbers))
 
     override fun writeContents(destination: DataOutputStream) {
         destination.writeInt(size)
-        value.forEach { destination.writeInt(it) }
+        value.numbers.forEach(destination::writeInt)
     }
 
     operator fun get(index: Int) = value[index]

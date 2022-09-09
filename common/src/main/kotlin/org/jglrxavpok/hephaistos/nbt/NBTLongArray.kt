@@ -14,7 +14,7 @@ class NBTLongArray constructor(override val value: ImmutableLongArray) : NBT, It
 
     override fun writeContents(destination: DataOutputStream) {
         destination.writeInt(size)
-        value.forEach { destination.writeLong(it) }
+        value.numbers.forEach(destination::writeLong)
     }
 
     operator fun get(index: Int) = value[index]
