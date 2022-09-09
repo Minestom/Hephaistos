@@ -48,15 +48,17 @@ class NBTIntArray constructor(override val value: ImmutableIntArray) : NBT, Iter
         override fun readContents(source: DataInputStream): NBTIntArray {
             val length = source.readInt()
             val inArray = source.readNBytes(length * 4)
+            val outArray = IntArray(length)
 
-            val value = ImmutableIntArray(length) {
-                val index = it * 4
-                (inArray[index].toInt() and 0xFF shl 24) or
+            for(i in 0 until length) {
+                val index = i * 4
+                outArray[i] = (inArray[index].toInt() and 0xFF shl 24) or
                         (inArray[index + 1].toInt() and 0xFF shl 16) or
                         (inArray[index + 2].toInt() and 0xFF shl 8) or
                         (inArray[index + 3].toInt() and 0xFF)
             }
 
+            val value = ImmutableIntArray(*outArray)
             return NBTIntArray(value)
         }
     }
