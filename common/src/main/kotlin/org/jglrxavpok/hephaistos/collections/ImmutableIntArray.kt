@@ -5,7 +5,7 @@ package org.jglrxavpok.hephaistos.collections
  *
  * Can not be modified -- if needed, use [copyArray] to create a mutable [IntArray] copy.
  */
-class ImmutableIntArray(internal vararg val numbers: Int): Iterable<Int> {
+class ImmutableIntArray(private vararg val numbers: Int): Iterable<Int> {
 
     constructor(size: Int, generator: (Int) -> Int) : this(*IntArray(size).apply {
         repeat(size) {

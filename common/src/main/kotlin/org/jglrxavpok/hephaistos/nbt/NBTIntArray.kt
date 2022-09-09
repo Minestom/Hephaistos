@@ -3,8 +3,6 @@ package org.jglrxavpok.hephaistos.nbt
 import org.jglrxavpok.hephaistos.collections.ImmutableIntArray
 import java.io.DataInputStream
 import java.io.DataOutputStream
-import java.nio.ByteBuffer
-import kotlin.math.min
 
 class NBTIntArray constructor(override val value: ImmutableIntArray) : NBT, Iterable<Int> {
 
@@ -12,24 +10,11 @@ class NBTIntArray constructor(override val value: ImmutableIntArray) : NBT, Iter
 
     override val ID = NBTType.TAG_Int_Array
 
-    constructor(vararg numbers: Int): this(ImmutableIntArray(*numbers))
+    constructor(vararg numbers: Int) : this(ImmutableIntArray(*numbers))
 
     override fun writeContents(destination: DataOutputStream) {
         destination.writeInt(size)
-
-        val bufferSize = min(size * 4, 4096)
-        val buffer = ByteBuffer.allocate(bufferSize)
-        for(i in 0 until size) {
-            buffer.putInt(value[i])
-            if(buffer.position() >= bufferSize) {
-                destination.write(buffer.array(), 0, buffer.position())
-                buffer.clear()
-            }
-        }
-
-        if(buffer.position() > 0) {
-            destination.write(buffer.array(), 0, buffer.position())
-        }
+        value.forEach { destination.writeInt(it) }
     }
 
     operator fun get(index: Int) = value[index]
@@ -63,13 +48,15 @@ class NBTIntArray constructor(override val value: ImmutableIntArray) : NBT, Iter
         override fun readContents(source: DataInputStream): NBTIntArray {
             val length = source.readInt()
             val inArray = source.readNBytes(length * 4)
-            val outArray = IntArray(length)
 
-            ByteBuffer.allocate(inArray.size).put(inArray)
-                .also { it.flip() }
-                .asIntBuffer().get(outArray)
+            val value = ImmutableIntArray(length) {
+                val index = it * 4
+                (inArray[index].toInt() and 0xFF shl 24) or
+                        (inArray[index + 1].toInt() and 0xFF shl 16) or
+                        (inArray[index + 2].toInt() and 0xFF shl 8) or
+                        (inArray[index + 3].toInt() and 0xFF)
+            }
 
-            val value = ImmutableIntArray(*outArray)
             return NBTIntArray(value)
         }
     }

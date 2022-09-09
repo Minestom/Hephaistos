@@ -3,8 +3,6 @@ package org.jglrxavpok.hephaistos.nbt
 import org.jglrxavpok.hephaistos.collections.ImmutableLongArray
 import java.io.DataInputStream
 import java.io.DataOutputStream
-import java.nio.ByteBuffer
-import kotlin.math.min
 
 class NBTLongArray constructor(override val value: ImmutableLongArray) : NBT, Iterable<Long> {
 
@@ -16,20 +14,7 @@ class NBTLongArray constructor(override val value: ImmutableLongArray) : NBT, It
 
     override fun writeContents(destination: DataOutputStream) {
         destination.writeInt(size)
-
-        val bufferSize = min(size * 8, 8192)
-        val buffer = ByteBuffer.allocate(bufferSize)
-        for(i in 0 until size) {
-            buffer.putLong(value[i])
-            if(buffer.position() >= bufferSize) {
-                destination.write(buffer.array(), 0, buffer.position())
-                buffer.clear()
-            }
-        }
-
-        if(buffer.position() > 0) {
-            destination.write(buffer.array(), 0, buffer.position())
-        }
+        value.forEach { destination.writeLong(it) }
     }
 
     operator fun get(index: Int) = value[index]
@@ -63,13 +48,19 @@ class NBTLongArray constructor(override val value: ImmutableLongArray) : NBT, It
         override fun readContents(source: DataInputStream): NBTLongArray {
             val length = source.readInt()
             val inArray = source.readNBytes(length * 8)
-            val outArray = LongArray(length)
 
-            ByteBuffer.allocate(inArray.size).put(inArray)
-                .also { it.flip() }
-                .asLongBuffer().get(outArray)
+            val value = ImmutableLongArray(length) {
+                val index = it * 8
+                (inArray[index].toLong() shl 56) or
+                        ((inArray[index+1].toLong() and 0xFF) shl 48) or
+                        ((inArray[index+2].toLong() and 0xFF) shl 40) or
+                        ((inArray[index+3].toLong() and 0xFF) shl 32) or
+                        ((inArray[index+4].toLong() and 0xFF) shl 24) or
+                        ((inArray[index+5].toLong() and 0xFF) shl 16) or
+                        ((inArray[index+6].toLong() and 0xFF) shl 8) or
+                        (inArray[index+7].toLong() and 0xFF)
+            }
 
-            val value = ImmutableLongArray(*outArray)
             return NBTLongArray(value)
         }
     }

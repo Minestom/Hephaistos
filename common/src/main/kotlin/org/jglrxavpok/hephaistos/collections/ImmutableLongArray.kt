@@ -5,7 +5,7 @@ package org.jglrxavpok.hephaistos.collections
  *
  * Can not be modified -- if needed, use [copyArray] to create a mutable [LongArray] copy.
  */
-class ImmutableLongArray(internal vararg val numbers: Long): Iterable<Long> {
+class ImmutableLongArray(private vararg val numbers: Long): Iterable<Long> {
 
     constructor(length: Int, generator: (Int) -> Long) : this(*LongArray(length).apply {
         repeat(length) {
