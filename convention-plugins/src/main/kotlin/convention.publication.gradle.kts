@@ -1,8 +1,4 @@
-import org.gradle.api.publish.maven.MavenPublication
-import org.gradle.api.tasks.bundling.Jar
-import org.gradle.kotlin.dsl.`maven-publish`
-import org.gradle.kotlin.dsl.signing
-import java.util.*
+import java.util.Properties
 
 plugins {
     `maven-publish`
@@ -92,6 +88,9 @@ publishing {
 
 // Signing artifacts. Signing.* extra properties values will be used
 
-signing {
-    sign(publishing.publications)
+// Gradle will throw an exception if the signing key is not found
+if (ext["signing.keyId"] != null) {
+    signing {
+        sign(publishing.publications)
+    }
 }
