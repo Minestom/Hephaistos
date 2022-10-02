@@ -42,13 +42,12 @@ class NBTByteArray constructor(override val value: ImmutableByteArray) : NBT, It
     override fun iterator() = value.iterator()
 
     companion object : NBTReaderCompanion<NBTByteArray> {
-
         @JvmField
         val EMPTY = NBTByteArray(ImmutableByteArray.EMPTY)
 
         override fun readContents(source: DataInputStream): NBTByteArray {
             val length = source.readInt()
-            val value = ImmutableByteArray(length) { source.readByte() }
+            val value = ImmutableByteArray(*source.readNBytes(length))
             return NBTByteArray(value)
         }
     }

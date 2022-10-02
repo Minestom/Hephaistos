@@ -14,7 +14,7 @@ class NBTIntArray constructor(override val value: ImmutableIntArray) : NBT, Iter
 
     override fun writeContents(destination: DataOutputStream) {
         destination.writeInt(size)
-        value.forEach(destination::writeInt)
+        value.numbers.forEach(destination::writeInt)
     }
 
     operator fun get(index: Int) = value[index]
@@ -42,13 +42,23 @@ class NBTIntArray constructor(override val value: ImmutableIntArray) : NBT, Iter
     override fun iterator() = value.iterator()
 
     companion object : NBTReaderCompanion<NBTIntArray> {
-
         @JvmField
         val EMPTY = NBTIntArray()
 
         override fun readContents(source: DataInputStream): NBTIntArray {
             val length = source.readInt()
-            val value = ImmutableIntArray(length) { source.readInt() }
+            val inArray = source.readNBytes(length * 4)
+            val outArray = IntArray(length)
+
+            for(i in 0 until length) {
+                val index = i * 4
+                outArray[i] = (inArray[index].toInt() and 0xFF shl 24) or
+                        (inArray[index + 1].toInt() and 0xFF shl 16) or
+                        (inArray[index + 2].toInt() and 0xFF shl 8) or
+                        (inArray[index + 3].toInt() and 0xFF)
+            }
+
+            val value = ImmutableIntArray(*outArray)
             return NBTIntArray(value)
         }
     }

@@ -14,7 +14,7 @@ class NBTLongArray constructor(override val value: ImmutableLongArray) : NBT, It
 
     override fun writeContents(destination: DataOutputStream) {
         destination.writeInt(size)
-        value.forEach(destination::writeLong)
+        value.numbers.forEach(destination::writeLong)
     }
 
     operator fun get(index: Int) = value[index]
@@ -47,8 +47,22 @@ class NBTLongArray constructor(override val value: ImmutableLongArray) : NBT, It
 
         override fun readContents(source: DataInputStream): NBTLongArray {
             val length = source.readInt()
-            val value = ImmutableLongArray(length) { source.readLong() }
-            return NBTLongArray(value)
+            val inArray = source.readNBytes(length * 8)
+            val outArray = LongArray(length)
+
+            for(i in 0 until length) {
+                val index = i * 8
+                outArray[i] = (inArray[index].toLong() shl 56) or
+                        ((inArray[index+1].toLong() and 0xFF) shl 48) or
+                        ((inArray[index+2].toLong() and 0xFF) shl 40) or
+                        ((inArray[index+3].toLong() and 0xFF) shl 32) or
+                        ((inArray[index+4].toLong() and 0xFF) shl 24) or
+                        ((inArray[index+5].toLong() and 0xFF) shl 16) or
+                        ((inArray[index+6].toLong() and 0xFF) shl 8) or
+                        (inArray[index+7].toLong() and 0xFF)
+            }
+
+            return NBTLongArray(*outArray)
         }
     }
 }

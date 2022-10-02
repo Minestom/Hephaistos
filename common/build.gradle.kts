@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     `maven-publish`
     id("convention.publication")
@@ -7,6 +5,7 @@ plugins {
 
 dependencies {
     api(project(":antlr"))
+    implementation("it.unimi.dsi:fastutil:8.5.8")
 }
 
 configurations {

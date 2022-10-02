@@ -7,8 +7,6 @@ import org.jglrxavpok.hephaistos.mcdata.Biome
 import org.jglrxavpok.hephaistos.nbt.NBTCompound
 import kotlin.experimental.and
 import kotlin.experimental.or
-import kotlin.math.ceil
-import kotlin.math.log2
 
 /**
  * 16x16x16 subchunk.
@@ -16,6 +14,7 @@ import kotlin.math.log2
 class ChunkSection(val y: Byte) {
 
     companion object {
+        private const val BlockStateSize = 16*16*16
         val BiomeArraySize = 4*4*4
     }
 
@@ -24,7 +23,7 @@ class ChunkSection(val y: Byte) {
      */
     private var blockPalette: BlockPalette? = null
     val empty get()= blockPalette == null
-    private val blockStates: Array<BlockState> = Array(16*16*16) { BlockState.AIR }
+    private val blockStates: Array<BlockState> = Array(BlockStateSize) { BlockState.AIR }
     var blockLights = ByteArray(0)
     var skyLights = ByteArray(0)
 
@@ -64,11 +63,15 @@ class ChunkSection(val y: Byte) {
         if(blockPalette != null) {
             val ids = reader.getUncompressedBlockStateIDs()
 
+            var nonAir = false
+
             for((index, id) in ids.withIndex()) {
-                blockStates[index] = blockPalette!!.elements[id]
+                val state = blockPalette!!.elements[id]
+                blockStates[index] = state
+                if(state !=  BlockState.AIR) nonAir = true
             }
 
-            blockPalette!!.loadReferences(blockStates.asIterable())
+            initializePalette(blockPalette!!, !nonAir)
         }
 
         reader.getBlockLight()?.let {
@@ -97,7 +100,7 @@ class ChunkSection(val y: Byte) {
         if(blockPalette == null) {
             blockPalette = BlockPalette() // initialize new palette
             blockPalette!!.elements += BlockState.AIR
-            blockPalette!!.loadReferences(blockStates.asIterable()) // load as all air
+            initializePalette(blockPalette!!, true) // load as all air
             blockPalette!!.increaseReference(block)
             blockPalette!!.decreaseReference(BlockState.AIR)
             blockStates[index(x, y, z)] = block
@@ -113,6 +116,15 @@ class ChunkSection(val y: Byte) {
         if(x !in 0..15) throw IllegalArgumentException("x ($x) is not in 0..15")
         if(y !in 0..15) throw IllegalArgumentException("y ($y) is not in 0..15")
         if(z !in 0..15) throw IllegalArgumentException("z ($z) is not in 0..15")
+    }
+
+    private fun initializePalette(palette: BlockPalette, isAir: Boolean) {
+        if (empty || isAir) {
+            palette.referenceCounts.clear()
+            palette.referenceCounts[BlockState.AIR] = BlockStateSize
+        } else {
+            palette.loadReferences(blockStates)
+        }
     }
 
     /**
@@ -201,7 +213,7 @@ class ChunkSection(val y: Byte) {
         if(empty) {
             blockPalette = BlockPalette() // initialize new palette
             blockPalette!!.elements += BlockState.AIR
-            blockPalette!!.loadReferences(blockStates.asIterable()) // load as all air
+            initializePalette(blockPalette!!, true) // load as all air
         }
     }
 
