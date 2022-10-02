@@ -1,4 +1,8 @@
-import java.util.Properties
+import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.tasks.bundling.Jar
+import org.gradle.kotlin.dsl.`maven-publish`
+import org.gradle.kotlin.dsl.signing
+import java.util.*
 
 plugins {
     `maven-publish`
@@ -88,8 +92,6 @@ publishing {
 
 // Signing artifacts. Signing.* extra properties values will be used
 
-if (ext["signing.keyId"] != null) {
-    signing {
-        sign(publishing.publications)
-    }
+signing {
+    sign(publishing.publications)
 }
