@@ -141,7 +141,7 @@ class ChunkColumn {
 
         // we allow empty lists for these
         entities = chunkReader.getOldEntities()
-        tileEntities = chunkReader.getTileEntities()
+        tileEntities = chunkReader.getBlockEntities()
 
         tileTicks = chunkReader.getTileTicks()
         liquidTicks = chunkReader.getLiquidTicks()
@@ -287,8 +287,10 @@ class ChunkColumn {
                 }
             }
             if(biomes != null) {
+                @Suppress("DEPRECATION")
                 setOldBiomes(ImmutableIntArray(*biomes))
             } else {
+                @Suppress("DEPRECATION")
                 setOldBiomes(ImmutableIntArray(biomeArraySize) { Biome.TheVoid.numericalID })
             }
         }
@@ -394,6 +396,9 @@ class ChunkColumn {
         companion object {
             @JvmStatic
             fun fromID(id: String): GenerationStatus {
+                if(id.startsWith("minecraft:")) {
+                    return fromID(id.substring("minecraft:".length))
+                }
                 return values().firstOrNull { it.id == id } ?: throw IllegalArgumentException("Invalid id: $id")
             }
         }

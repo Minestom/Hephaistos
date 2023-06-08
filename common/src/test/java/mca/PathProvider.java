@@ -9,10 +9,11 @@ import java.util.stream.Stream;
 
 public class PathProvider implements ArgumentsProvider {
     @Override
-    public Stream<? extends Arguments> provideArguments(ExtensionContext context) throws Exception {
+    public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
         return Stream.of(
                 Arguments.of(Paths.get("src/test/resources/1.18-pre4regions/r.0.0.mca")),
-                Arguments.of(Paths.get("src/test/resources/r.0.0.mca"))
+                Arguments.of(Paths.get("src/test/resources/r.0.0.mca")),
+                Arguments.of(Paths.get("src/test/resources/1.20/r.0.0.mca"))
                 );
     }
 }
