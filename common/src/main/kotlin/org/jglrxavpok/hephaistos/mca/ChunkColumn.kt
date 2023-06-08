@@ -162,7 +162,7 @@ class ChunkColumn {
         postProcessing = chunkReader.getPostProcessing()
 
         for(nbt in sectionsNBT) {
-            val sectionY = nbt.getByte("Y") ?: missing("Y")
+            val sectionY = nbt.getAsByte("Y") ?: missing("Y")
             if(version < SupportedVersion.MC_1_17_0) {
                 if(sectionY !in 0..15)
                     continue

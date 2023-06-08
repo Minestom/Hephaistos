@@ -79,11 +79,12 @@ class ChunkReader @Throws(AnvilException::class) constructor(val chunkData: NBTC
             minY = (minSectionY.toInt()+1).sectionToBlock()
             maxY = (biomes.size / ChunkSection.BiomeArraySize).sectionToBlock() + minY -1
         } else {
-            minY = (levelData.getInt("yPos") ?: AnvilException.missing("yPos")).sectionToBlock()
+            minY = (levelData.getInt("yPos") ?: 0).sectionToBlock()
             maxY = minY
 
             for(nbt in getSections()) {
-                val sectionY = nbt.getByte("Y") ?: AnvilException.missing("Y")
+                val sectionY = nbt.getAsByte("Y") ?: AnvilException.missing("Y")
+                minY = minOf(minY, sectionY.toInt().sectionToBlock())
                 maxY = maxOf(maxY, sectionY.toInt().sectionToBlock()+15)
             }
         }

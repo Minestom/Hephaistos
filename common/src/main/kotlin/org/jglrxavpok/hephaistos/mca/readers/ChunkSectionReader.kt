@@ -28,7 +28,7 @@ class ChunkSectionReader constructor(val version: SupportedVersion, val nbt: NBT
          */
         @Throws(AnvilException::class)
         @JvmStatic
-        fun getY(nbt: NBTCompound) = nbt.getByte("Y") ?: AnvilException.missing("Y")
+        fun getY(nbt: NBTCompound) = nbt.getAsByte("Y") ?: AnvilException.missing("Y")
     }
 
     /**
@@ -148,7 +148,7 @@ class ChunkSectionReader constructor(val version: SupportedVersion, val nbt: NBT
         if(!hasBiomes()) {
             return SectionBiomeInformation()
         }
-        var biomes: Array<String>? = null
+        var biomes: Array<String>?
         val biomesNBT = getBiomes()!!
         val paletteNBT = biomesNBT.getList<NBTString>("palette") ?: AnvilException.missing("biomes.palette")
         val biomePalette = BiomePalette(paletteNBT)

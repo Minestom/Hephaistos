@@ -1,7 +1,5 @@
-import org.jglrxavpok.hephaistos.mca.AnvilException;
 import org.jglrxavpok.hephaistos.mca.RegionFile;
 
-import java.io.IOException;
 import java.io.RandomAccessFile;
 
 /**
@@ -10,8 +8,12 @@ import java.io.RandomAccessFile;
  */
 public class LoadTest {
 
-    public static void main(String[] args) throws IOException, AnvilException {
-        RegionFile regionFile = new RegionFile(new RandomAccessFile("C:\\Users\\jglrxavpok\\AppData\\Roaming\\.minecraft\\saves\\Test for Hephaistos\\region\\r.0.0.mca", "r"), 0, 0);
-        regionFile.getChunk(0, 0);
+    public static void main(String[] args) {
+        try {
+            RegionFile regionFile = new RegionFile(new RandomAccessFile("C:\\Users\\jglrxavpok\\AppData\\Roaming\\.minecraft\\saves\\Test for Hephaistos\\region\\r.0.0.mca", "r"), 0, 0);
+            regionFile.getChunk(0, 0);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
