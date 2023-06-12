@@ -391,7 +391,10 @@ class ChunkColumn {
         Light("light"),
         Spawn("spawn"),
         Heightmaps("heightmaps"),
-        Full("full");
+        Full("full"),
+
+        InitializeLight("initialize_light"), // 1.20
+        ;
 
         companion object {
             @JvmStatic
