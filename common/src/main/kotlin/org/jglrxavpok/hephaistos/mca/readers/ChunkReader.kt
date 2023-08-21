@@ -83,6 +83,12 @@ class ChunkReader @Throws(AnvilException::class) constructor(val chunkData: NBTC
             maxY = minY
 
             for(nbt in getSections()) {
+                // Skip any chunk sections without any block data (i.e. lighting only chunks)
+                // note that empty chunk sections will still have a block state with air, so this is only for
+                // lighting only chunk sections
+                if (nbt.getCompound("block_states") === null) {
+                    continue
+                }
                 val sectionY = nbt.getAsByte("Y") ?: AnvilException.missing("Y")
                 minY = minOf(minY, sectionY.toInt().sectionToBlock())
                 maxY = maxOf(maxY, sectionY.toInt().sectionToBlock()+15)

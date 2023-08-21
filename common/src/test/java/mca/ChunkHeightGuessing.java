@@ -1,6 +1,8 @@
 package mca;
 
 import org.jglrxavpok.hephaistos.mca.AnvilException;
+import org.jglrxavpok.hephaistos.mca.BlockPalette;
+import org.jglrxavpok.hephaistos.mca.BlockState;
 import org.jglrxavpok.hephaistos.mca.ChunkColumn;
 import org.jglrxavpok.hephaistos.mca.CoordinatesKt;
 import org.jglrxavpok.hephaistos.mca.SupportedVersion;
@@ -10,9 +12,7 @@ import org.jglrxavpok.hephaistos.nbt.NBTType;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.function.BiConsumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -102,8 +102,8 @@ public class ChunkHeightGuessing {
     @Test
     public void test1_18() throws AnvilException {
         Checker checker = (int minY, int maxY) -> {
-            final int worldHeight = maxY - minY +1;
             NBTCompound data = NBT.Compound(level -> {
+                final SupportedVersion version = SupportedVersion.MC_1_18_PRE_4;
                 level.setInt("DataVersion", SupportedVersion.MC_1_18_PRE_4.getLowestDataVersion());
 
                 int minSectionY = CoordinatesKt.blockToSection(minY);
@@ -117,6 +117,13 @@ public class ChunkHeightGuessing {
                     int finalSectionY = sectionY;
                     compounds.add(NBT.Compound(section -> {
                         section.setByte("Y", (byte) finalSectionY);
+                        section.set("block_states", NBT.Compound(blockStates -> {
+                            BlockPalette palette = new BlockPalette();
+                            palette.increaseReference(BlockState.AIR); // make sure there is AIR inside this palette
+                            int[] blocks = new int[16*16*16];
+                            blockStates.set("palette", palette.toNBT());
+                            blockStates.setLongArray("data", palette.compactPreProcessedIDs(blocks, version, 4));
+                        })); // required, otherwise considered to be a lighting-only chunk
                     }));
                 }
 
